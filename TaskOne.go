@@ -3,5 +3,5 @@ package main
 import "fmt"
 
 func main() {
-	fmt.Println("task1")
+	fmt.Println("task №1")
 }
