@@ -10,11 +10,16 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	fmt.Print("for start go to:  127.0.0.0:8080/")
+	fmt.Println("for start go to:  127.0.0.0:8080/")
 
-	fileServer := http.FileServer(http.Dir("./ui/static/"))
+	fileServer := http.FileServer(http.Dir("./app/ui/static/"))
 
 	http.HandleFunc("/", mainPage)
 	http.Handle("/static/", http.StripPrefix("/static", fileServer))
-	http.ListenAndServe(":8080", nil)
+
+	err := http.ListenAndServe(":80w80", nil)
+
+	if err != nil {
+		fmt.Println(err)
+	}
 }
