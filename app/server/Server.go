@@ -10,6 +10,8 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	fmt.Print("for start go to:  127.0.0.0:8080/")
+
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
 
 	http.HandleFunc("/", mainPage)
