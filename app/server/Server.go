@@ -14,7 +14,11 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc("/", mainPage)
 
-	setupStaticResource()
+	err := setupStaticResource()
+
+	if err != nil {
+		log.Fatal("it doesnt make dir for static resources")
+	}
 
 	go startServer()
 
@@ -23,7 +27,12 @@ func main() {
 	select {}
 }
 
-func setupStaticResource() {
+// setupStaticResource creates a directory named path: "./app/server/ui/static",
+// along with any necessary parents, and returns nil,
+// or else returns an error.
+// If path is already a directory, setupStaticResource does nothing
+// and returns nil.
+func setupStaticResource() error {
 	path := "./app/server/ui/static"
 
 	_, err := os.Stat(path)
@@ -32,13 +41,15 @@ func setupStaticResource() {
 		err = os.MkdirAll(path, 0777)
 
 		if err != nil {
-			log.Fatal("dont make a dir for static resource")
+			return err
 		}
 	}
 
 	fileServer := http.FileServer(http.Dir(path))
 
 	http.Handle("/static/", http.StripPrefix("/static", fileServer))
+
+	return nil
 }
 
 func startServer() {
