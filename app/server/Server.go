@@ -29,7 +29,11 @@ func setupStaticResource() {
 	_, err := os.Stat(path)
 
 	if err != nil {
-		os.MkdirAll(path, 0777)
+		err = os.MkdirAll(path, 0777)
+
+		if err != nil {
+			log.Fatal("dont make a dir for static resource")
+		}
 	}
 
 	fileServer := http.FileServer(http.Dir(path))
