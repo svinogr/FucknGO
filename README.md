@@ -11,5 +11,5 @@
 - For Linux start Server_lin 
 - For Window start Server_win
 - With Docker use DockerFile and commands:
-  * placeholde
-  * placeholde
+  * docker build -t your_image_name .
+  * docker run -d  -p 8080:8080 your_image_name
