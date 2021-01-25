@@ -12,7 +12,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Главная")
 }
 
-func main() {
+func mainNo() {
 	http.HandleFunc("/", mainPage)
 
 	err := setupStaticResource()
