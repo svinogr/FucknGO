@@ -12,7 +12,6 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Главная")
 }
 
-// main access point
 func main() {
 	http.HandleFunc("/", mainPage)
 
@@ -54,6 +53,7 @@ func setupStaticResource() error {
 	return nil
 }
 
+// startServer starts server on port 8080
 func startServer() {
 	err := http.ListenAndServe(":8080", nil)
 
