@@ -7,10 +7,12 @@ import (
 	"os"
 )
 
+// Controller function for main page
 func mainPage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Главная")
 }
 
+// main access point
 func main() {
 	http.HandleFunc("/", mainPage)
 
