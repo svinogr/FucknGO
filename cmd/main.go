@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	conf := config.Config{"./config/config.json"}
+	conf := config.Config{Path: "./config/config.json"}
 	conMap, err := conf.GetConfig()
 	if err != nil {
 		log.Fatal(err)

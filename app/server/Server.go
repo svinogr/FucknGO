@@ -12,6 +12,20 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Главная")
 }
 
+type Server struct {
+	port int8
+}
+
+type HandleFunction struct {
+	Url string
+	Function
+}
+
+func (s *Server) registreHandlerFunction(function HandleFunction) error {
+	http.Handle(function.Url, function.Function)
+
+}
+
 func mainNo() {
 	http.HandleFunc("/", mainPage)
 
