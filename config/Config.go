@@ -6,30 +6,19 @@ import (
 )
 
 type Config struct {
-	Path string
+	ServerConfig ServerConfigStr `json:"server"`
 }
 
-func (p *Config) SetPath(path string) {
-	p.Path = path
-}
-
-// GetConfig return map with config from json
-func (p *Config) GetConfig() (map[string]string, error) {
-	var jsonConfigMap map[string]string
-
-	fileJson, err := os.Open(p.Path)
+func (p *Config) ReadConfig(path string) (*Config, error) {
+	fileJson, err := os.Open(path)
 
 	defer fileJson.Close()
 
 	if err != nil {
-		return jsonConfigMap, err
+		return nil, err
 	}
 
-	if err != nil {
-		return jsonConfigMap, err
-	}
-
-	fileInfo, _ := os.Stat(p.Path)
+	fileInfo, _ := os.Stat(path)
 	fileSize := fileInfo.Size()
 
 	var dataJson = make([]byte, fileSize)
@@ -37,14 +26,14 @@ func (p *Config) GetConfig() (map[string]string, error) {
 	_, err = fileJson.Read(dataJson)
 
 	if err != nil {
-		return jsonConfigMap, err
+		return nil, err
 	}
 
-	err = json.Unmarshal(dataJson, &jsonConfigMap)
+	err = json.Unmarshal(dataJson, &p.ServerConfig)
 
 	if err != nil {
-		return jsonConfigMap, err
+		return nil, err
 	}
 
-	return jsonConfigMap, nil
+	return p, nil
 }

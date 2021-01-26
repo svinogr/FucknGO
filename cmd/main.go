@@ -7,13 +7,15 @@ import (
 )
 
 func main() {
-	conf := config.Config{Path: "./config/config.json"}
-	conMap, err := conf.GetConfig()
+	conf := config.Config{}
+	config, err := conf.ReadConfig("./config/config.json")
+
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Print("port: ", conMap["port"])
+	fmt.Print(config.ServerConfig.Port)
+	fmt.Print(config.ServerConfig.MiddlewareTimeout)
 
 	//здесь запускаем сервер
 }
