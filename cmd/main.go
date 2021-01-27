@@ -3,22 +3,61 @@ package main
 import (
 	"FucknGO/config"
 	"FucknGO/server"
+	"flag"
+	"fmt"
 	"log"
+	"os"
+	"strconv"
 )
 
 func main() {
+	setLogging()
+
+	config := getConfig()
+
+	startServer(*config)
+}
+
+func getConfig() *config.Config {
 	conf := config.Config{}
-	_, err := conf.ReadConfig(config.Path)
+	config, err := conf.ReadConfig(config.Path)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	server := server.Server{Config: conf}
+	portArg := flag.String("port", "8080", "used port")
+	flag.Parse()
 
-	server.Start()
+	if *portArg != string(config.JsonStr.ServerConfig.Port) {
 
-	//fmt.Print(config.JsonStr.ServerConfig.JwtLifeTimeDays)
+		value, err := strconv.Atoi(*portArg)
 
-	//здесь запускаем сервер
+		if err == nil {
+			config.JsonStr.ServerConfig.Port = uint16(value)
+		}
+	}
+
+	return config
+}
+
+func setLogging() {
+	_, err := os.Stat("log.txt")
+
+	if err != nil {
+		file, err := os.Create("log.txt")
+
+		defer file.Close()
+
+		if err != nil {
+			fmt.Print(err)
+		}
+
+		log.SetOutput(file)
+	}
+}
+
+func startServer(config config.Config) {
+	ser := server.Server{Config: config}
+	ser.Start()
 }
