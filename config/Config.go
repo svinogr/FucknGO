@@ -6,7 +6,7 @@ import (
 )
 
 type Config struct {
-	ServerConfig ServerConfigStr `json:"server"`
+	JsonStr JsonStr
 }
 
 func (p *Config) ReadConfig(path string) (*Config, error) {
@@ -29,7 +29,7 @@ func (p *Config) ReadConfig(path string) (*Config, error) {
 		return nil, err
 	}
 
-	err = json.Unmarshal(dataJson, &p.ServerConfig)
+	err = json.Unmarshal(dataJson, &p.JsonStr)
 
 	if err != nil {
 		return nil, err

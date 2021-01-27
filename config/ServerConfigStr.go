@@ -5,5 +5,5 @@ type ServerConfigStr struct {
 	Ws                string `json:"ws"`
 	MiddlewareTimeout string `json:"middlewareTimeout"`
 	JwtSecret         string `json:"jwtSecret"`
-	JwtLifeTimeDays   int8   `json:"jwtLifeTimeDays"`
+	JwtLifeTimeDays   uint16 `json:"jwtLifeTimeDays"`
 }
