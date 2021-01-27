@@ -14,30 +14,31 @@ type Server struct {
 }
 
 // Start starts server with settings
-func (s *Server) Start() error {
+func (s *Server) Start() {
 	// TODO вставить обработку ошибку отсутсвия конфига
-	port := s.Config.JsonStr.ServerConfig.Port
+
 	s.SetupHttpHandlers()
 
-	err := s.setupStaticResource()
+	s.setupStaticResource()
+
+	go s.runServer()
+
+	select {}
+}
+
+func (s *Server) runServer() {
+	port := s.Config.JsonStr.ServerConfig.Port
+	err := http.ListenAndServe("127.0.0.1:"+strconv.Itoa(int(port)), nil)
 
 	if err != nil {
 		log.Fatal(err)
-	}
-
-	err = http.ListenAndServe(strconv.Itoa(int(port)), nil)
-
-	if err != nil {
-		return err
-	} else {
-		return nil
 	}
 }
 
 //SetupHttpHandlers set handlers for http.HandleFunc
 func (s *Server) SetupHttpHandlers() {
-	handlers := FabricHandlers{}
-	fabric := handlers.NewFabric()
+	fabricHandlers := FabricHandlers{}
+	fabric := fabricHandlers.NewFabric()
 
 	for i, e := range fabric.Handlers {
 		fmt.Println(i)
@@ -50,7 +51,7 @@ func (s *Server) SetupHttpHandlers() {
 // or else returns an error.
 // If path is already a directory, setupStaticResource does nothing
 // and returns nil.
-func (s *Server) setupStaticResource() error {
+func (s *Server) setupStaticResource() {
 
 	path := s.Config.JsonStr.UiConfig.WWW.Static
 
@@ -60,22 +61,11 @@ func (s *Server) setupStaticResource() error {
 		err = os.MkdirAll(path, 0777)
 
 		if err != nil {
-			return err
+			log.Fatal(err)
 		}
 	}
 
 	fileServer := http.FileServer(http.Dir(path))
 
 	http.Handle("/static/", http.StripPrefix("/static", fileServer))
-
-	return nil
-}
-
-// startServer starts server on port 8080
-func startServer() {
-	err := http.ListenAndServe(":8080", nil)
-
-	if err != nil {
-		log.Fatalf("Error while starting serverErrors: %v", err)
-	}
 }
