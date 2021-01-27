@@ -17,7 +17,7 @@
     }
   },
   "server": {
-    "port": 3001,
+    "port": 8080 ,
     "ws": "ws://127.0.0.1:3005/ws/conn",
     "middlewareTimeout": "15s",
     "jwtSecret": "secret",
@@ -41,7 +41,7 @@
     "www": {
       "js": "./web/client/build",
       "html": "./web/templates",
-      "static": "./web/static"
+      "static": "./ui/web/static"
     }
   }
 }

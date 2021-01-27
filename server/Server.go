@@ -1,45 +1,48 @@
 package server
 
 import (
+	"FucknGO/config"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 )
 
-// Controller function for main page
-func mainPage(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Главная")
-}
-
 type Server struct {
-	port int8
+	Config config.Config
 }
 
-type HandleFunction struct {
-	Url string
-	Function
-}
+// Start starts server with settings
+func (s *Server) Start() error {
+	// TODO вставить обработку ошибку отсутсвия конфига
+	port := s.Config.JsonStr.ServerConfig.Port
+	s.SetupHttpHandlers()
 
-func (s *Server) registreHandlerFunction(function HandleFunction) error {
-	http.Handle(function.Url, function.Function)
-
-}
-
-func mainNo() {
-	http.HandleFunc("/", mainPage)
-
-	err := setupStaticResource()
+	err := s.setupStaticResource()
 
 	if err != nil {
-		log.Fatal("it doesnt make dir for static resources")
+		log.Fatal(err)
 	}
 
-	go startServer()
+	err = http.ListenAndServe(strconv.Itoa(int(port)), nil)
 
-	fmt.Println("Successfully started server on http://localhost:8080")
+	if err != nil {
+		return err
+	} else {
+		return nil
+	}
+}
 
-	select {}
+//SetupHttpHandlers set handlers for http.HandleFunc
+func (s *Server) SetupHttpHandlers() {
+	handlers := FabricHandlers{}
+	fabric := handlers.NewFabric()
+
+	for i, e := range fabric.Handlers {
+		fmt.Println(i)
+		http.HandleFunc(e.Path, e.Handler)
+	}
 }
 
 // setupStaticResource creates a directory named path: "./app/server/ui/static",
@@ -47,8 +50,9 @@ func mainNo() {
 // or else returns an error.
 // If path is already a directory, setupStaticResource does nothing
 // and returns nil.
-func setupStaticResource() error {
-	path := "./app/server/ui/static"
+func (s *Server) setupStaticResource() error {
+
+	path := s.Config.JsonStr.UiConfig.WWW.Static
 
 	_, err := os.Stat(path)
 
