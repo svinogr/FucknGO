@@ -1,18 +1,19 @@
 package server
 
 import (
+	"FucknGO/server/Handler"
 	"fmt"
 	"net/http"
 )
 
 type FabricHandlers struct {
-	Handlers []HandlerInterface
+	Handlers []Handler.HandlerInterface
 }
 
 // NewFabric constructs new FabricHandlers and inflate handlers for http.HandleFunc
 func NewFabric() FabricHandlers {
 	f := FabricHandlers{}
-	hand := Handler{"/", mainPage}
+	hand := Handler.Handler{"/", mainPage}
 	f.Handlers = append(f.Handlers, &hand)
 
 	return f
