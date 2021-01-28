@@ -14,8 +14,9 @@ type FabricHandlers struct {
 	Handlers []Handler
 }
 
-// NewFabric construct new FabricHandlers and inflate handlers for http.HandleFunc
-func (f *FabricHandlers) NewFabric() *FabricHandlers {
+// NewFabric constructs new FabricHandlers and inflate handlers for http.HandleFunc
+func NewFabric() FabricHandlers {
+	f := FabricHandlers{}
 	f.Handlers = append(f.Handlers, Handler{"/", mainPage})
 
 	return f

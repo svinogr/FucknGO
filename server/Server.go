@@ -37,8 +37,7 @@ func (s *Server) runServer() {
 
 //SetupHttpHandlers set handlers for http.HandleFunc
 func (s *Server) SetupHttpHandlers() {
-	fabricHandlers := FabricHandlers{}
-	fabric := fabricHandlers.NewFabric()
+	fabric := NewFabric()
 
 	for i, e := range fabric.Handlers {
 		fmt.Println(i)
