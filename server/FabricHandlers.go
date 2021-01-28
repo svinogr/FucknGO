@@ -5,19 +5,15 @@ import (
 	"net/http"
 )
 
-type Handler struct {
-	Path    string
-	Handler func(w http.ResponseWriter, r *http.Request)
-}
-
 type FabricHandlers struct {
-	Handlers []Handler
+	Handlers []HandlerInterface
 }
 
 // NewFabric constructs new FabricHandlers and inflate handlers for http.HandleFunc
 func NewFabric() FabricHandlers {
 	f := FabricHandlers{}
-	f.Handlers = append(f.Handlers, Handler{"/", mainPage})
+	hand := Handler{"/", mainPage}
+	f.Handlers = append(f.Handlers, &hand)
 
 	return f
 }

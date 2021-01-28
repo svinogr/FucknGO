@@ -41,7 +41,7 @@ func (s *Server) SetupHttpHandlers() {
 
 	for i, e := range fabric.Handlers {
 		fmt.Println(i)
-		http.HandleFunc(e.Path, e.Handler)
+		http.HandleFunc(e.GetHandler().Path, e.GetHandler().HandlerFunc)
 	}
 }
 
