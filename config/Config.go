@@ -7,7 +7,7 @@ import (
 )
 
 type Config struct {
-	JsonStr JsonStr
+	JsonStr jsonStr
 }
 
 var instance *Config

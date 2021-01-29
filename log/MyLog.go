@@ -15,8 +15,11 @@ type myLog struct {
 var debugResume = false
 
 func NewLog() *myLog {
-	pathLogFile := config.Config{}.JsonStr.Log.Path
-	_, err := os.Stat(pathLogFile)
+	config, err := config.GetConfig(config.Path)
+
+	pathLogFile := config.JsonStr.Log.Path
+
+	_, err = os.Stat(pathLogFile)
 
 	if err != nil {
 		fileCreated, err := os.Create(pathLogFile)
@@ -26,7 +29,6 @@ func NewLog() *myLog {
 		}
 
 		fileCreated.Close()
-
 	}
 
 	openLogfile, err := os.OpenFile(pathLogFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
@@ -41,15 +43,7 @@ func NewLog() *myLog {
 	l.commonLog = log.New(openLogfile, "INFO:\t", log.Ldate|log.Ltime|log.Lshortfile)
 	l.errorLog = log.New(openLogfile, "ERROR:\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	config, err := config.GetConfig(config.Path)
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
 	debugResume = config.JsonStr.Resume.IsDebug
-
-	fmt.Println("port", config.JsonStr.ServerConfig.Port)
 
 	return l
 }

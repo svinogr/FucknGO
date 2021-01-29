@@ -9,13 +9,13 @@ import (
 )
 
 func init() {
-	getConfig()
+	conf = *getConfig()
 }
 
-func main() {
-	config := getConfig()
+var conf config.Config
 
-	startServer(*config)
+func main() {
+	startServer(conf)
 }
 
 func getConfig() *config.Config {
