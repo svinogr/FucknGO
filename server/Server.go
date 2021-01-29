@@ -2,8 +2,7 @@ package server
 
 import (
 	"FucknGO/config"
-	"fmt"
-	"log"
+	"FucknGO/log"
 	"net/http"
 	"os"
 	"strconv"
@@ -31,7 +30,7 @@ func (s *Server) runServer() {
 	err := http.ListenAndServe("127.0.0.1:"+strconv.Itoa(int(port)), nil)
 
 	if err != nil {
-		log.Fatal(err)
+		log.NewLog().Fatal(err)
 	}
 }
 
@@ -39,8 +38,7 @@ func (s *Server) runServer() {
 func (s *Server) SetupHttpHandlers() {
 	fabric := NewFabric()
 
-	for i, e := range fabric.Handlers {
-		fmt.Println(i)
+	for _, e := range fabric.Handlers {
 		http.HandleFunc(e.GetHandler().Path, e.GetHandler().HandlerFunc)
 	}
 }
@@ -60,7 +58,7 @@ func (s *Server) setupStaticResource() {
 		err = os.MkdirAll(path, 0777)
 
 		if err != nil {
-			log.Fatal(err)
+			log.NewLog().Fatal(err)
 		}
 	}
 

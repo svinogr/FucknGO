@@ -2,17 +2,14 @@ package main
 
 import (
 	"FucknGO/config"
+	"FucknGO/log"
 	"FucknGO/server"
 	"flag"
-	"fmt"
-	"log"
-	"os"
 	"strconv"
 )
 
 func main() {
-	setLogging()
-
+	log.NewLog().PrintCommon("ddfd")
 	config := getConfig()
 
 	startServer(*config)
@@ -23,7 +20,7 @@ func getConfig() *config.Config {
 	config, err := conf.ReadConfig(config.Path)
 
 	if err != nil {
-		log.Fatal(err)
+		log.NewLog().Fatal(err)
 	}
 
 	portArg := flag.String("port", "8080", "used port")
@@ -39,22 +36,6 @@ func getConfig() *config.Config {
 	}
 
 	return config
-}
-
-func setLogging() {
-	_, err := os.Stat("log.txt")
-
-	if err != nil {
-		file, err := os.Create("log.txt")
-
-		defer file.Close()
-
-		if err != nil {
-			fmt.Print(err)
-		}
-
-		log.SetOutput(file)
-	}
 }
 
 func startServer(config config.Config) {
