@@ -3,13 +3,27 @@ package config
 import (
 	"encoding/json"
 	"os"
+	"sync"
 )
 
 type Config struct {
 	JsonStr JsonStr
 }
 
-func (p *Config) ReadConfig(path string) (*Config, error) {
+var instance *Config
+var once sync.Once
+
+func GetConfig(path string) (*Config, error) {
+	var err error
+	once.Do(func() {
+		instance = &Config{}
+		instance, err = instance.readConfig(path)
+	})
+
+	return instance, err
+}
+
+func (p *Config) readConfig(path string) (*Config, error) {
 	fileJson, err := os.Open(path)
 
 	defer fileJson.Close()

@@ -45,6 +45,9 @@
     }
   },
   "log": {
-    "path": "./log"
+    "path": "./log.txt"
+  },
+  "resume": {
+    "debug": true
   }
 }

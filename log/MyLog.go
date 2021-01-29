@@ -1,26 +1,28 @@
 package log
 
 import (
+	"FucknGO/config"
 	"fmt"
 	"log"
 	"os"
 )
 
-const pathLogFile = "log.txt"
-
 type myLog struct {
-	CommonLog *log.Logger
-	ErrorLog  *log.Logger
+	commonLog *log.Logger
+	errorLog  *log.Logger
 }
 
+var debugResume = false
+
 func NewLog() *myLog {
+	pathLogFile := config.Config{}.JsonStr.Log.Path
 	_, err := os.Stat(pathLogFile)
 
 	if err != nil {
 		fileCreated, err := os.Create(pathLogFile)
 
 		if err != nil {
-			fmt.Println("doesnt crate file...")
+			fmt.Println("doesnt create file...")
 		}
 
 		fileCreated.Close()
@@ -36,21 +38,38 @@ func NewLog() *myLog {
 	}
 
 	l := new(myLog)
+	l.commonLog = log.New(openLogfile, "INFO:\t", log.Ldate|log.Ltime|log.Lshortfile)
+	l.errorLog = log.New(openLogfile, "ERROR:\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	l.CommonLog = log.New(openLogfile, "Common Logger:\t", log.Ldate|log.Ltime|log.Lshortfile)
+	config, err := config.GetConfig(config.Path)
 
-	l.ErrorLog = log.New(openLogfile, "Error Logger:\t", log.Ldate|log.Ltime|log.Lshortfile)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	debugResume = config.JsonStr.Resume.IsDebug
+
+	fmt.Println("port", config.JsonStr.ServerConfig.Port)
 
 	return l
-
 }
 
 func (l *myLog) PrintCommon(text string) {
-	l.CommonLog.Println(text)
+	if debugResume {
+		l.commonLog.Println(text)
+		fmt.Println(text)
+	} else {
+		l.commonLog.Println(text)
+	}
 }
 
 func (l *myLog) PrintError(err error) {
-	l.CommonLog.Println(err)
+	if debugResume {
+		l.errorLog.Println(err)
+		fmt.Println(err)
+	} else {
+		l.errorLog.Println(err)
+	}
 }
 
 func (l *myLog) Fatal(err error) {

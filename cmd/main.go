@@ -8,16 +8,18 @@ import (
 	"strconv"
 )
 
+func init() {
+	getConfig()
+}
+
 func main() {
-	log.NewLog().PrintCommon("ddfd")
 	config := getConfig()
 
 	startServer(*config)
 }
 
 func getConfig() *config.Config {
-	conf := config.Config{}
-	config, err := conf.ReadConfig(config.Path)
+	conf, err := config.GetConfig(config.Path)
 
 	if err != nil {
 		log.NewLog().Fatal(err)
@@ -26,16 +28,16 @@ func getConfig() *config.Config {
 	portArg := flag.String("port", "8080", "used port")
 	flag.Parse()
 
-	if *portArg != string(config.JsonStr.ServerConfig.Port) {
+	if *portArg != string(conf.JsonStr.ServerConfig.Port) {
 
 		value, err := strconv.Atoi(*portArg)
 
 		if err == nil {
-			config.JsonStr.ServerConfig.Port = uint16(value)
+			conf.JsonStr.ServerConfig.Port = uint16(value)
 		}
 	}
 
-	return config
+	return conf
 }
 
 func startServer(config config.Config) {
