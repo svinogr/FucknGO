@@ -5,6 +5,5 @@ const Path = "./config/jsondata/config.json"
 type jsonStr struct {
 	ServerConfig ServerConfigStr `json:"server"`
 	UiConfig     UiConfigStr     `json:"ui"`
-	Resume       ResumeStr       `json:"resume"`
 	Log          LogStr          `json:"log"`
 }

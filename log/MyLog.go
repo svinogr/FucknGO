@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 )
 
 type myLog struct {
@@ -12,7 +13,7 @@ type myLog struct {
 	errorLog  *log.Logger
 }
 
-var debugResume = false
+var debugMode bool
 
 func NewLog() *myLog {
 	config, err := config.GetConfig(config.Path)
@@ -43,13 +44,21 @@ func NewLog() *myLog {
 	l.commonLog = log.New(openLogfile, "INFO:\t", log.Ldate|log.Ltime|log.Lshortfile)
 	l.errorLog = log.New(openLogfile, "ERROR:\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	debugResume = config.JsonStr.Resume.IsDebug
+	debug, errBool := os.LookupEnv("debug")
+
+	if errBool {
+		debug, err := strconv.ParseBool(debug)
+
+		if err == nil {
+			debugMode = debug
+		}
+	}
 
 	return l
 }
 
 func (l *myLog) PrintCommon(text string) {
-	if debugResume {
+	if debugMode {
 		l.commonLog.Println(text)
 		fmt.Println(text)
 	} else {
@@ -58,7 +67,7 @@ func (l *myLog) PrintCommon(text string) {
 }
 
 func (l *myLog) PrintError(err error) {
-	if debugResume {
+	if debugMode {
 		l.errorLog.Println(err)
 		fmt.Println(err)
 	} else {
