@@ -1,4 +1,4 @@
-package config
+package server
 
 type ServerConfigStr struct {
 	Port              uint16 `json:"port"`

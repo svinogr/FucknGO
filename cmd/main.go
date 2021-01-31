@@ -2,9 +2,12 @@ package main
 
 import (
 	"FucknGO/config"
+	"FucknGO/config/json"
+	"FucknGO/db"
 	"FucknGO/log"
 	"FucknGO/server"
 	"flag"
+	"fmt"
 	"strconv"
 )
 
@@ -15,11 +18,18 @@ func init() {
 var conf config.Config
 
 func main() {
+	//postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]
+
+	//fmt.Printf("postgresql://[%s[:%s]@][%s][:%d][/postgres]","postgres", "postgres","localhost", 5432)
+
+	db := db.NewDataBase(conf)
+	err := db.OpenDataBase()
+	fmt.Print(err)
 	startServer(conf)
 }
 
 func getConfig() *config.Config {
-	conf, err := config.GetConfig(config.Path)
+	conf, err := config.GetConfig(json.Path)
 
 	if err != nil {
 		log.NewLog().Fatal(err)

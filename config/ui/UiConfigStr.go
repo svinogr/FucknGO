@@ -1,4 +1,4 @@
-package config
+package ui
 
 type UiConfigStr struct {
 	WWW WWWConfig `json:"www"`

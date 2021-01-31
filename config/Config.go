@@ -1,13 +1,14 @@
 package config
 
 import (
+	conf "FucknGO/config/json"
 	"encoding/json"
 	"os"
 	"sync"
 )
 
 type Config struct {
-	JsonStr jsonStr
+	JsonStr conf.JsonStr
 }
 
 var instance *Config

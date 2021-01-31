@@ -2,6 +2,7 @@ package log
 
 import (
 	"FucknGO/config"
+	"FucknGO/config/json"
 	"fmt"
 	"log"
 	"os"
@@ -16,7 +17,7 @@ type myLog struct {
 var debugMode bool
 
 func NewLog() *myLog {
-	config, err := config.GetConfig(config.Path)
+	config, err := config.GetConfig(json.Path)
 
 	pathLogFile := config.JsonStr.Log.Path
 

@@ -1,11 +1,11 @@
 {
   "databases": {
     "postgresql": {
-      "address": "192.168.99.100",
-      "port": 6001,
-      "basename": "am_db",
-      "user": "am_user",
-      "password": "am_password"
+      "address": "127.0.0.0",
+      "port": 5432,
+      "basename": "test_db",
+      "user": "postgres",
+      "password": "postgres"
     },
     "geoip": {
       "address": "./GeoLite2-City.mmdb"
