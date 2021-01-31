@@ -1,9 +1,9 @@
 {
   "databases": {
     "postgresql": {
-      "address": "127.0.0.0",
+      "address": "localhost",
       "port": 5432,
-      "basename": "test_db",
+      "basename": "postgres",
       "user": "postgres",
       "password": "postgres"
     },

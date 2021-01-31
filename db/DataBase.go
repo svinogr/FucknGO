@@ -3,10 +3,13 @@ package db
 import (
 	"FucknGO/config"
 	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
+	"fmt"
+	_ "github.com/lib/pq"
 )
 
 var driverSql = "postgres"
+var dbUrlStart = "postgresql"
+var sslMode = "sslmode=disable"
 
 type Database struct {
 	config      config.Config
@@ -14,14 +17,25 @@ type Database struct {
 	db          sql.DB
 }
 
-func NewDataBase(config config.Config) Database {
-	return Database{
+func NewDataBase(config config.Config) *Database {
+	return &Database{
 		config: config,
 	}
 }
 
 func (d *Database) OpenDataBase() error {
-	db, err := sql.Open(driverSql, "postgresql://[postgres[:postgres]@][localhost][:5432][/postgres]")
+	db, err := sql.Open("postgres", "postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable")
+
+	urlDB := fmt.Sprintf("%s://%s:%s@%s:%d/%s?%s",
+		dbUrlStart,
+		d.config.JsonStr.DataBase.Postgres.User,
+		d.config.JsonStr.DataBase.Postgres.Password,
+		d.config.JsonStr.DataBase.Postgres.Address,
+		d.config.JsonStr.DataBase.Postgres.Port,
+		d.config.JsonStr.DataBase.Postgres.BaseName,
+		sslMode)
+
+	db, err = sql.Open("postgres", urlDB)
 
 	if err != nil {
 		return err
