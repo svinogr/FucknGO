@@ -2,7 +2,6 @@ package main
 
 import (
 	"FucknGO/config"
-	"FucknGO/config/json"
 	"FucknGO/log"
 	"FucknGO/server"
 	"flag"
@@ -22,13 +21,14 @@ func main() {
 }
 
 func getConfig() *config.Config {
-	conf, err := config.GetConfig(json.Path)
+	conf, err := config.GetConfig()
 
 	if err != nil {
 		log.NewLog().Fatal(err)
 	}
 
 	portArg := flag.String("port", "8080", "used port")
+
 	flag.Parse()
 
 	if *portArg != string(conf.JsonStr.ServerConfig.Port) {
@@ -45,5 +45,8 @@ func getConfig() *config.Config {
 
 func startServer(config config.Config) {
 	ser := server.Server{Config: config}
-	ser.Start()
+	port := fmt.Sprint(config.JsonStr.ServerConfig.Port)
+	fmt.Print("port", port)
+	staticResource := ser.Config.JsonStr.UiConfig.WWW.Static
+	ser.Start("127.0.0.1:"+port, staticResource)
 }

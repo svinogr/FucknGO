@@ -5,29 +5,25 @@ import (
 	"FucknGO/log"
 	"net/http"
 	"os"
-	"strconv"
 )
 
 type Server struct {
 	Config config.Config
 }
 
-// Start starts server with settings
-func (s *Server) Start() {
-	// TODO вставить обработку ошибку отсутсвия конфига
-
-	s.SetupHttpHandlers()
-
-	s.setupStaticResource()
-
-	s.runServer()
-
-	//select {}
+func init() {
+	SetupHttpHandlers()
 }
 
-func (s *Server) runServer() {
-	port := s.Config.JsonStr.ServerConfig.Port
-	err := http.ListenAndServe("127.0.0.1:"+strconv.Itoa(int(port)), nil)
+// Start starts server with settings
+func (s *Server) Start(address string, staticResource string) {
+	s.setupStaticResource(staticResource)
+
+	s.runServer(address)
+}
+
+func (s *Server) runServer(address string) {
+	err := http.ListenAndServe(address, nil)
 
 	if err != nil {
 		log.NewLog().Fatal(err)
@@ -35,7 +31,7 @@ func (s *Server) runServer() {
 }
 
 //SetupHttpHandlers set handlers for http.HandleFunc
-func (s *Server) SetupHttpHandlers() {
+func SetupHttpHandlers() {
 	fabric := NewFabric()
 
 	for _, e := range fabric.Handlers {
@@ -48,9 +44,9 @@ func (s *Server) SetupHttpHandlers() {
 // or else returns an error.
 // If path is already a directory, setupStaticResource does nothing
 // and returns nil.
-func (s *Server) setupStaticResource() {
+func (s *Server) setupStaticResource(staticResource string) {
 
-	path := s.Config.JsonStr.UiConfig.WWW.Static
+	path := staticResource
 
 	_, err := os.Stat(path)
 
@@ -62,7 +58,7 @@ func (s *Server) setupStaticResource() {
 		}
 	}
 
-	fileServer := http.FileServer(http.Dir(path))
+	_ = http.FileServer(http.Dir(staticResource))
 
-	http.Handle("/static/", http.StripPrefix("/static", fileServer))
+	//	http.Handle("/static/", http.StripPrefix("/static", fileServer))
 }

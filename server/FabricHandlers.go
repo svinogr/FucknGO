@@ -1,6 +1,7 @@
 package server
 
 import (
+	"FucknGO/config"
 	"FucknGO/server/Handler"
 	"fmt"
 	"net/http"
@@ -27,6 +28,12 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func newServer(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	port := query.Get("port")
+
+	config, _ := config.GetConfig()
+	server := Server{Config: *config}
+	go server.Start("127.0.0.1:"+port, "./ui/web/slave/")
 
 	/*	query := r.URL.Query()
 		port := query.Get("port")

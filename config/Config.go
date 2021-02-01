@@ -1,30 +1,31 @@
 package config
 
 import (
-	conf "FucknGO/config/json"
+	js "FucknGO/config/json"
 	"encoding/json"
 	"os"
 	"sync"
 )
 
 type Config struct {
-	JsonStr conf.JsonStr
+	JsonStr js.JsonStr
 }
 
 var instance *Config
 var once sync.Once
 
-func GetConfig(path string) (*Config, error) {
+func GetConfig() (*Config, error) {
 	var err error
 	once.Do(func() {
 		instance = &Config{}
-		instance, err = instance.readConfig(path)
+		instance, err = instance.readConfig()
 	})
 
 	return instance, err
 }
 
-func (p *Config) readConfig(path string) (*Config, error) {
+func (p *Config) readConfig() (*Config, error) {
+	path := js.Path
 	fileJson, err := os.Open(path)
 
 	defer fileJson.Close()
