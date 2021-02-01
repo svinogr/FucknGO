@@ -58,7 +58,7 @@ func (s *Server) setupStaticResource(staticResource string) {
 		}
 	}
 
-	_ = http.FileServer(http.Dir(staticResource))
+	fileServer := http.FileServer(http.Dir(staticResource))
 
-	//	http.Handle("/static/", http.StripPrefix("/static", fileServer))
+	http.Handle("/static/", http.StripPrefix("/static", fileServer))
 }
