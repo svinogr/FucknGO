@@ -14,7 +14,9 @@ type fabricHandlers struct {
 func NewFabric() fabricHandlers {
 	f := fabricHandlers{}
 	hand := Handler.Handler{"/", mainPage}
-	f.Handlers = append(f.Handlers, &hand)
+	hand2 := Handler.Handler{"/s", newServer}
+	f.Handlers = append(f.Handlers, &hand, &hand2)
+	//	f.Handlers = append(f.Handlers, &hand2)
 
 	return f
 }
@@ -22,4 +24,21 @@ func NewFabric() fabricHandlers {
 //main page
 func mainPage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Главная страница")
+}
+
+func newServer(w http.ResponseWriter, r *http.Request) {
+
+	/*	query := r.URL.Query()
+		port := query.Get("port")
+
+		re, err := http.Get("localhost:" + port)
+
+		fmt.Fprint(w, "port is busy")
+		fmt.Print(err)
+		fmt.Print(re)
+		return
+
+		go http.ListenAndServe(":"+port, nil)
+		fmt.Fprint(w, query)*/
+
 }

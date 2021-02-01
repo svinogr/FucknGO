@@ -20,9 +20,9 @@ func (s *Server) Start() {
 
 	s.setupStaticResource()
 
-	go s.runServer()
+	s.runServer()
 
-	select {}
+	//select {}
 }
 
 func (s *Server) runServer() {

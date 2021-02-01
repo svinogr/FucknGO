@@ -6,6 +6,7 @@ import (
 	"FucknGO/log"
 	"FucknGO/server"
 	"flag"
+	"fmt"
 	"strconv"
 )
 
@@ -16,6 +17,7 @@ func init() {
 var conf config.Config
 
 func main() {
+	fmt.Printf("new server %d", conf.JsonStr.ServerConfig.Port)
 	startServer(conf)
 }
 
