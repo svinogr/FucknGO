@@ -13,10 +13,11 @@ type fabricHandlers struct {
 // NewFabric constructs new fabricHandlers and inflate handlers for http.HandleFunc
 func NewFabric() fabricHandlers {
 	f := fabricHandlers{}
+
 	hand := Handler.Handler{"/", mainPage}
 	hand2 := Handler.Handler{"/s", newServer}
+
 	f.Handlers = append(f.Handlers, &hand, &hand2)
-	//	f.Handlers = append(f.Handlers, &hand2)
 
 	return f
 }

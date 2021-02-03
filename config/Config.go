@@ -14,6 +14,7 @@ type Config struct {
 var instance *Config
 var once sync.Once
 
+// GetConfig return reading config from json
 func GetConfig() (*Config, error) {
 	var err error
 	once.Do(func() {
@@ -24,6 +25,7 @@ func GetConfig() (*Config, error) {
 	return instance, err
 }
 
+// readConfig read config from json file defined in value js.Path
 func (p *Config) readConfig() (*Config, error) {
 	path := js.Path
 	fileJson, err := os.Open(path)
