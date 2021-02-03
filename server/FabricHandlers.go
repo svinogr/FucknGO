@@ -1,7 +1,6 @@
 package server
 
 import (
-	"FucknGO/config"
 	"FucknGO/server/Handler"
 	"fmt"
 	"net/http"
@@ -27,25 +26,17 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Главная страница")
 }
 
+// newServer creates new server with input parameters
 func newServer(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	port := query.Get("port")
+	staticPath := query.Get("staticPath")
 
-	config, _ := config.GetConfig()
-	server := Server{Config: *config}
-	go server.Start("127.0.0.1:"+port, "./ui/web/slave/")
-
-	/*	query := r.URL.Query()
-		port := query.Get("port")
-
-		re, err := http.Get("localhost:" + port)
-
-		fmt.Fprint(w, "port is busy")
-		fmt.Print(err)
-		fmt.Print(re)
-		return
-
-		go http.ListenAndServe(":"+port, nil)
-		fmt.Fprint(w, query)*/
-
+	if port != "" && staticPath != "" {
+		server := Server{}
+		go server.Start("127.0.0.1:"+port, staticPath)
+		fmt.Fprint(w, "new server is run on port= "+port+"with static resource= "+staticPath)
+	} else {
+		fmt.Fprint(w, "invalid parameters")
+	}
 }

@@ -16,7 +16,6 @@ func init() {
 var conf config.Config
 
 func main() {
-	fmt.Printf("new server %d", conf.JsonStr.ServerConfig.Port)
 	startServer(conf)
 }
 
@@ -44,9 +43,8 @@ func getConfig() *config.Config {
 }
 
 func startServer(config config.Config) {
-	ser := server.Server{Config: config}
+	ser := server.Server{}
 	port := fmt.Sprint(config.JsonStr.ServerConfig.Port)
-	fmt.Print("port", port)
-	staticResource := ser.Config.JsonStr.UiConfig.WWW.Static
-	ser.Start("127.0.0.1:"+port, staticResource)
+	staticPath := config.JsonStr.UiConfig.WWW.Static
+	ser.Start("127.0.0.1:"+port, staticPath)
 }

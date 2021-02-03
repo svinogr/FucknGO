@@ -1,51 +1,47 @@
 package server
 
 import (
-	"FucknGO/config"
 	"FucknGO/log"
 	"net/http"
 	"os"
 )
 
 type Server struct {
-	Config config.Config
 }
 
-func init() {
-	SetupHttpHandlers()
-}
-
-// Start starts server with settings
+// Start creates and starts server with settings
 func (s *Server) Start(address string, staticResource string) {
-	s.setupStaticResource(staticResource)
+	mux := http.ServeMux{}
 
-	s.runServer(address)
+	s.setupStaticResource(staticResource, &mux)
+	s.setupHttpHandlers(&mux)
+	s.runServer(address, &mux)
 }
 
-func (s *Server) runServer(address string) {
-	err := http.ListenAndServe(address, nil)
+// runServer run server on address by value address
+func (s *Server) runServer(address string, mux *http.ServeMux) {
+	server := http.Server{Addr: address, Handler: mux}
+
+	err := server.ListenAndServe()
 
 	if err != nil {
 		log.NewLog().Fatal(err)
 	}
 }
 
-//SetupHttpHandlers set handlers for http.HandleFunc
-func SetupHttpHandlers() {
+//setupHttpHandlers set handlers for http.HandleFunc
+func (s *Server) setupHttpHandlers(mux *http.ServeMux) *http.ServeMux {
 	fabric := NewFabric()
 
 	for _, e := range fabric.Handlers {
-		http.HandleFunc(e.GetHandler().Path, e.GetHandler().HandlerFunc)
+		mux.HandleFunc(e.GetHandler().Path, e.GetHandler().HandlerFunc)
 	}
+	return mux
 }
 
-// setupStaticResource creates a directory named path: "./app/server/ui/static",
-// along with any necessary parents, and returns nil,
-// or else returns an error.
-// If path is already a directory, setupStaticResource does nothing
-// and returns nil.
-func (s *Server) setupStaticResource(staticResource string) {
-
+// setupStaticResource creates a directory named by value staticResource ,
+// along with any necessary parents,
+func (s *Server) setupStaticResource(staticResource string, mux *http.ServeMux) *http.ServeMux {
 	path := staticResource
 
 	_, err := os.Stat(path)
@@ -60,5 +56,7 @@ func (s *Server) setupStaticResource(staticResource string) {
 
 	fileServer := http.FileServer(http.Dir(staticResource))
 
-	http.Handle("/static/", http.StripPrefix("/static", fileServer))
+	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+
+	return mux
 }
