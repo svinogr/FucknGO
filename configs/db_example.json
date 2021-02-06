@@ -1,7 +1,0 @@
-{
-  "host": "192.168.99.100",
-  "port": 5432,
-  "dbname": "fuckngo_db",
-  "user": "fuckngo_user",
-  "password": "fuckngo_password"
-}

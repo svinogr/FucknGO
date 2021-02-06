@@ -2,13 +2,14 @@ package master
 
 import (
 	"FucknGO/internal/app/config"
+	"FucknGO/internal/app/log"
 	"fmt"
-	"log"
 	"net/http"
 )
 
 func RunServer() {
 	conf := config.Get()
+	logger := log.GetLogger()
 
 	// create new server
 	server := http.Server{
@@ -18,6 +19,6 @@ func RunServer() {
 
 	err := server.ListenAndServe()
 	if err != nil {
-		log.Fatalf("Error while starting server, info: %v", err)
+		logger.Fatalf("Error while starting server, info: %v", err)
 	}
 }

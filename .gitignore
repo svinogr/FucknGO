@@ -42,8 +42,10 @@ $RECYCLE.BIN/
 # vendor/
 
 .idea/
-configs/db.json
+configs/basic.json
 configs/master.json
 deployments/postgresql/data/*
 !deployments/postgresql/data/.gitkeep
 go.sum
+logs/*
+!logs/.gitkeep

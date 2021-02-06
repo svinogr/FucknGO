@@ -2,21 +2,23 @@ package main
 
 import (
 	"FucknGO/internal/app/config"
-	"FucknGO/internal/app/db"
+	"FucknGO/internal/app/log"
 	"FucknGO/internal/app/master"
-	"log"
 )
 
 func main() {
 	conf := config.Get()
-	log.Printf("DB: %+v\n", conf.DB)
-	log.Printf("MS: %+v\n", conf.MasterServer)
 
-	orm := db.GetDB()
-	log.Printf("Successfully connect to DB %v\n", orm)
+	if conf.Basic.Debug {
+		log.SetOutputFile()
+	}
+	logger := log.GetLogger()
+
+	logger.Printf("Basic: %+v\n", conf.Basic)
+	logger.Printf("MS: %+v\n", conf.MasterServer)
 
 	go master.RunServer()
-	log.Printf("Successfully started master server on http://%s:%d\n",
+	logger.Printf("Successfully started master server on http://%s:%d\n",
 		conf.MasterServer.Host, conf.MasterServer.Port)
 
 	select {}

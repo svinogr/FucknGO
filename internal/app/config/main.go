@@ -13,16 +13,12 @@ import (
 var conf *Config
 
 type Config struct {
-	DB           *DB
+	Basic        *Basic
 	MasterServer *MasterServer
 }
 
-type DB struct {
-	Host     string `json:"host"`
-	Port     int    `json:"port"`
-	Dbname   string `json:"dbname"`
-	User     string `json:"user"`
-	Password string `json:"password"`
+type Basic struct {
+	Debug bool `json:"debug"`
 }
 
 type MasterServer struct {
@@ -70,11 +66,11 @@ func checkError(err error) {
 }
 
 func make() *Config {
-	db, err := read("db", &DB{})
+	basic, err := read("basic", &Basic{})
 	master, err := read("master", &MasterServer{})
 
 	conf = &Config{
-		DB:           db.(*DB),
+		Basic:        basic.(*Basic),
 		MasterServer: master.(*MasterServer),
 	}
 
