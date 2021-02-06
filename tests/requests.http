@@ -1,0 +1,20 @@
+POST http://localhost:8080/api/slave
+Cache-Control: no-cache
+Content-Type: application/json
+
+{
+  "port": 9093,
+  "static_dir": "C:\\Go"
+}
+
+###
+
+#GET http://localhost:8080/api/slave
+#GET http://localhost:8080/api/slave/1612637034
+GET http://localhost:9093/static
+Cache-Control: no-cache
+
+###
+
+DELETE http://localhost:8080/api/slave/1612637034
+Cache-Control: no-cache
