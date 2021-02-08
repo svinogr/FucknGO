@@ -46,5 +46,5 @@ func startServer(config config.Config) {
 	ser := server.Server{}
 	port := fmt.Sprint(config.JsonStr.ServerConfig.Port)
 	staticPath := config.JsonStr.UiConfig.WWW.Static
-	ser.Start("127.0.0.1:"+port, staticPath)
+	ser.Start("0.0.0.0:"+port, staticPath)
 }

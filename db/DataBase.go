@@ -12,20 +12,18 @@ var dbUrlStart = "postgresql"
 var sslMode = "sslmode=disable"
 
 type Database struct {
-	config      config.Config
+	config      *config.Config
 	dataBaseUrl string
 	db          sql.DB
 }
 
-func NewDataBase(config config.Config) *Database {
+func NewDataBase(config *config.Config) *Database {
 	return &Database{
 		config: config,
 	}
 }
 
 func (d *Database) OpenDataBase() error {
-	db, err := sql.Open("postgres", "postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable")
-
 	urlDB := fmt.Sprintf("%s://%s:%s@%s:%d/%s?%s",
 		dbUrlStart,
 		d.config.JsonStr.DataBase.Postgres.User,
@@ -35,7 +33,7 @@ func (d *Database) OpenDataBase() error {
 		d.config.JsonStr.DataBase.Postgres.BaseName,
 		sslMode)
 
-	db, err = sql.Open("postgres", urlDB)
+	db, err := sql.Open("postgres", urlDB)
 
 	if err != nil {
 		return err
