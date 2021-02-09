@@ -52,6 +52,6 @@ func startServer(config config.Config) {
 		log.NewLog().Fatal(err)
 	}
 
-	ser := fb.GetNewMasterServer("0.0.0.0:"+port, staticPath)
+	ser := fb.GetNewMasterServer("0.0.0.0", port, staticPath)
 	ser.RunServer()
 }

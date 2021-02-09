@@ -6,21 +6,37 @@ import (
 )
 
 type server struct {
+	id             uint64
 	mux            *http.ServeMux
 	address        string
+	port           string
 	staticResource string
 }
 
-// Setup creates and starts server with settings
-func (s *server) setup(address string, staticResource string) {
-	s.mux = &http.ServeMux{}
-	s.address = address
-	s.staticResource = staticResource
+func (s *server) StaticResource() string {
+	return s.staticResource
 }
 
-// runServer run server
+func (s *server) Address() string {
+	return s.address
+}
+
+func (s *server) Id() uint64 {
+	return s.id
+}
+
+// Setup creates and starts server with settings
+func (s *server) setup(address string, port string, staticResource string, id uint64) {
+	s.mux = &http.ServeMux{}
+	s.address = address
+	s.port = port
+	s.staticResource = staticResource
+	s.id = id
+}
+
+// runServer run servers
 func (s *server) RunServer() {
-	server := http.Server{Addr: s.address, Handler: s.mux}
+	server := http.Server{Addr: s.address + ":" + s.port, Handler: s.mux}
 
 	err := server.ListenAndServe()
 
