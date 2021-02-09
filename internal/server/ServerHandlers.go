@@ -5,9 +5,11 @@ import (
 	"FucknGO/db"
 	serModel "FucknGO/internal/model/server"
 	"FucknGO/log"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 )
 
 //main page
@@ -25,12 +27,60 @@ func Connect(w http.ResponseWriter, r *http.Request) {
 
 	database := db.NewDataBase(c)
 	err = database.OpenDataBase()
+
 	if err != nil {
 		fmt.Fprint(w, err)
 	}
 
 	fmt.Fprint(w, "connect")
 
+}
+
+func GetAllServers(w http.ResponseWriter, r *http.Request) {
+	if fb, err := FabricServer(); err != nil {
+		fmt.Fprint(w, err)
+	} else {
+		servers := fb.servers
+		jsonStr := ""
+
+		for _, el := range servers {
+			if el.Port() != "" {
+
+				s, err := json.Marshal(serModel.ServerModel{el.Id(), el.StaticResource(), el.Port(), el.Address()})
+
+				if err != nil {
+					continue
+				} else {
+					jsonStr = jsonStr + string(s)
+				}
+			}
+		}
+		fmt.Fprint(w, jsonStr)
+	}
+}
+
+//StopServerById stops server by Id
+func StopServerById(w http.ResponseWriter, r *http.Request) {
+	//TODO не останавливается :(
+	query := r.URL.Query()
+	if id, err := strconv.Atoi(query.Get("Id")); err != nil {
+		fmt.Fprint(w, err)
+
+	} else {
+		if fb, err := FabricServer(); err != nil {
+			fmt.Fprint(w, err)
+		} else {
+
+			servers := fb.servers
+			for _, el := range servers {
+				if el.Id() != uint64(id) {
+					err = el.server.Shutdown(context.Background())
+					fmt.Print(err)
+				}
+
+			}
+		}
+	}
 }
 
 // newServer creates new servers with input parameters
@@ -52,7 +102,7 @@ func NewServer(w http.ResponseWriter, r *http.Request) {
 
 			go ser.RunServer()
 
-			s := serModel.ServerModel{ser.Id(), ser.staticResource, ser.port, ser.address}
+			s := serModel.ServerModel{ser.Id(), ser.StaticResource(), ser.Port(), ser.Address()}
 
 			if data, err := json.Marshal(&s); err != nil {
 				fmt.Fprint(w, "not to marshal json")

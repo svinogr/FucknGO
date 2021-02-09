@@ -11,6 +11,11 @@ type server struct {
 	address        string
 	port           string
 	staticResource string
+	server         http.Server
+}
+
+func (s *server) Port() string {
+	return s.port
 }
 
 func (s *server) StaticResource() string {
@@ -36,9 +41,9 @@ func (s *server) setup(address string, port string, staticResource string, id ui
 
 // runServer run servers
 func (s *server) RunServer() {
-	server := http.Server{Addr: s.address + ":" + s.port, Handler: s.mux}
+	s.server = http.Server{Addr: s.address + ":" + s.port, Handler: s.mux}
 
-	err := server.ListenAndServe()
+	err := s.server.ListenAndServe()
 
 	if err != nil {
 		log.NewLog().Fatal(err)

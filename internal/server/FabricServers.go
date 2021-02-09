@@ -37,10 +37,7 @@ func (f *fabricServers) GetNewMasterServer(address string, port string, staticRe
 	f.servers = append(f.servers, server)
 	setupStaticResource(staticResource, server)
 
-	fabric := NewFabric()
-	for _, e := range fabric.Handlers {
-		server.mux.HandleFunc(e.GetHandler().Path, e.GetHandler().HandlerFunc)
-	}
+	setupHandlers(&server)
 
 	return &server
 }
@@ -63,7 +60,16 @@ func (f *fabricServers) GetNewSlaveServer(address string, port string, staticRes
 	f.servers = append(f.servers, server)
 	setupStaticResource(staticResource, server)
 
+	setupHandlers(&server)
+
 	return &server, nil
+}
+
+func setupHandlers(s *server) {
+	fabric := NewFabric()
+	for _, e := range fabric.Handlers {
+		s.mux.HandleFunc(e.GetHandler().Path, e.GetHandler().HandlerFunc)
+	}
 }
 
 //setupStaticResource set static dir for server

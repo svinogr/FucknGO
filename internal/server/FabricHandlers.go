@@ -13,10 +13,12 @@ func NewFabric() fabricHandlers {
 	f := fabricHandlers{}
 
 	hand := handler.Handler{"/", MainPage}
-	hand2 := handler.Handler{"/s", NewServer}
+	hand2 := handler.Handler{"/server", NewServer}
 	hand3 := handler.Handler{"/connect", Connect}
+	hand4 := handler.Handler{"/server/all", GetAllServers}
+	hand5 := handler.Handler{"/serverkill", StopServerById}
 
-	f.Handlers = append(f.Handlers, &hand, &hand2, &hand3)
+	f.Handlers = append(f.Handlers, &hand, &hand2, &hand3, &hand4, &hand5)
 
 	return f
 }
