@@ -2,8 +2,8 @@ package main
 
 import (
 	"FucknGO/config"
+	"FucknGO/internal/server"
 	"FucknGO/log"
-	"FucknGO/server"
 	"flag"
 	"fmt"
 	"strconv"
@@ -43,8 +43,15 @@ func getConfig() *config.Config {
 }
 
 func startServer(config config.Config) {
-	ser := server.Server{}
 	port := fmt.Sprint(config.JsonStr.ServerConfig.Port)
 	staticPath := config.JsonStr.UiConfig.WWW.Static
-	ser.Start("0.0.0.0:"+port, staticPath)
+
+	fb, err := server.FabricServer()
+
+	if err != nil {
+		log.NewLog().Fatal(err)
+	}
+
+	ser := fb.GetNewMasterServer("0.0.0.0:"+port, staticPath)
+	ser.RunServer()
 }

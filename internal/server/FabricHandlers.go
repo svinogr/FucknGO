@@ -3,22 +3,23 @@ package server
 import (
 	"FucknGO/config"
 	"FucknGO/db"
-	"FucknGO/server/Handler"
+	"FucknGO/internal/handler"
+	"FucknGO/log"
 	"fmt"
 	"net/http"
 )
 
 type fabricHandlers struct {
-	Handlers []Handler.HandlerInterface
+	Handlers []handler.HandlerInterface
 }
 
 // NewFabric constructs new fabricHandlers and inflate handlers for http.HandleFunc
 func NewFabric() fabricHandlers {
 	f := fabricHandlers{}
 
-	hand := Handler.Handler{"/", mainPage}
-	hand2 := Handler.Handler{"/s", newServer}
-	hand3 := Handler.Handler{"/connect", connect}
+	hand := handler.Handler{"/", mainPage}
+	hand2 := handler.Handler{"/s", newServer}
+	hand3 := handler.Handler{"/connect", connect}
 
 	f.Handlers = append(f.Handlers, &hand, &hand2, &hand3)
 
@@ -55,10 +56,18 @@ func newServer(w http.ResponseWriter, r *http.Request) {
 	staticPath := query.Get("staticPath")
 
 	if port != "" && staticPath != "" {
-		server := Server{}
-		go server.Start("127.0.0.1:"+port, staticPath)
+		fb, err := FabricServer()
+
+		if err != nil {
+			log.NewLog().Fatal(err)
+		}
+
+		ser := fb.GetNewSlaveServer("0.0.0.0:"+port, staticPath)
+		go ser.RunServer()
+
 		fmt.Fprint(w, "new server is run on port= "+port+"with static resource= "+staticPath)
 	} else {
 		fmt.Fprint(w, "invalid parameters")
 	}
+
 }
