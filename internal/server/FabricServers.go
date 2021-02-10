@@ -10,7 +10,7 @@ import (
 )
 
 type fabricServers struct {
-	servers []server
+	servers []*server
 }
 
 var instance *fabricServers
@@ -21,7 +21,7 @@ func FabricServer() (*fabricServers, error) {
 	var err error
 	once.Do(func() {
 		instance = &fabricServers{}
-		instance.servers = make([]server, 10)
+		instance.servers = make([]*server, 10)
 	})
 
 	return instance, err
@@ -34,10 +34,11 @@ func (f *fabricServers) GetNewMasterServer(address string, port string, staticRe
 	server := server{}
 	server.setup(address, port, staticResource, uint64(idServer))
 
-	f.servers = append(f.servers, server)
-	setupStaticResource(staticResource, server)
+	setupStaticResource(staticResource, &server)
 
 	setupHandlers(&server)
+
+	f.servers = append(f.servers, &server)
 
 	return &server
 }
@@ -46,6 +47,10 @@ func (f *fabricServers) GetNewMasterServer(address string, port string, staticRe
 func (f *fabricServers) GetNewSlaveServer(address string, port string, staticResource string) (*server, error) {
 
 	for _, el := range f.servers {
+
+		if el == nil {
+			continue
+		}
 
 		if el.port == port {
 			return nil, errors.New("port is uses yet")
@@ -57,10 +62,11 @@ func (f *fabricServers) GetNewSlaveServer(address string, port string, staticRes
 	server := server{}
 	server.setup(address, port, staticResource, uint64(idServer))
 
-	f.servers = append(f.servers, server)
-	setupStaticResource(staticResource, server)
+	setupStaticResource(staticResource, &server)
 
 	setupHandlers(&server)
+
+	f.servers = append(f.servers, &server)
 
 	return &server, nil
 }
@@ -73,7 +79,7 @@ func setupHandlers(s *server) {
 }
 
 //setupStaticResource set static dir for server
-func setupStaticResource(staticResource string, server server) {
+func setupStaticResource(staticResource string, server *server) {
 	_, err := os.Stat(staticResource)
 
 	if err != nil {

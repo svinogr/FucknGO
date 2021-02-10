@@ -44,6 +44,10 @@ func GetAllServers(w http.ResponseWriter, r *http.Request) {
 		jsonStr := ""
 
 		for _, el := range servers {
+			if el == nil {
+				continue
+			}
+
 			if el.Port() != "" {
 
 				s, err := json.Marshal(serModel.ServerModel{el.Id(), el.StaticResource(), el.Port(), el.Address()})
@@ -73,9 +77,17 @@ func StopServerById(w http.ResponseWriter, r *http.Request) {
 
 			servers := fb.servers
 			for _, el := range servers {
-				if el.Id() != uint64(id) {
+				if el == nil {
+					continue
+				}
+
+				if el.Id() == uint64(id) {
+					fmt.Printf("shut server")
+					fmt.Print(el.server)
 					err = el.server.Shutdown(context.Background())
+
 					fmt.Print(err)
+					break
 				}
 
 			}
