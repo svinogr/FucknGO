@@ -88,11 +88,25 @@ func StopServerById(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// newServer creates new servers with input parameters
-func NewServer(w http.ResponseWriter, r *http.Request) {
-	query := r.URL.Query()
-	port := query.Get("port")
-	staticPath := query.Get("staticPath")
+// newServer creates new servers
+func Server(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodPost:
+		CreateServer(w, r)
+	case http.MethodGet:
+		GetAllServers(w, r)
+	}
+}
+func CreateServer(w http.ResponseWriter, r *http.Request) {
+	var sM serModel.ServerModel
+	if err := json.NewDecoder(r.Body).Decode(&sM); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	port := sM.Port
+	staticPath := sM.StaticResource
+	fmt.Print(port, staticPath)
 
 	if port != "" && staticPath != "" {
 		fb, err := FabricServer()
@@ -108,16 +122,19 @@ func NewServer(w http.ResponseWriter, r *http.Request) {
 
 			s := serModel.ServerModel{ser.Id(), ser.StaticResource(), ser.Port(), ser.Address()}
 
-			if data, err := json.Marshal(&s); err != nil {
-				fmt.Fprint(w, "not to marshal json")
-			} else {
-				fmt.Print(data)
-				fmt.Fprint(w, string(data))
+			data, err := json.Marshal(&s)
+
+			if err != nil {
+				fmt.Fprint(w, http.StatusBadRequest)
+				return
 			}
+
+			w.Header().Set("Content-Type", "application/json")
+			fmt.Fprint(w, string(data))
 		}
 
 	} else {
-		fmt.Fprint(w, "invalid parameters")
+		fmt.Fprint(w, http.StatusBadRequest)
 	}
 
 }

@@ -1,8 +1,14 @@
-POST http://localhost:8080/
+POST http://localhost:8080/api/server
 Cache-Control: no-cache
 Content-Type: application/json
 
 {
-  "port": 9093,
-  "static_dir": "C:\\Go"
+  "port": "8081",
+  "static_resource": "./ui/web2"
 }
+###
+GET http://localhost:8080/api/server
+Cache-Control: no-cache
+Content-Type: application/json
+
+
