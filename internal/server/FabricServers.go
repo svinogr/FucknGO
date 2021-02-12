@@ -21,7 +21,8 @@ func FabricServer() (*fabricServers, error) {
 	var err error
 	once.Do(func() {
 		instance = &fabricServers{}
-		instance.servers = make([]*server, 10)
+		//TODO сделать нормальное создание массива
+		instance.servers = make([]*server, 0)
 	})
 
 	return instance, err

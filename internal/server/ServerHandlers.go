@@ -49,14 +49,13 @@ func GetAllServers(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if el.Port() != "" {
-
 				s, err := json.Marshal(serModel.ServerModel{el.Id(), el.StaticResource(), el.Port(), el.Address()})
 
 				if err != nil {
 					continue
-				} else {
-					jsonStr = jsonStr + string(s)
 				}
+
+				jsonStr = jsonStr + string(s)
 			}
 		}
 		fmt.Fprint(w, jsonStr)
@@ -65,7 +64,6 @@ func GetAllServers(w http.ResponseWriter, r *http.Request) {
 
 //StopServerById stops server by Id
 func StopServerById(w http.ResponseWriter, r *http.Request) {
-	//TODO не останавливается :(
 	query := r.URL.Query()
 	if id, err := strconv.Atoi(query.Get("Id")); err != nil {
 		fmt.Fprint(w, err)
@@ -82,14 +80,9 @@ func StopServerById(w http.ResponseWriter, r *http.Request) {
 				}
 
 				if el.Id() == uint64(id) {
-					fmt.Printf("shut server")
-					fmt.Print(el.server)
 					err = el.server.Shutdown(context.Background())
-
-					fmt.Print(err)
 					break
 				}
-
 			}
 		}
 	}
@@ -111,7 +104,6 @@ func NewServer(w http.ResponseWriter, r *http.Request) {
 		if ser, err := fb.GetNewSlaveServer("0.0.0.0", port, staticPath); err != nil {
 			fmt.Fprint(w, err)
 		} else {
-
 			go ser.RunServer()
 
 			s := serModel.ServerModel{ser.Id(), ser.StaticResource(), ser.Port(), ser.Address()}

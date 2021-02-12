@@ -46,6 +46,10 @@ func (s *server) RunServer() {
 	err := s.server.ListenAndServe()
 
 	if err != nil {
-		log.NewLog().Fatal(err)
+		if err.Error() != "http: Server closed" {
+			log.NewLog().Fatal(err)
+		}
+
+		log.NewLog().PrintError(err)
 	}
 }

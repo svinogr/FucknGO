@@ -49,7 +49,7 @@ func startServer(config config.Config) {
 	fb, err := server.FabricServer()
 
 	if err != nil {
-		log.NewLog().Fatal(err)
+		//log.NewLog().Fatal(err)
 	}
 
 	ser := fb.GetNewMasterServer("0.0.0.0", port, staticPath)
