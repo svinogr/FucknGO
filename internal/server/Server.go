@@ -12,6 +12,7 @@ type server struct {
 	port           string
 	staticResource string
 	server         http.Server
+	isSlave        bool
 }
 
 func (s *server) Port() string {
@@ -31,7 +32,8 @@ func (s *server) Id() uint64 {
 }
 
 // Setup creates and starts server with settings
-func (s *server) setup(address string, port string, staticResource string, id uint64) {
+func (s *server) setup(address string, port string, staticResource string, id uint64, isSlave bool) {
+	s.isSlave = isSlave
 	s.mux = http.ServeMux{}
 	s.address = address
 	s.port = port

@@ -16,6 +16,9 @@ type fabricServers struct {
 var instance *fabricServers
 var once sync.Once
 
+const apiSlave = "/api/slave"
+const apiMaster = "/api"
+
 // FabricServer construct singleton
 func FabricServer() (*fabricServers, error) {
 	var err error
@@ -33,7 +36,7 @@ func (f *fabricServers) GetNewMasterServer(address string, port string, staticRe
 	idServer := time.Now().Unix()
 
 	server := server{}
-	server.setup(address, port, staticResource, uint64(idServer))
+	server.setup(address, port, staticResource, uint64(idServer), false)
 
 	setupStaticResource(staticResource, &server)
 
@@ -61,7 +64,7 @@ func (f *fabricServers) GetNewSlaveServer(address string, port string, staticRes
 	idServer := time.Now().Unix()
 
 	server := server{}
-	server.setup(address, port, staticResource, uint64(idServer))
+	server.setup(address, port, staticResource, uint64(idServer), true)
 
 	setupStaticResource(staticResource, &server)
 
@@ -74,8 +77,14 @@ func (f *fabricServers) GetNewSlaveServer(address string, port string, staticRes
 
 func setupHandlers(s *server) {
 	fabric := NewFabric()
-	for _, e := range fabric.Handlers {
-		s.mux.HandleFunc(e.GetHandler().Path, e.GetHandler().HandlerFunc)
+	if s.isSlave {
+		for _, e := range fabric.Handlers {
+			s.mux.HandleFunc(apiSlave+e.GetHandler().Path, e.GetHandler().HandlerFunc)
+		}
+	} else {
+		for _, e := range fabric.Handlers {
+			s.mux.HandleFunc(apiMaster+e.GetHandler().Path, e.GetHandler().HandlerFunc)
+		}
 	}
 }
 
