@@ -9,7 +9,7 @@ import (
 func main() {
 	conf := config.Get()
 
-	if conf.Basic.Debug {
+	if !conf.Basic.Debug {
 		log.SetOutputFile()
 	}
 	logger := log.GetLogger()

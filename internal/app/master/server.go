@@ -19,6 +19,6 @@ func RunServer() {
 
 	err := server.ListenAndServe()
 	if err != nil {
-		logger.Fatalf("Error while starting server, info: %v", err)
+		logger.Printf("Error while starting server, info: %v", err)
 	}
 }

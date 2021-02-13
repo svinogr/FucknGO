@@ -76,6 +76,7 @@ func deleteSlave(w http.ResponseWriter, r *http.Request) {
 		render.JSON(w, r, map[string]interface{}{"status": "fail", "error": err, "data": nil})
 		return
 	}
+	delete(slaves, id)
 
 	render.JSON(w, r, map[string]interface{}{"status": "ok", "error": nil, "data": nil})
 }
