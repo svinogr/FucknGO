@@ -12,11 +12,11 @@ type fabricHandlers struct {
 func NewFabric() fabricHandlers {
 	f := fabricHandlers{}
 
-	hand := handler.Handler{"/", MainPage}
-	hand2 := handler.Handler{"/server", Server}
-	hand3 := handler.Handler{"/connect", Connect}
-	hand4 := handler.Handler{"/server/all", GetAllServers}
-	hand5 := handler.Handler{"/serverkill", StopServerById}
+	hand := handler.Handler{"/", MainPage, "GET"}
+	hand2 := handler.Handler{"/server", Server, "GET"}
+	hand3 := handler.Handler{"/server", Server, "POST"}
+	hand4 := handler.Handler{"/server/{id}", Server, "DELETE"}
+	hand5 := handler.Handler{"/connect", Connect, "GET"}
 
 	f.Handlers = append(f.Handlers, &hand, &hand2, &hand3, &hand4, &hand5)
 

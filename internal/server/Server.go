@@ -2,12 +2,13 @@ package server
 
 import (
 	"FucknGO/log"
+	"github.com/gorilla/mux"
 	"net/http"
 )
 
 type server struct {
 	id             uint64
-	mux            http.ServeMux
+	mux            mux.Router
 	address        string
 	port           string
 	staticResource string
@@ -34,7 +35,7 @@ func (s *server) Id() uint64 {
 // Setup creates and starts server with settings
 func (s *server) setup(address string, port string, staticResource string, id uint64, isSlave bool) {
 	s.isSlave = isSlave
-	s.mux = http.ServeMux{}
+	s.mux = *mux.NewRouter()
 	s.address = address
 	s.port = port
 	s.staticResource = staticResource

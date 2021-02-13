@@ -5,4 +5,5 @@ type ServerModel struct {
 	StaticResource string `json:"static_resource"`
 	Port           string `json:"port"`
 	Address        string `json:"address"`
+	IsRun          bool   `json:"is_run"`
 }

@@ -1,4 +1,4 @@
-FROM golang:latest
+FROM  golang:rc-alpine3.13
 RUN mkdir /go/test
 WORKDIR /go/test
 COPY ./ ./

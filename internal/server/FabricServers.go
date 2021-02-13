@@ -79,11 +79,11 @@ func setupHandlers(s *server) {
 	fabric := NewFabric()
 	if s.isSlave {
 		for _, e := range fabric.Handlers {
-			s.mux.HandleFunc(apiSlave+e.GetHandler().Path, e.GetHandler().HandlerFunc)
+			s.mux.HandleFunc(apiSlave+e.GetHandler().Path, e.GetHandler().HandlerFunc).Methods(e.GetHandler().Method)
 		}
 	} else {
 		for _, e := range fabric.Handlers {
-			s.mux.HandleFunc(apiMaster+e.GetHandler().Path, e.GetHandler().HandlerFunc)
+			s.mux.HandleFunc(apiMaster+e.GetHandler().Path, e.GetHandler().HandlerFunc).Methods(e.GetHandler().Method)
 		}
 	}
 }

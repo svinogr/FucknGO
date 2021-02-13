@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
 )
@@ -49,7 +50,7 @@ func GetAllServers(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if el.Port() != "" {
-				s, err := json.Marshal(serModel.ServerModel{el.Id(), el.StaticResource(), el.Port(), el.Address()})
+				s, err := json.Marshal(serModel.ServerModel{el.Id(), el.StaticResource(), el.Port(), el.Address(), true})
 
 				if err != nil {
 					continue
@@ -58,33 +59,8 @@ func GetAllServers(w http.ResponseWriter, r *http.Request) {
 				jsonStr = jsonStr + string(s)
 			}
 		}
+		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprint(w, jsonStr)
-	}
-}
-
-//StopServerById stops server by Id
-func StopServerById(w http.ResponseWriter, r *http.Request) {
-	query := r.URL.Query()
-	if id, err := strconv.Atoi(query.Get("Id")); err != nil {
-		fmt.Fprint(w, err)
-
-	} else {
-		if fb, err := FabricServer(); err != nil {
-			fmt.Fprint(w, err)
-		} else {
-
-			servers := fb.servers
-			for _, el := range servers {
-				if el == nil {
-					continue
-				}
-
-				if el.Id() == uint64(id) {
-					err = el.server.Shutdown(context.Background())
-					break
-				}
-			}
-		}
 	}
 }
 
@@ -95,8 +71,65 @@ func Server(w http.ResponseWriter, r *http.Request) {
 		CreateServer(w, r)
 	case http.MethodGet:
 		GetAllServers(w, r)
+	case http.MethodDelete:
+		DeleteServerById(w, r)
 	}
 }
+
+// DeleteServerById deletes by id
+func DeleteServerById(w http.ResponseWriter, r *http.Request) {
+	var sM serModel.ServerModel
+
+	vars := mux.Vars(r)
+
+	id, err := strconv.ParseUint(vars["id"], 10, 32)
+
+	if err != nil {
+		log.NewLog().PrintError(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	fb, err := FabricServer()
+
+	if err != nil {
+		log.NewLog().PrintError(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	servers := fb.servers
+
+	for _, el := range servers {
+		if el == nil {
+			continue
+		}
+
+		if el.Id() == id {
+			err = el.server.Shutdown(context.Background())
+			sM.Port = el.Port()
+			sM.Address = el.Address()
+			sM.StaticResource = el.StaticResource()
+			sM.Id = el.Id()
+			sM.IsRun = false
+			//TODO сделать удаление из спсика серверов
+			break
+		}
+	}
+
+	jsonStr, err := json.Marshal(&sM)
+
+	if err != nil {
+		log.NewLog().PrintError(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprint(w, string(jsonStr))
+}
+
+//Crate new server
 func CreateServer(w http.ResponseWriter, r *http.Request) {
 	var sM serModel.ServerModel
 	if err := json.NewDecoder(r.Body).Decode(&sM); err != nil {
@@ -106,7 +139,6 @@ func CreateServer(w http.ResponseWriter, r *http.Request) {
 
 	port := sM.Port
 	staticPath := sM.StaticResource
-	fmt.Print(port, staticPath)
 
 	if port != "" && staticPath != "" {
 		fb, err := FabricServer()
@@ -120,7 +152,7 @@ func CreateServer(w http.ResponseWriter, r *http.Request) {
 		} else {
 			go ser.RunServer()
 
-			s := serModel.ServerModel{ser.Id(), ser.StaticResource(), ser.Port(), ser.Address()}
+			s := serModel.ServerModel{ser.Id(), ser.StaticResource(), ser.Port(), ser.Address(), true}
 
 			data, err := json.Marshal(&s)
 
@@ -136,5 +168,4 @@ func CreateServer(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Fprint(w, http.StatusBadRequest)
 	}
-
 }
