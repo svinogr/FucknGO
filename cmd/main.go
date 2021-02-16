@@ -2,6 +2,7 @@ package main
 
 import (
 	"FucknGO/config"
+	"FucknGO/internal/jwt"
 	"FucknGO/internal/server"
 	"FucknGO/log"
 	"flag"
@@ -16,6 +17,7 @@ func init() {
 var conf config.Config
 
 func main() {
+	fmt.Print(jwt.CreateJWT(32))
 	startServer(conf)
 }
 

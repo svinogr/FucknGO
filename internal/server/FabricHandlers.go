@@ -2,6 +2,7 @@ package server
 
 import (
 	"FucknGO/internal/handler"
+	"net/http"
 )
 
 type fabricHandlers struct {
@@ -11,14 +12,23 @@ type fabricHandlers struct {
 // NewFabric constructs new fabricHandlers and inflate handlers for http.HandleFunc
 func NewFabric() fabricHandlers {
 	f := fabricHandlers{}
-
-	hand := handler.Handler{"/", MainPage, "GET"}
-	hand2 := handler.Handler{"/server", Server, "GET"}
-	hand3 := handler.Handler{"/server", Server, "POST"}
-	hand4 := handler.Handler{"/server/{id}", Server, "DELETE"}
-	hand5 := handler.Handler{"/connect", Connect, "GET"}
-
-	f.Handlers = append(f.Handlers, &hand, &hand2, &hand3, &hand4, &hand5)
+	setupServerHandlers(&f)
+	setupAuthHandlers(&f)
 
 	return f
+}
+
+func setupAuthHandlers(f *fabricHandlers) {
+	hand := handler.Handler{"/auth", auth, http.MethodPost}
+	f.Handlers = append(f.Handlers, &hand)
+}
+
+func setupServerHandlers(f *fabricHandlers) {
+	hand := handler.Handler{"/", MainPage, http.MethodGet}
+	hand2 := handler.Handler{"/server", Server, http.MethodGet}
+	hand3 := handler.Handler{"/server", Server, http.MethodPost}
+	hand4 := handler.Handler{"/server/{id}", Server, http.MethodDelete}
+	hand5 := handler.Handler{"/connect", Connect, http.MethodGet}
+
+	f.Handlers = append(f.Handlers, &hand, &hand2, &hand3, &hand4, &hand5)
 }
