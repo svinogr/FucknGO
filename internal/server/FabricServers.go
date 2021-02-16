@@ -1,6 +1,7 @@
 package server
 
 import (
+	"FucknGO/internal/jwt"
 	"FucknGO/log"
 	"errors"
 	"net/http"
@@ -92,6 +93,17 @@ func setupHandlers(s *server) {
 	} else {
 		for _, e := range fabric.Handlers {
 			s.mux.HandleFunc(apiMaster+e.GetHandler().Path, e.GetHandler().HandlerFunc).Methods(e.GetHandler().Method)
+
+			s.mux.Use(func(handler http.Handler) http.Handler {
+
+				if e.GetHandler().Path == "/auth" {
+					return handler
+				} else {
+					return jwt.JwtMiddleware.Handler(handler)
+				}
+
+			})
+
 		}
 	}
 }

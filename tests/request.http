@@ -16,3 +16,8 @@ Content-Type: application/json
 DELETE http://localhost:8080/api/server/1613455303
 Cache-Control: no-cache
 Content-Type: application/json
+
+###
+GET http://localhost:8080/api/auth
+Cache-Control: no-cache
+Content-Type: application/json

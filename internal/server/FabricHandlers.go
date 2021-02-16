@@ -19,16 +19,18 @@ func NewFabric() fabricHandlers {
 }
 
 func setupAuthHandlers(f *fabricHandlers) {
-	hand := handler.Handler{"/auth", auth, http.MethodPost}
+	hand := handler.MyHandler{"/auth", auth, http.MethodGet}
+
 	f.Handlers = append(f.Handlers, &hand)
 }
 
 func setupServerHandlers(f *fabricHandlers) {
-	hand := handler.Handler{"/", MainPage, http.MethodGet}
-	hand2 := handler.Handler{"/server", Server, http.MethodGet}
-	hand3 := handler.Handler{"/server", Server, http.MethodPost}
-	hand4 := handler.Handler{"/server/{id}", Server, http.MethodDelete}
-	hand5 := handler.Handler{"/connect", Connect, http.MethodGet}
+
+	hand := handler.MyHandler{"/", MainPage, http.MethodGet}
+	hand2 := handler.MyHandler{"/server", Server, http.MethodGet}
+	hand3 := handler.MyHandler{"/server", Server, http.MethodPost}
+	hand4 := handler.MyHandler{"/server/{id}", Server, http.MethodDelete}
+	hand5 := handler.MyHandler{"/connect", Connect, http.MethodGet}
 
 	f.Handlers = append(f.Handlers, &hand, &hand2, &hand3, &hand4, &hand5)
 }

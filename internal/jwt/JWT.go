@@ -15,7 +15,13 @@ var JwtMiddleware = jwtmiddleware.New(jwtmiddleware.Options{
 	ValidationKeyGetter: func(token *jwt2.Token) (interface{}, error) {
 		return mySigningKey, nil
 	},
-	SigningMethod: jwt.SigningMethodHS256,
+	UserProperty:        "",
+	ErrorHandler:        nil,
+	CredentialsOptional: false,
+	Extractor:           nil,
+	Debug:               false,
+	EnableAuthOnOptions: false,
+	SigningMethod:       jwt.SigningMethodHS256,
 })
 
 func CreateJWT(id uint64) (string, error) {
