@@ -112,6 +112,7 @@ func DeleteServerById(w http.ResponseWriter, r *http.Request) {
 			sM.StaticResource = el.StaticResource()
 			sM.Id = el.Id()
 			sM.IsRun = false
+			fb.RemoveServer(*el)
 			//TODO сделать удаление из спсика серверов
 			break
 		}

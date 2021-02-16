@@ -75,6 +75,14 @@ func (f *fabricServers) GetNewSlaveServer(address string, port string, staticRes
 	return &server, nil
 }
 
+func (f *fabricServers) RemoveServer(server server) {
+	for i, el := range f.servers {
+		if el.port == server.port {
+			f.servers[i] = nil
+		}
+	}
+}
+
 func setupHandlers(s *server) {
 	fabric := NewFabric()
 	if s.isSlave {
