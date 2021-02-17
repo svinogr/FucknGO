@@ -88,22 +88,21 @@ func setupHandlers(s *server) {
 	fabric := NewFabric()
 	if s.isSlave {
 		for _, e := range fabric.Handlers {
-			s.mux.HandleFunc(apiSlave+e.GetHandler().Path, e.GetHandler().HandlerFunc).Methods(e.GetHandler().Method)
+			if e.GetHandler().Path != "/auth" {
+				fh := http.HandlerFunc(e.GetHandler().HandlerFunc)
+				s.mux.Handle(apiMaster+e.GetHandler().Path, jwt.JwtMiddleware.Handler(fh)).Methods(e.GetHandler().Method)
+			} else {
+				s.mux.HandleFunc(apiMaster+e.GetHandler().Path, e.GetHandler().HandlerFunc).Methods(e.GetHandler().Method)
+			}
 		}
 	} else {
 		for _, e := range fabric.Handlers {
-			s.mux.HandleFunc(apiMaster+e.GetHandler().Path, e.GetHandler().HandlerFunc).Methods(e.GetHandler().Method)
-
-			s.mux.Use(func(handler http.Handler) http.Handler {
-
-				if e.GetHandler().Path == "/auth" {
-					return handler
-				} else {
-					return jwt.JwtMiddleware.Handler(handler)
-				}
-
-			})
-
+			if e.GetHandler().Path != "/auth" {
+				fh := http.HandlerFunc(e.GetHandler().HandlerFunc)
+				s.mux.Handle(apiMaster+e.GetHandler().Path, jwt.JwtMiddleware.Handler(fh)).Methods(e.GetHandler().Method)
+			} else {
+				s.mux.HandleFunc(apiMaster+e.GetHandler().Path, e.GetHandler().HandlerFunc).Methods(e.GetHandler().Method)
+			}
 		}
 	}
 }
