@@ -10,7 +10,7 @@ import (
 
 var mySigningKey = []byte("SECRET")
 
-// hadnler cath jwt token
+// hadnler catch jwt token
 var JwtMiddleware = jwtmiddleware.New(jwtmiddleware.Options{
 	ValidationKeyGetter: func(token *jwt2.Token) (interface{}, error) {
 		return mySigningKey, nil
@@ -26,6 +26,7 @@ var JwtMiddleware = jwtmiddleware.New(jwtmiddleware.Options{
 
 func CreateJWT(id uint64) (string, error) {
 	var err error
+
 	//Creating Access Token
 	os.Setenv("ACCESS_SECRET", string(mySigningKey)) //TODO this should be in an env file
 

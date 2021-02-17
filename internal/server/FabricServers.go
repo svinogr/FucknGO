@@ -88,12 +88,14 @@ func setupHandlers(s *server) {
 	fabric := NewFabric()
 	if s.isSlave {
 		for _, e := range fabric.Handlers {
-			if e.GetHandler().Path != "/auth" {
+			s.mux.HandleFunc(apiSlave+e.GetHandler().Path, e.GetHandler().HandlerFunc).Methods(e.GetHandler().Method)
+			//uncomment if need token for slave
+			/*if e.GetHandler().Path != "/auth" {
 				fh := http.HandlerFunc(e.GetHandler().HandlerFunc)
-				s.mux.Handle(apiMaster+e.GetHandler().Path, jwt.JwtMiddleware.Handler(fh)).Methods(e.GetHandler().Method)
+				s.mux.Handle(apiSlave+e.GetHandler().Path, jwt.JwtMiddleware.Handler(fh)).Methods(e.GetHandler().Method)
 			} else {
-				s.mux.HandleFunc(apiMaster+e.GetHandler().Path, e.GetHandler().HandlerFunc).Methods(e.GetHandler().Method)
-			}
+				s.mux.HandleFunc(apiSlave+e.GetHandler().Path, e.GetHandler().HandlerFunc).Methods(e.GetHandler().Method)
+			}*/
 		}
 	} else {
 		for _, e := range fabric.Handlers {

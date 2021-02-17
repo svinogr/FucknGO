@@ -19,7 +19,7 @@ func NewFabric() fabricHandlers {
 }
 
 func setupAuthHandlers(f *fabricHandlers) {
-	hand := handler.MyHandler{"/auth", auth, http.MethodGet}
+	hand := handler.MyHandler{"/auth", auth, http.MethodPost}
 
 	f.Handlers = append(f.Handlers, &hand)
 }

@@ -1,28 +1,49 @@
 package server
 
 import (
+	"FucknGO/internal/jwt"
 	"FucknGO/internal/model/user"
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 )
 
 // auth user and send jwt token
 func auth(w http.ResponseWriter, r *http.Request) {
-	/*	vars := mux.Vars(r)
+	var userM user.UserModel
+	if err := json.NewDecoder(r.Body).Decode(&userM); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-		email := vars["email"]
-		pass := vars["password"]
+	user, err := validUser(userM)
 
-		if user, err := validUser(email, pass); err != nil {
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+	}
 
-			jwt.CreateJWT(user.Id)
+	token, _ := jwt.CreateJWT(user.Id)
 
-		}*/
+	c := http.Cookie{
+		Name:    "token",
+		Value:   token,
+		Expires: time.Now().Add(600 * time.Second),
+	}
 
+	http.SetCookie(w, &c)
 	fmt.Fprint(w, "логинься гад")
 }
 
 //проверка на валидность юзера в базе
-func validUser(email string, pass string) (user.UserModel, error) {
-	return user.UserModel{}, nil
+func validUser(user user.UserModel) (user.UserModel, error) {
+	//implement with BD
+
+	if user.Password == "1" {
+		return user, http.ErrNoCookie
+	}
+
+	user.Id = 5
+	// end implement
+	return user, nil
 }
