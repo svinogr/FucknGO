@@ -50,3 +50,9 @@ GET http://localhost:8080/api/server
 Cache-Control: no-cache
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2MTM1NjE0ODUsInVzZXJfaWQiOjEzfQ.qX1Mn2Z9BumX8eNMFDbnOfOtKVjZ8MmlIgOCcMEAU9w
+
+### test conect bd
+GET http://localhost:8080/api/connect
+Cache-Control: no-cache
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2MTM2MzcxNzgsInVzZXJfaWQiOjV9.v5xpFOakFBAzKxm-f3BngHppJkrlKBGMrWf0XVW0_x4

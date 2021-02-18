@@ -37,7 +37,7 @@ func auth(w http.ResponseWriter, r *http.Request) {
 
 //проверка на валидность юзера в базе
 func validUser(user user.UserModel) (user.UserModel, error) {
-	//implement with BD
+	//TODO implement with BD
 
 	if user.Password == "1" {
 		return user, http.ErrNoCookie

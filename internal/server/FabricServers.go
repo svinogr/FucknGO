@@ -99,7 +99,7 @@ func setupHandlers(s *server) {
 		}
 	} else {
 		for _, e := range fabric.Handlers {
-			if e.GetHandler().Path != "/auth" {
+			if e.GetHandler().Path != "/auth" && e.GetHandler().Path != "/connect" { //TODO странный момент в докере не рабоатет connect
 				fh := http.HandlerFunc(e.GetHandler().HandlerFunc)
 				s.mux.Handle(apiMaster+e.GetHandler().Path, jwt.JwtMiddleware.Handler(fh)).Methods(e.GetHandler().Method)
 			} else {
