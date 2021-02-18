@@ -10,6 +10,11 @@ import (
 )
 
 // auth user and send jwt token
+
+func logPage(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "")
+}
+
 func auth(w http.ResponseWriter, r *http.Request) {
 	var userM user.UserModel
 	if err := json.NewDecoder(r.Body).Decode(&userM); err != nil {
@@ -26,9 +31,10 @@ func auth(w http.ResponseWriter, r *http.Request) {
 	token, _ := jwt.CreateJWT(user.Id)
 
 	c := http.Cookie{
-		Name:    "token",
-		Value:   token,
-		Expires: time.Now().Add(600 * time.Second),
+		Name:     "token",
+		Value:    token,
+		Expires:  time.Now().Add(600 * time.Second),
+		HttpOnly: true,
 	}
 
 	http.SetCookie(w, &c)
