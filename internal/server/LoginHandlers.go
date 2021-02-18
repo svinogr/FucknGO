@@ -5,6 +5,7 @@ import (
 	"FucknGO/internal/model/user"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"net/http"
 	"time"
 )
@@ -12,7 +13,8 @@ import (
 // auth user and send jwt token
 
 func logPage(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "")
+	tmp, _ := template.ParseFiles("log.html")
+	tmp.Execute(w, "done")
 }
 
 func auth(w http.ResponseWriter, r *http.Request) {

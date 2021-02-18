@@ -4,6 +4,7 @@ import (
 	jwtmiddleware "github.com/auth0/go-jwt-middleware"
 	"github.com/dgrijalva/jwt-go"
 	jwt2 "github.com/form3tech-oss/jwt-go"
+	"net/http"
 	"os"
 	"time"
 )
@@ -23,6 +24,48 @@ var JwtMiddleware = jwtmiddleware.New(jwtmiddleware.Options{
 	EnableAuthOnOptions: false,
 	SigningMethod:       jwt.SigningMethodHS256,
 })
+
+type Claims struct {
+	Username string `json:"username"`
+	jwt.StandardClaims
+}
+
+func CookieMiddleWare(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// если нет авторизованого токена то го хом
+		c, err := r.Cookie("token")
+
+		if err != nil {
+			if err == http.ErrNoCookie {
+				// If the cookie is not set, return an unauthorized status
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			// For any other type of error, return a bad request status
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		tknStr := c.Value
+		claims := Claims{}
+
+		tkn, err := jwt.ParseWithClaims(tknStr, claims, func(token *jwt.Token) (interface{}, error) {
+			return mySigningKey, nil
+		})
+
+		if err != nil {
+			if err == jwt.ErrSignatureInvalid {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		if !tkn.Valid {
+			handler.ServeHTTP(w, r)
+		}
+
+	})
+}
 
 func CreateJWT(id uint64) (string, error) {
 	var err error

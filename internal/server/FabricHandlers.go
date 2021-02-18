@@ -20,8 +20,9 @@ func NewFabric() fabricHandlers {
 
 func setupAuthHandlers(f *fabricHandlers) {
 	hand := handler.MyHandler{"/auth", auth, http.MethodPost}
+	hand2 := handler.MyHandler{"/log", logPage, http.MethodGet}
 
-	f.Handlers = append(f.Handlers, &hand)
+	f.Handlers = append(f.Handlers, &hand, &hand2)
 }
 
 func setupServerHandlers(f *fabricHandlers) {
