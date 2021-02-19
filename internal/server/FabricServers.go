@@ -89,31 +89,16 @@ func setupHandlers(s *server) {
 	if s.isSlave {
 		for _, e := range fabric.Handlers {
 			s.mux.HandleFunc(apiSlave+e.GetHandler().Path, e.GetHandler().HandlerFunc).Methods(e.GetHandler().Method)
-			//uncomment if need token for slave
-			/*if e.GetHandler().Path != "/auth" {
-				fh := http.HandlerFunc(e.GetHandler().HandlerFunc)
-				s.mux.Handle(apiSlave+e.GetHandler().Path, jwt.JwtMiddleware.Handler(fh)).Methods(e.GetHandler().Method)
-			} else {
-				s.mux.HandleFunc(apiSlave+e.GetHandler().Path, e.GetHandler().HandlerFunc).Methods(e.GetHandler().Method)
-			}*/
 		}
 	} else {
 		for _, e := range fabric.Handlers {
-			if e.GetHandler().Path != "/auth" && e.GetHandler().Path != "/connect" && e.GetHandler().Path != "/log" { //TODO странный момент в докере не рабоатет connect
+			if e.GetHandler().NeedAuthToken { //TODO странный момент в докере не рабоатет connect
 				fh := http.HandlerFunc(e.GetHandler().HandlerFunc)
 				s.mux.Handle(apiMaster+e.GetHandler().Path, jwt.JwtMiddleware.Handler(fh)).Methods(e.GetHandler().Method)
 			} else {
 				s.mux.HandleFunc(apiMaster+e.GetHandler().Path, e.GetHandler().HandlerFunc).Methods(e.GetHandler().Method)
 			}
 		}
-		/*for _, e := range fabric.Handlers {
-			if e.GetHandler().Path != "/auth" && e.GetHandler().Path != "/connect" && e.GetHandler().Path != "/log" { //TODO странный момент в докере не рабоатет connect
-				fh := http.HandlerFunc(e.GetHandler().HandlerFunc)
-				s.mux.Handle(apiMaster+e.GetHandler().Path, jwt.CookieMiddleWare(fh)).Methods(e.GetHandler().Method)
-			} else {
-				s.mux.HandleFunc(apiMaster+e.GetHandler().Path, e.GetHandler().HandlerFunc).Methods(e.GetHandler().Method)
-			}
-		}*/
 	}
 }
 

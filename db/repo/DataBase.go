@@ -1,8 +1,7 @@
-package db
+package repo
 
 import (
 	"FucknGO/config"
-	"FucknGO/db/repo"
 	"database/sql"
 	"fmt"
 	_ "github.com/lib/pq"
@@ -16,7 +15,8 @@ type DataBase struct {
 	config      *config.Config
 	dataBaseUrl string
 	Db          sql.DB
-	userRepo    *repo.UserRepo
+	userRepo    *UserRepo
+	tokenRepo   *TokenRepo
 }
 
 func NewDataBase(config *config.Config) *DataBase {
@@ -49,17 +49,29 @@ func (d *DataBase) OpenDataBase() error {
 }
 
 func (d *DataBase) CloseDataBase() error {
-	return d.db.Close()
+	return d.Db.Close()
 }
 
-func (d *DataBase) User() *repo.UserRepo {
+func (d *DataBase) User() *UserRepo {
 	if d.userRepo != nil {
 		return d.userRepo
 	}
 
-	d.userRepo = &repo.UserRepo{
+	d.userRepo = &UserRepo{
 		d,
 	}
 
 	return d.userRepo
+}
+
+func (d *DataBase) Token() *TokenRepo {
+	if d.tokenRepo != nil {
+		return d.tokenRepo
+	}
+
+	d.tokenRepo = &TokenRepo{
+		d,
+	}
+
+	return d.tokenRepo
 }

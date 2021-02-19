@@ -1,8 +1,7 @@
 package repo
 
 import (
-	"FucknGO/db"
-	"FucknGO/internal/model/user"
+	"FucknGO/db/user"
 )
 
 const (
@@ -13,7 +12,7 @@ const (
 )
 
 type TokenRepo struct {
-	Database *db.DataBase
+	Database *DataBase
 }
 
 func (t *TokenRepo) FindTokenByUserId(userId uint64) (*user.TokenModel, error) {

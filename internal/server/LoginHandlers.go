@@ -2,7 +2,7 @@ package server
 
 import (
 	"FucknGO/internal/jwt"
-	"FucknGO/internal/model/user"
+	"FucknGO/internal/server/model"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -18,13 +18,13 @@ func logPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func auth(w http.ResponseWriter, r *http.Request) {
-	var userM user.UserModel
-	if err := json.NewDecoder(r.Body).Decode(&userM); err != nil {
+	var uM model.UserModel
+	if err := json.NewDecoder(r.Body).Decode(&uM); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	user, err := validUser(userM)
+	// TODO переписать под новые мидлкваре
+	user, err := validUser(uM)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
@@ -44,7 +44,7 @@ func auth(w http.ResponseWriter, r *http.Request) {
 }
 
 //проверка на валидность юзера в базе
-func validUser(user user.UserModel) (user.UserModel, error) {
+func validUser(user model.UserModel) (model.UserModel, error) {
 	//TODO implement with BD
 
 	if user.Password == "1" {

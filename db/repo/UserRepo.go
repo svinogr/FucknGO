@@ -1,8 +1,7 @@
 package repo
 
 import (
-	"FucknGO/db"
-	"FucknGO/internal/model/user"
+	"FucknGO/db/user"
 )
 
 const (
@@ -14,7 +13,7 @@ const (
 )
 
 type UserRepo struct {
-	Database *db.DataBase
+	Database *DataBase
 }
 
 func (u *UserRepo) CreateUser(user *user.UserModel) (*user.UserModel, error) {
