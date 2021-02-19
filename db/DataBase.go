@@ -2,6 +2,7 @@ package db
 
 import (
 	"FucknGO/config"
+	"FucknGO/db/repo"
 	"database/sql"
 	"fmt"
 	_ "github.com/lib/pq"
@@ -11,19 +12,20 @@ var driverSql = "postgres"
 var dbUrlStart = "postgresql"
 var sslMode = "sslmode=disable"
 
-type Database struct {
+type DataBase struct {
 	config      *config.Config
 	dataBaseUrl string
-	db          sql.DB
+	Db          sql.DB
+	userRepo    *repo.UserRepo
 }
 
-func NewDataBase(config *config.Config) *Database {
-	return &Database{
+func NewDataBase(config *config.Config) *DataBase {
+	return &DataBase{
 		config: config,
 	}
 }
 
-func (d *Database) OpenDataBase() error {
+func (d *DataBase) OpenDataBase() error {
 	urlDB := fmt.Sprintf("%s://%s:%s@%s:%d/%s?%s",
 		dbUrlStart,
 		d.config.JsonStr.DataBase.Postgres.User,
@@ -46,6 +48,18 @@ func (d *Database) OpenDataBase() error {
 	return nil
 }
 
-func (d *Database) CloseDataBase() error {
+func (d *DataBase) CloseDataBase() error {
 	return d.db.Close()
+}
+
+func (d *DataBase) User() *repo.UserRepo {
+	if d.userRepo != nil {
+		return d.userRepo
+	}
+
+	d.userRepo = &repo.UserRepo{
+		d,
+	}
+
+	return d.userRepo
 }
