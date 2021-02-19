@@ -15,8 +15,8 @@ type TokenRepo struct {
 	Database *DataBase
 }
 
-func (t *TokenRepo) FindTokenByUserId(userId uint64) (*user.TokenModel, error) {
-	token := user.TokenModel{}
+func (t *TokenRepo) FindTokenByUserId(userId uint64) (*user.TokenModelRepo, error) {
+	token := user.TokenModelRepo{}
 	if err := t.Database.Db.QueryRow("SELECT "+COL_ID_TOKEN+", "+COL_TOKEN+", "+COL_ID_USER+" from "+TABLE_NAME_TOKEN+" where "+COL_USER_ID+" = $1", userId).
 		Scan(token.Id, token.Token, token.UserId); err != nil {
 		return nil, err
@@ -25,7 +25,7 @@ func (t *TokenRepo) FindTokenByUserId(userId uint64) (*user.TokenModel, error) {
 	return &token, nil
 }
 
-func (t *TokenRepo) CreateToken(token *user.TokenModel) (*user.TokenModel, error) {
+func (t *TokenRepo) CreateToken(token *user.TokenModelRepo) (*user.TokenModelRepo, error) {
 	if err := t.Database.Db.QueryRow("INSERT into "+TABLE_NAME_TOKEN+" ("+COL_TOKEN+", "+COL_ID_USER+") VALUES ($1, $2) RETURNING "+COL_ID_TOKEN,
 		token.Token,
 		token.UserId).
@@ -36,7 +36,7 @@ func (t *TokenRepo) CreateToken(token *user.TokenModel) (*user.TokenModel, error
 	return token, nil
 }
 
-func (t *TokenRepo) UpdateToken(token *user.TokenModel) (*user.TokenModel, error) {
+func (t *TokenRepo) UpdateToken(token *user.TokenModelRepo) (*user.TokenModelRepo, error) {
 	if err := t.Database.Db.QueryRow("INSERT into "+TABLE_NAME_TOKEN+" ("+COL_TOKEN+", "+COL_ID_USER+") VALUES ($1, $2) where "+COL_ID_TOKEN+" = 3$",
 		token.Token,
 		token.UserId,

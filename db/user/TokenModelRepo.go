@@ -1,6 +1,6 @@
 package user
 
-type TokenModel struct {
+type TokenModelRepo struct {
 	Id     uint64
 	Token  string
 	UserId uint64

@@ -9,4 +9,5 @@ require (
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
 	github.com/lib/pq v1.9.0
+	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
 )

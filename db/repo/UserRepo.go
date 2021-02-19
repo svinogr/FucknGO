@@ -13,11 +13,13 @@ const (
 )
 
 type UserRepo struct {
-	Database *DataBase
+	db *DataBase
 }
 
-func (u *UserRepo) CreateUser(user *user.UserModel) (*user.UserModel, error) {
-	if err := u.Database.Db.QueryRow("INSERT into "+TABLE_NAME_USERS+" ("+COL_NAME+", "+COL_PASSWORD+", "+COL_EMAIL+") VALUES ($1, $2, $3) RETURNING "+COL_ID_USER,
+func (u *UserRepo) CreateUser(user *user.UserModelRepo) (*user.UserModelRepo, error) {
+	u.openAndCloseDb()
+
+	if err := u.db.Db.QueryRow("INSERT into "+TABLE_NAME_USERS+" ("+COL_NAME+", "+COL_PASSWORD+", "+COL_EMAIL+") VALUES ($1, $2, $3) RETURNING "+COL_ID_USER,
 		user.Name,
 		user.Password,
 		user.Email).
@@ -28,8 +30,15 @@ func (u *UserRepo) CreateUser(user *user.UserModel) (*user.UserModel, error) {
 	return user, nil
 }
 
-func (u *UserRepo) UpdateUser(user *user.UserModel) (*user.UserModel, error) {
-	if err := u.Database.Db.QueryRow("INSERT into "+TABLE_NAME_USERS+" ("+COL_NAME+", "+COL_PASSWORD+", "+COL_EMAIL+")  VALUES ($1, $2, $3) where "+COL_ID_USER+" = 4$",
+func (u *UserRepo) openAndCloseDb() {
+	u.db.OpenDataBase()
+	defer u.db.CloseDataBase()
+}
+
+func (u *UserRepo) UpdateUser(user *user.UserModelRepo) (*user.UserModelRepo, error) {
+	u.openAndCloseDb()
+
+	if err := u.db.Db.QueryRow("INSERT into "+TABLE_NAME_USERS+" ("+COL_NAME+", "+COL_PASSWORD+", "+COL_EMAIL+")  VALUES ($1, $2, $3) where "+COL_ID_USER+" = 4$",
 		user.Name,
 		user.Password,
 		user.Email,
@@ -40,10 +49,12 @@ func (u *UserRepo) UpdateUser(user *user.UserModel) (*user.UserModel, error) {
 	return user, nil
 }
 
-func (u *UserRepo) FindUserById(id uint64) (*user.UserModel, error) {
-	user := user.UserModel{}
+func (u *UserRepo) FindUserById(id uint64) (*user.UserModelRepo, error) {
+	u.openAndCloseDb()
 
-	if err := u.Database.Db.QueryRow("SELECT "+COL_ID_USER+","+COL_NAME+","+COL_NAME+","+COL_EMAIL+" from "+TABLE_NAME_USERS+" where "+COL_ID_USER+" = 1$",
+	user := user.UserModelRepo{}
+
+	if err := u.db.Db.QueryRow("SELECT "+COL_ID_USER+","+COL_NAME+","+COL_NAME+","+COL_EMAIL+" from "+TABLE_NAME_USERS+" where "+COL_ID_USER+" = 1$",
 		id).
 		Scan(&user.Name, &user.Password, &user.Email); err != nil {
 
@@ -53,8 +64,10 @@ func (u *UserRepo) FindUserById(id uint64) (*user.UserModel, error) {
 	return &user, nil
 }
 
-func (u *UserRepo) DeleteUser(user *user.UserModel) (*user.UserModel, error) {
-	if err := u.Database.Db.QueryRow("DELETE from "+TABLE_NAME_USERS+" where "+COL_ID_USER+" = 1$", user.Id).
+func (u *UserRepo) DeleteUser(user *user.UserModelRepo) (*user.UserModelRepo, error) {
+	u.openAndCloseDb()
+
+	if err := u.db.Db.QueryRow("DELETE from "+TABLE_NAME_USERS+" where "+COL_ID_USER+" = 1$", user.Id).
 		Err(); err != nil {
 
 		return nil, err
