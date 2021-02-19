@@ -10,7 +10,7 @@ CREATE TABLE if not exists users
     UNIQUE(Id)
     );
 
-CREATE TABLE if not exists token
+CREATE TABLE if not exists tokens
 (
     Id SERIAL PRIMARY KEY,
     token  CHARACTER VARYING(250),
