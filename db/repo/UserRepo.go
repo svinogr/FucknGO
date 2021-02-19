@@ -18,7 +18,7 @@ type UserRepo struct {
 }
 
 func (u *UserRepo) CreateUser(user *user.UserModel) (*user.UserModel, error) {
-	if err := u.Database.Db.QueryRow("INSERT into "+TABLE_NAME+"("+COL_NAME+","+COL_PASSWORD+","+COL_EMAIL+",) VALUES ($1, $2, $3) RETURNING id",
+	if err := u.Database.Db.QueryRow("INSERT into "+TABLE_NAME+" ("+COL_NAME+", "+COL_PASSWORD+", "+COL_EMAIL+") VALUES ($1, $2, $3) RETURNING "+COL_ID,
 		user.Name,
 		user.Password,
 		user.Email).
@@ -30,7 +30,7 @@ func (u *UserRepo) CreateUser(user *user.UserModel) (*user.UserModel, error) {
 }
 
 func (u *UserRepo) UpdateUser(user *user.UserModel) (*user.UserModel, error) {
-	if err := u.Database.Db.QueryRow("INSERT into "+TABLE_NAME+"("+COL_NAME+","+COL_PASSWORD+","+COL_EMAIL+",)  VALUES ($1, $2, $3) where users.id = 4$",
+	if err := u.Database.Db.QueryRow("INSERT into "+TABLE_NAME+" ("+COL_NAME+", "+COL_PASSWORD+", "+COL_EMAIL+")  VALUES ($1, $2, $3) where "+COL_ID+" = 4$",
 		user.Name,
 		user.Password,
 		user.Email,
@@ -44,7 +44,7 @@ func (u *UserRepo) UpdateUser(user *user.UserModel) (*user.UserModel, error) {
 func (u *UserRepo) FindUserById(id uint64) (*user.UserModel, error) {
 	user := user.UserModel{}
 
-	if err := u.Database.Db.QueryRow("SELECT "+COL_ID+","+COL_NAME+","+COL_NAME+","+COL_EMAIL+" from"+TABLE_NAME+"where users.id = 1$",
+	if err := u.Database.Db.QueryRow("SELECT "+COL_ID+","+COL_NAME+","+COL_NAME+","+COL_EMAIL+" from "+TABLE_NAME+" where "+COL_ID+" = 1$",
 		id).
 		Scan(&user.Name, &user.Password, &user.Email); err != nil {
 
