@@ -3,7 +3,7 @@ package server
 import (
 	"FucknGO/config"
 	"FucknGO/db/repo"
-	user2 "FucknGO/db/user"
+	userRepo "FucknGO/db/user"
 	"FucknGO/internal/server/model"
 	"encoding/json"
 	"fmt"
@@ -28,7 +28,7 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := user2.UserModelRepo{}
+	user := userRepo.UserModelRepo{}
 	user.Email = uM.Email
 	user.Name = uM.Name
 
