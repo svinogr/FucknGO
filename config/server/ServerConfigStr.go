@@ -7,3 +7,5 @@ type ServerConfigStr struct {
 	JwtSecret         string `json:"jwtSecret"`
 	JwtLifeTimeDays   uint16 `json:"jwtLifeTimeDays"`
 }
+
+//TODO не забыть использовтаь ключ для jwt отсюда
