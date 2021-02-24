@@ -17,8 +17,9 @@ type UserRepo struct {
 }
 
 func (u *UserRepo) CreateUser(user *user.UserModelRepo) (*user.UserModelRepo, error) {
-	u.openAndCloseDb()
+	u.openAndCloseDb() // открываем базу
 
+	// отправляем запрсо на создание юзера
 	if err := u.db.Db.QueryRow("INSERT into "+TABLE_NAME_USERS+" ("+COL_NAME+", "+COL_PASSWORD+", "+COL_EMAIL+") VALUES ($1, $2, $3) RETURNING "+COL_ID_USER,
 		user.Name,
 		user.Password,
@@ -32,7 +33,7 @@ func (u *UserRepo) CreateUser(user *user.UserModelRepo) (*user.UserModelRepo, er
 
 func (u *UserRepo) openAndCloseDb() {
 	u.db.OpenDataBase()
-	defer u.db.CloseDataBase()
+	//defer u.db.CloseDataBase()
 }
 
 func (u *UserRepo) UpdateUser(user *user.UserModelRepo) (*user.UserModelRepo, error) {
