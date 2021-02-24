@@ -7,26 +7,93 @@ import (
 	"testing"
 )
 
-func GetDB() (*repo.DataBase, error) {
+func GetUserRepo() (*repo.UserRepo, error) {
 	conf, err := config.GetConfig()
 
 	if err != nil {
 		return nil, err
 	}
 
-	return repo.NewDataBase(conf), err
+	userRepo := repo.NewDataBase(conf).User()
+
+	return userRepo, nil
 }
 
-var u = user.UserModelRepo{Name: "foo", Email: "1@mail.test", Password: "123456"}
+var testUser = user.UserModelRepo{Name: "foo", Email: "emeil", Password: "pass"}
 
 func TestCreateUser(t *testing.T) {
-	db, err := GetDB()
+	userRepo, err := GetUserRepo()
 
 	if err != nil {
 		t.Errorf("%v", err)
 	}
 
-	userRepo := db.User()
-	userRepo.CreateUser(&u)
+	createUser, err := userRepo.CreateUser(&testUser)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if createUser.Id < 0 {
+		t.Error()
+	}
+}
+
+func TestFindUserById(t *testing.T) {
+	userRepo, err := GetUserRepo()
+
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+
+	findUser, err := userRepo.FindUserById(testUser.Id)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if findUser.Id < 0 {
+		t.Error()
+	}
+}
+
+func TestUpdateUser(t *testing.T) {
+	userRepo, err := GetUserRepo()
+
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+
+	newUser := user.UserModelRepo{
+		Id:       testUser.Id,
+		Name:     "newFoo",
+		Password: "newPass",
+		Email:    "newEmail",
+	}
+
+	updateUser, err := userRepo.UpdateUser(&newUser)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if updateUser.Id != testUser.Id && updateUser.Name != testUser.Name && updateUser.Password != testUser.Password &&
+		updateUser.Email != testUser.Email {
+		t.Error()
+	}
+}
+
+func TestDeleteUser(t *testing.T) {
+	userRepo, err := GetUserRepo()
+
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+
+	_, err = userRepo.DeleteUser(&testUser)
+
+	if err != nil {
+		t.Error(err)
+	}
 
 }

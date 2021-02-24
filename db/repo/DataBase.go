@@ -14,7 +14,7 @@ var sslMode = "sslmode=disable"
 type DataBase struct {
 	config      *config.Config
 	dataBaseUrl string
-	Db          sql.DB
+	Db          *sql.DB
 	userRepo    *UserRepo
 	tokenRepo   *TokenRepo
 }
@@ -35,13 +35,14 @@ func (d *DataBase) OpenDataBase() error {
 		d.config.JsonStr.DataBase.Postgres.BaseName,
 		sslMode)
 
-	db, err := sql.Open("postgres", urlDB)
+	var err error
+	d.Db, err = sql.Open("postgres", urlDB)
 
 	if err != nil {
 		return err
 	}
 
-	if err = db.Ping(); err != nil {
+	if err = d.Db.Ping(); err != nil {
 		return err
 	}
 
@@ -56,7 +57,7 @@ func (d *DataBase) User() *UserRepo {
 	if d.userRepo != nil {
 		return d.userRepo
 	}
-
+	d.OpenDataBase()
 	d.userRepo = &UserRepo{
 		d,
 	}
