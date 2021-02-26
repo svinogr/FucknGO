@@ -47,7 +47,7 @@ func TestFindUserById(t *testing.T) {
 		t.Errorf("%v", err)
 	}
 
-	findUser, err := userRepo.FindUserById(testUser.Id + 1)
+	findUser, err := userRepo.FindUserById(testUser.Id)
 
 	if err != nil {
 		t.Error(err)
@@ -55,6 +55,20 @@ func TestFindUserById(t *testing.T) {
 
 	if findUser.Id < 0 {
 		t.Error()
+	}
+}
+
+func TestFindUserByIdNotAddedInDB(t *testing.T) {
+	userRepo, err := GetUserRepo()
+
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+
+	_, err = userRepo.FindUserById(testUser.Id + 1)
+
+	if err != sql.ErrNoRows {
+		t.Error(err)
 	}
 }
 
