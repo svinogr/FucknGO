@@ -4,6 +4,7 @@ import (
 	"FucknGO/config"
 	"FucknGO/db/repo"
 	"FucknGO/db/user"
+	"database/sql"
 	"testing"
 )
 
@@ -46,7 +47,7 @@ func TestFindUserById(t *testing.T) {
 		t.Errorf("%v", err)
 	}
 
-	findUser, err := userRepo.FindUserById(testUser.Id)
+	findUser, err := userRepo.FindUserById(testUser.Id + 1)
 
 	if err != nil {
 		t.Error(err)
@@ -83,6 +84,27 @@ func TestUpdateUser(t *testing.T) {
 	}
 }
 
+func TestUpdateUserNotAddedInDB(t *testing.T) {
+	userRepo, err := GetUserRepo()
+
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+
+	newUser := user.UserModelRepo{
+		Id:       testUser.Id + 1,
+		Name:     "newFoo",
+		Password: "newPass",
+		Email:    "newEmail",
+	}
+
+	_, err = userRepo.UpdateUser(&newUser)
+
+	if err != sql.ErrNoRows {
+		t.Error(err)
+	}
+}
+
 func TestDeleteUser(t *testing.T) {
 	userRepo, err := GetUserRepo()
 
@@ -95,5 +117,4 @@ func TestDeleteUser(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-
 }
