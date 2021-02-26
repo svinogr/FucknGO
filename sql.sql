@@ -1,6 +1,6 @@
 CREATE DATABASE db;
 CREATE USER user_test WITH PASSWORD '123456';
-GRANT ALL PRIVILEGES ON DATABASE db to user_test;
+/*GRANT ALL PRIVILEGES ON DATABASE db to user_test;
 CREATE TABLE if not exists users
 (
     Id SERIAL PRIMARY KEY,
@@ -18,3 +18,4 @@ CREATE TABLE if not exists tokens
     UNIQUE(Id)
     );
 
+*/

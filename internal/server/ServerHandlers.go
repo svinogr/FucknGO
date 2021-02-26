@@ -28,7 +28,7 @@ func Connect(w http.ResponseWriter, r *http.Request) {
 	}
 
 	database := repo.NewDataBase(c)
-	err = database.OpenDataBase()
+	err = database.OpenDataBase(database.GetURLDataBAse())
 
 	if err != nil {
 		fmt.Fprint(w, err)

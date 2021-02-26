@@ -17,9 +17,6 @@ type UserRepo struct {
 }
 
 func (u *UserRepo) CreateUser(user *user.UserModelRepo) (*user.UserModelRepo, error) {
-	//	u.openAndCloseDb() // открываем базу
-	// defer u.db.CloseDataBase()
-	// отправляем запрсо на создание юзера
 	if err := u.db.Db.QueryRow("INSERT into "+TABLE_NAME_USERS+" ("+COL_NAME+", "+COL_PASSWORD+", "+COL_EMAIL+") VALUES ($1, $2, $3) RETURNING "+COL_ID_USER,
 		user.Name,
 		user.Password,
@@ -37,16 +34,17 @@ func (u *UserRepo) openAndCloseDb() {
 }
 
 func (u *UserRepo) UpdateUser(user *user.UserModelRepo) (*user.UserModelRepo, error) {
-	//u.openAndCloseDb()
-
-	if err := u.db.Db.QueryRow("INSERT into "+TABLE_NAME_USERS+" ("+COL_NAME+
-		", "+COL_PASSWORD+
-		", "+COL_EMAIL+
-		") VALUES ($1, $2, $3) WHERE "+COL_ID_USER+"=$4",
+	err := u.db.Db.QueryRow("UPDATE "+TABLE_NAME_USERS+" set "+
+		COL_NAME+"= $1, "+
+		COL_PASSWORD+"= $2, "+
+		COL_EMAIL+"= $3"+
+		" WHERE "+COL_ID_USER+"=$4 returning id, user_name, password, email",
 		user.Name,
 		user.Password,
 		user.Email,
-		user.Id).Scan(&user.Id, &user.Name, &user.Password, &user.Email); err != nil {
+		user.Id).Scan(&user.Id, &user.Name, &user.Password, &user.Email)
+
+	if err != nil {
 		return nil, err
 	}
 
@@ -54,8 +52,6 @@ func (u *UserRepo) UpdateUser(user *user.UserModelRepo) (*user.UserModelRepo, er
 }
 
 func (u *UserRepo) FindUserById(id uint64) (*user.UserModelRepo, error) {
-	//u.openAndCloseDb()
-
 	user := user.UserModelRepo{}
 
 	if err := u.db.Db.QueryRow("SELECT "+COL_ID_USER+", "+COL_NAME+", "+COL_PASSWORD+", "+COL_EMAIL+" from "+TABLE_NAME_USERS+" where "+COL_ID_USER+"=$1",
@@ -69,11 +65,9 @@ func (u *UserRepo) FindUserById(id uint64) (*user.UserModelRepo, error) {
 }
 
 func (u *UserRepo) DeleteUser(user *user.UserModelRepo) (*user.UserModelRepo, error) {
-	u.openAndCloseDb()
+	_, err := u.db.Db.Exec("DELETE from "+TABLE_NAME_USERS+" where "+COL_ID_USER+" = $1", user.Id)
 
-	if err := u.db.Db.QueryRow("DELETE from "+TABLE_NAME_USERS+" where "+COL_ID_USER+" = $1", user.Id).
-		Err(); err != nil {
-
+	if err != nil {
 		return nil, err
 	}
 

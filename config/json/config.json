@@ -2,7 +2,7 @@
   "databases": {
     "postgresql": {
       "address": "127.0.0.1",
-      "port": 5432,
+      "port": 54323,
       "basename": "db",
       "user": "user_test",
       "password": "123456"
