@@ -17,6 +17,7 @@ type UserRepo struct {
 }
 
 func (u *UserRepo) CreateUser(user *user.UserModelRepo) (*user.UserModelRepo, error) {
+	//defer u.db.CloseDataBase()
 	if err := u.db.Db.QueryRow("INSERT into "+TABLE_NAME_USERS+" ("+COL_NAME+", "+COL_PASSWORD+", "+COL_EMAIL+") VALUES ($1, $2, $3) RETURNING "+COL_ID_USER,
 		user.Name,
 		user.Password,

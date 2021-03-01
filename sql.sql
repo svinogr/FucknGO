@@ -14,8 +14,8 @@ CREATE TABLE if not exists tokens
 (
     Id SERIAL PRIMARY KEY,
     token  CHARACTER VARYING(250),
-    user_id INTEGER references users (Id),
+    user_id INTEGER NOT NULL ,
     UNIQUE(Id)
-    );
+);
 
 */

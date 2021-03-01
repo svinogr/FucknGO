@@ -17,8 +17,12 @@ type TokenRepo struct {
 
 func (t *TokenRepo) FindTokenByUserId(userId uint64) (*user.TokenModelRepo, error) {
 	token := user.TokenModelRepo{}
-	if err := t.Database.Db.QueryRow("SELECT "+COL_ID_TOKEN+", "+COL_TOKEN+", "+COL_ID_USER+" from "+TABLE_NAME_TOKEN+" where "+COL_USER_ID+" = $1", userId).
-		Scan(token.Id, token.Token, token.UserId); err != nil {
+
+	if err := t.Database.Db.QueryRow("SELECT "+COL_ID_TOKEN+", "+
+		COL_TOKEN+", "+COL_USER_ID+
+		" from "+TABLE_NAME_TOKEN+
+		" where "+COL_USER_ID+" = $1", userId).
+		Scan(&token.Id, &token.Token, &token.UserId); err != nil {
 		return nil, err
 	}
 
@@ -26,10 +30,11 @@ func (t *TokenRepo) FindTokenByUserId(userId uint64) (*user.TokenModelRepo, erro
 }
 
 func (t *TokenRepo) CreateToken(token *user.TokenModelRepo) (*user.TokenModelRepo, error) {
-	if err := t.Database.Db.QueryRow("INSERT into "+TABLE_NAME_TOKEN+" ("+COL_TOKEN+", "+COL_ID_USER+") VALUES ($1, $2) RETURNING "+COL_ID_TOKEN,
+	if err := t.Database.Db.QueryRow("INSERT into "+TABLE_NAME_TOKEN+" ("+COL_TOKEN+", "+COL_USER_ID+") "+
+		"VALUES ($1, $2) RETURNING "+COL_ID_TOKEN,
 		token.Token,
 		token.UserId).
-		Scan(&token.Id, &token.Token, &token.UserId); err != nil {
+		Scan(&token.Id); err != nil {
 		return nil, err
 	}
 
@@ -37,12 +42,25 @@ func (t *TokenRepo) CreateToken(token *user.TokenModelRepo) (*user.TokenModelRep
 }
 
 func (t *TokenRepo) UpdateToken(token *user.TokenModelRepo) (*user.TokenModelRepo, error) {
-	if err := t.Database.Db.QueryRow("INSERT into "+TABLE_NAME_TOKEN+" ("+COL_TOKEN+", "+COL_ID_USER+") VALUES ($1, $2) where "+COL_ID_TOKEN+" = 3$",
+	if err := t.Database.Db.QueryRow("UPDATE "+TABLE_NAME_TOKEN+
+		" set "+COL_TOKEN+
+		"=$1 where "+COL_USER_ID+
+		"=$2 returning id, token, user_id",
 		token.Token,
-		token.UserId,
-		token.Id).Scan(&token.Id, &token.Token, &token.UserId); err != nil {
+		token.UserId).Scan(&token.Id, &token.Token, &token.UserId); err != nil {
 		return nil, err
 	}
 
 	return token, nil
+}
+
+func (t *TokenRepo) DeleteToken(token *user.TokenModelRepo) (*user.TokenModelRepo, error) {
+	_, err := t.Database.Db.Exec("DELETE from "+TABLE_NAME_TOKEN+" where "+COL_USER_ID+" = $1", token.Id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return token, nil
+
 }

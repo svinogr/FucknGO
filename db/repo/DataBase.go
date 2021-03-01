@@ -69,7 +69,7 @@ func (d *DataBase) Token() *TokenRepo {
 	if d.tokenRepo != nil {
 		return d.tokenRepo
 	}
-
+	d.OpenDataBase()
 	d.tokenRepo = &TokenRepo{
 		d,
 	}
