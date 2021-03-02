@@ -23,6 +23,7 @@ func user(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// createUser creates new user in db
 func createUser(w http.ResponseWriter, r *http.Request) {
 	var uM = model.UserModel{}
 	if err := json.NewDecoder(r.Body).Decode(&uM); err != nil {
@@ -82,6 +83,7 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, string(jsonStr))
 }
 
+// validRegInfo validation register data
 func validRegInfo(user repo.UserModelRepo) bool {
 	if user.Password == "" {
 		return false

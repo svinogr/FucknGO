@@ -1,11 +1,14 @@
 package server
 
 import (
+	"FucknGO/config"
+	"FucknGO/db/repo"
 	"FucknGO/internal/jwt"
 	"FucknGO/internal/server/model"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"golang.org/x/crypto/bcrypt"
 	"html/template"
 	"net/http"
 )
@@ -17,20 +20,22 @@ func logPage(w http.ResponseWriter, r *http.Request) {
 	tmp.Execute(w, "done")
 }
 
+// auth responses with token if log is success
 func auth(w http.ResponseWriter, r *http.Request) {
 	var uM model.UserModel
 	if err := json.NewDecoder(r.Body).Decode(&uM); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	// TODO переписать под новые мидлкваре
-	user, err := validUser(uM)
+
+	validUser, err := getValidUser(uM)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
-	token, _ := jwt.CreateJWT(user.Id)
+	token, _ := jwt.CreateJWT(validUser.Id)
 
 	/*	c := http.Cookie{
 			Name:     "token",
@@ -45,17 +50,29 @@ func auth(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "{ \"token\": \""+token+"\"}")
 }
 
-//проверка на валидность юзера в базе
-func validUser(user model.UserModel) (model.UserModel, error) {
-	//TODO implement with BD
+// validUser gets valid user by email and password
+func getValidUser(user model.UserModel) (*repo.UserModelRepo, error) {
+	conf, err := config.GetConfig()
 
-	if user.Password == "1" {
-		return user, http.ErrNoCookie
+	if err != nil {
+		return nil, err
 	}
 
-	user.Id = 5
-	// end implement
-	return user, nil
+	userRepo := repo.NewDataBase(conf).User()
+
+	uBemail, err := userRepo.FindUserByEmail(user.Email)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(uBemail.Password), []byte(user.Password))
+
+	if err != nil {
+		return nil, err
+	}
+
+	return uBemail, nil
 }
 
 func GetUserIdFromContext(r *http.Request) (interface{}, error) {
