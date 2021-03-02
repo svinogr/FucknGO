@@ -1,9 +1,5 @@
 package repo
 
-import (
-	"FucknGO/db/user"
-)
-
 const (
 	TABLE_NAME_USERS = "users"
 	COL_ID_USER      = "id"
@@ -12,11 +8,18 @@ const (
 	COL_EMAIL        = "email"
 )
 
+type UserModelRepo struct {
+	Id       uint64 `json:"id"`
+	Name     string `json:"name"`
+	Password string `json:"password"`
+	Email    string `json:"email"`
+}
+
 type UserRepo struct {
 	db *DataBase
 }
 
-func (u *UserRepo) CreateUser(user *user.UserModelRepo) (*user.UserModelRepo, error) {
+func (u *UserRepo) CreateUser(user *UserModelRepo) (*UserModelRepo, error) {
 	//defer u.db.CloseDataBase()
 	if err := u.db.Db.QueryRow("INSERT into "+TABLE_NAME_USERS+" ("+COL_NAME+", "+COL_PASSWORD+", "+COL_EMAIL+") VALUES ($1, $2, $3) RETURNING "+COL_ID_USER,
 		user.Name,
@@ -34,7 +37,7 @@ func (u *UserRepo) openAndCloseDb() {
 	//defer u.db.CloseDataBase()
 }
 
-func (u *UserRepo) UpdateUser(user *user.UserModelRepo) (*user.UserModelRepo, error) {
+func (u *UserRepo) UpdateUser(user *UserModelRepo) (*UserModelRepo, error) {
 	err := u.db.Db.QueryRow("UPDATE "+TABLE_NAME_USERS+" set "+
 		COL_NAME+"= $1, "+
 		COL_PASSWORD+"= $2, "+
@@ -52,8 +55,8 @@ func (u *UserRepo) UpdateUser(user *user.UserModelRepo) (*user.UserModelRepo, er
 	return user, nil
 }
 
-func (u *UserRepo) FindUserById(id uint64) (*user.UserModelRepo, error) {
-	user := user.UserModelRepo{}
+func (u *UserRepo) FindUserById(id uint64) (*UserModelRepo, error) {
+	user := UserModelRepo{}
 
 	if err := u.db.Db.QueryRow("SELECT "+COL_ID_USER+", "+COL_NAME+", "+COL_PASSWORD+", "+COL_EMAIL+" from "+TABLE_NAME_USERS+" where "+COL_ID_USER+"=$1",
 		id).
@@ -65,7 +68,7 @@ func (u *UserRepo) FindUserById(id uint64) (*user.UserModelRepo, error) {
 	return &user, nil
 }
 
-func (u *UserRepo) DeleteUser(user *user.UserModelRepo) (*user.UserModelRepo, error) {
+func (u *UserRepo) DeleteUser(user *UserModelRepo) (*UserModelRepo, error) {
 	_, err := u.db.Db.Exec("DELETE from "+TABLE_NAME_USERS+" where "+COL_ID_USER+" = $1", user.Id)
 
 	if err != nil {

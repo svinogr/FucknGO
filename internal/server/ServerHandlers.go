@@ -3,7 +3,6 @@ package server
 import (
 	"FucknGO/config"
 	"FucknGO/db/repo"
-	user2 "FucknGO/db/user"
 	"FucknGO/internal/server/model"
 	"FucknGO/log"
 	"context"
@@ -37,7 +36,7 @@ func Connect(w http.ResponseWriter, r *http.Request) {
 	getConfig, err := config.GetConfig()
 	usR := repo.NewDataBase(getConfig).User()
 
-	usR.CreateUser(&user2.UserModelRepo{
+	usR.CreateUser(&repo.UserModelRepo{
 		Name:     "vasya",
 		Password: "123",
 		Email:    "123",
