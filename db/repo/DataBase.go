@@ -20,6 +20,8 @@ type DataBase struct {
 }
 
 func NewDataBase(config *config.Config) *DataBase {
+	if config == nil {
+	}
 	return &DataBase{
 		config: config,
 	}

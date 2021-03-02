@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-	"time"
 )
 
 // auth user and send jwt token
@@ -33,15 +32,17 @@ func auth(w http.ResponseWriter, r *http.Request) {
 
 	token, _ := jwt.CreateJWT(user.Id)
 
-	c := http.Cookie{
-		Name:     "token",
-		Value:    token,
-		Expires:  time.Now().Add(600 * time.Second),
-		HttpOnly: true,
-	}
+	/*	c := http.Cookie{
+			Name:     "token",
+			Value:    token,
+			Expires:  time.Now().Add(600 * time.Second),
+			HttpOnly: true,
+		}
 
-	http.SetCookie(w, &c)
-	fmt.Fprint(w, "логинься гад")
+		http.SetCookie(w, &c)*/
+
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprint(w, "{ \"token\": \""+token+"\"}")
 }
 
 //проверка на валидность юзера в базе

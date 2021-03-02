@@ -3,7 +3,6 @@ package FucknGO
 import (
 	"FucknGO/config"
 	"FucknGO/db/repo"
-	"FucknGO/db/user"
 	"database/sql"
 	"testing"
 )
@@ -20,7 +19,7 @@ func GetUserRepo() (*repo.UserRepo, error) {
 	return userRepo, nil
 }
 
-var testUser = user.UserModelRepo{Name: "foo", Email: "emeil", Password: "pass"}
+var testUser = repo.UserModelRepo{Name: "foo", Email: "emeil", Password: "pass"}
 
 func TestCreateUser(t *testing.T) {
 	userRepo, err := GetUserRepo()
@@ -79,21 +78,21 @@ func TestUpdateUser(t *testing.T) {
 		t.Errorf("%v", err)
 	}
 
-	newUser := user.UserModelRepo{
+	newUser := repo.UserModelRepo{
 		Id:       testUser.Id,
 		Name:     "newFoo",
 		Password: "newPass",
 		Email:    "newEmail",
 	}
 
-	updateUser, err := userRepo.UpdateUser(&newUser)
+	testUser, err := userRepo.UpdateUser(&newUser)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if updateUser.Id != testUser.Id && updateUser.Name != testUser.Name && updateUser.Password != testUser.Password &&
-		updateUser.Email != testUser.Email {
+	if newUser.Id != testUser.Id && newUser.Name != testUser.Name && newUser.Password != testUser.Password &&
+		newUser.Email != testUser.Email {
 		t.Error()
 	}
 }
@@ -105,7 +104,7 @@ func TestUpdateUserNotAddedInDB(t *testing.T) {
 		t.Errorf("%v", err)
 	}
 
-	newUser := user.UserModelRepo{
+	newUser := repo.UserModelRepo{
 		Id:       testUser.Id + 1,
 		Name:     "newFoo",
 		Password: "newPass",
@@ -117,6 +116,46 @@ func TestUpdateUserNotAddedInDB(t *testing.T) {
 	if err != sql.ErrNoRows {
 		t.Error(err)
 	}
+}
+
+func TestFindUserByEmail(t *testing.T) {
+	userRepo, err := GetUserRepo()
+
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+
+	user, err := userRepo.FindUserByEmail(testUser.Email)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if user.Id != testUser.Id && user.Name != testUser.Name && user.Password != testUser.Password &&
+		user.Email != testUser.Email {
+		t.Error()
+	}
+
+}
+
+func TestFindUserByName(t *testing.T) {
+	userRepo, err := GetUserRepo()
+
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+
+	user, err := userRepo.FindUserByName(testUser.Name)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if user.Id != testUser.Id && user.Name != testUser.Name && user.Password != testUser.Password &&
+		user.Email != testUser.Email {
+		t.Error()
+	}
+
 }
 
 func TestDeleteUser(t *testing.T) {

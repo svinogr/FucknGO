@@ -3,7 +3,6 @@ package FucknGO
 import (
 	"FucknGO/config"
 	"FucknGO/db/repo"
-	"FucknGO/db/user"
 	. "FucknGO/internal/jwt"
 	"database/sql"
 	"log"
@@ -22,8 +21,8 @@ func GetTokenRepo() (*repo.TokenRepo, error) {
 	return tokenRepo, nil
 }
 
-var testUserWithToken *user.UserModelRepo
-var token *user.TokenModelRepo
+var testUserWithToken *repo.UserModelRepo
+var token *repo.TokenModelRepo
 var tokenRepo *repo.TokenRepo
 
 func CreatTestUser() {
@@ -33,7 +32,7 @@ func CreatTestUser() {
 		log.Fatal(err)
 	}
 
-	testUser = user.UserModelRepo{Name: "foo", Email: "emeil", Password: "pass"}
+	testUser = repo.UserModelRepo{Name: "foo", Email: "emeil", Password: "pass"}
 
 	testUserWithToken, err = userRepo.CreateUser(&testUser)
 
@@ -61,7 +60,7 @@ func TestCreateToken(t *testing.T) {
 		t.Error(err)
 	}
 
-	token = &user.TokenModelRepo{
+	token = &repo.TokenModelRepo{
 		Token:  createJWT,
 		UserId: testUserWithToken.Id,
 	}

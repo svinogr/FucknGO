@@ -64,5 +64,4 @@ func (t *TokenRepo) DeleteToken(token *TokenModelRepo) (*TokenModelRepo, error) 
 	}
 
 	return token, nil
-
 }

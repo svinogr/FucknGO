@@ -9,10 +9,10 @@ const (
 )
 
 type UserModelRepo struct {
-	Id       uint64 `json:"id"`
-	Name     string `json:"name"`
-	Password string `json:"password"`
-	Email    string `json:"email"`
+	Id       uint64
+	Name     string
+	Password string
+	Email    string
 }
 
 type UserRepo struct {
@@ -76,4 +76,30 @@ func (u *UserRepo) DeleteUser(user *UserModelRepo) (*UserModelRepo, error) {
 	}
 
 	return user, nil
+}
+
+func (u *UserRepo) FindUserByEmail(email string) (*UserModelRepo, error) {
+	user := UserModelRepo{}
+
+	if err := u.db.Db.QueryRow("SELECT "+COL_ID_USER+", "+COL_NAME+", "+COL_PASSWORD+", "+COL_EMAIL+" from "+TABLE_NAME_USERS+" where "+COL_EMAIL+"=$1",
+		email).
+		Scan(&user.Id, &user.Name, &user.Password, &user.Email); err != nil {
+
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (u *UserRepo) FindUserByName(name string) (*UserModelRepo, error) {
+	user := UserModelRepo{}
+
+	if err := u.db.Db.QueryRow("SELECT "+COL_ID_USER+", "+COL_NAME+", "+COL_PASSWORD+", "+COL_EMAIL+" from "+TABLE_NAME_USERS+" where "+COL_NAME+"=$1",
+		name).
+		Scan(&user.Id, &user.Name, &user.Password, &user.Email); err != nil {
+
+		return nil, err
+	}
+
+	return &user, nil
 }

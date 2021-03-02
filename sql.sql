@@ -5,7 +5,7 @@ CREATE TABLE if not exists users
 (
     Id SERIAL PRIMARY KEY,
     user_name CHARACTER VARYING(30),
-    password CHARACTER VARYING(30),
+    password CHARACTER VARYING(255),
     Email CHARACTER VARYING(30),
     UNIQUE(Id)
     );

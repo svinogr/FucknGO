@@ -40,6 +40,24 @@ Content-Type: application/json
   "password": "2"
 }
 
+###novalid registre
+POST http://localhost:8080/api/user
+Content-Type: application/json
+
+{
+  "email": "2@2.ru",
+  "password": "2"
+}
+###VALID
+POST http://localhost:8080/api/user
+Content-Type: application/json
+
+{
+  "name":"vasya",
+  "email": "2@22.ru",
+  "password": "2"
+}
+
 ###
 GET http://localhost:8082/api/slave/server
 Cache-Control: no-cache
