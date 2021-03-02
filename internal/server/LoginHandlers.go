@@ -4,6 +4,7 @@ import (
 	"FucknGO/internal/jwt"
 	"FucknGO/internal/server/model"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -54,4 +55,13 @@ func validUser(user model.UserModel) (model.UserModel, error) {
 	user.Id = 5
 	// end implement
 	return user, nil
+}
+
+func GetUserIdFromContext(r *http.Request) (interface{}, error) {
+	value := r.Context().Value(jwt.USER_ID)
+	if value == nil {
+		return nil, errors.New("Not found id")
+	}
+
+	return value, nil
 }

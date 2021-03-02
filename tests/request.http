@@ -13,7 +13,7 @@ Content-Type: application/json
 POST http://localhost:8080/api/server
 Cache-Control: no-cache
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2MTM2NTIzNTEsInVzZXJfaWQiOjV9.KMU9SJuFeK30Os9jgxizviAE7lPf7v-B08Hfq1rGb_k
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2MTQ2MDM1NTUsInVzZXJfaWQiOjV9.quRrBeidEd_4_zP0rryjqUf06HfQtvkNyCihfRCxpmY
 
 {
   "port": "8082",
@@ -26,9 +26,10 @@ Cache-Control: no-cache
 Content-Type: application/json
 
 ###
-DELETE http://localhost:8080/api/server/1613455303
+DELETE http://localhost:8080/api/server/1614603334
 Cache-Control: no-cache
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2MTQ2MDM1NTUsInVzZXJfaWQiOjV9.quRrBeidEd_4_zP0rryjqUf06HfQtvkNyCihfRCxpmY
 
 ###
 POST http://localhost:8080/api/auth
@@ -49,10 +50,13 @@ Content-Type: application/json
 GET http://localhost:8080/api/server
 Cache-Control: no-cache
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2MTM1NjE0ODUsInVzZXJfaWQiOjEzfQ.qX1Mn2Z9BumX8eNMFDbnOfOtKVjZ8MmlIgOCcMEAU9w
-
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2MTQ2OTQyODYsInVzZXJfaWQiOjV9.NbUH3umlI9XjQONy0CNKhIid9uxNwDrnCBLwlJXsCzY
 ### test conect bd
 GET http://localhost:8080/api/connect
 Cache-Control: no-cache
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2MTM2MzcxNzgsInVzZXJfaWQiOjV9.v5xpFOakFBAzKxm-f3BngHppJkrlKBGMrWf0XVW0_x4
+### Panic
+GET http://localhost:8080/api/panic
+Cache-Control: no-cache
+Content-Type: application/json

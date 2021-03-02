@@ -52,6 +52,7 @@ func (s *server) RunServer() {
 
 	if err != nil {
 		if err.Error() != "http: Server closed" {
+			panic(err)
 			log.NewLog().Fatal(err)
 		}
 

@@ -94,7 +94,7 @@ func setupHandlers(s *server) {
 		for _, e := range fabric.Handlers {
 			if e.GetHandler().NeedAuthToken { //TODO странный момент в докере не рабоатет connect
 				fh := http.HandlerFunc(e.GetHandler().HandlerFunc)
-				s.mux.Handle(apiMaster+e.GetHandler().Path, jwt.JwtMiddleware.Handler(fh)).Methods(e.GetHandler().Method)
+				s.mux.Handle(apiMaster+e.GetHandler().Path, jwt.JwtVerifMiddleware.Handler(jwt.ParseJWT(fh))).Methods(e.GetHandler().Method)
 			} else {
 				s.mux.HandleFunc(apiMaster+e.GetHandler().Path, e.GetHandler().HandlerFunc).Methods(e.GetHandler().Method)
 			}

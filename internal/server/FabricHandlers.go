@@ -15,6 +15,7 @@ func NewFabric() fabricHandlers {
 	setupServerHandlers(&f)
 	setupAuthHandlers(&f)
 	setupUserHandlers(&f)
+	testPanicHendler(&f)
 
 	return f
 }
@@ -40,4 +41,9 @@ func setupServerHandlers(f *fabricHandlers) {
 	hand5 := handler.MyHandler{"/connect", Connect, http.MethodGet, false}
 
 	f.Handlers = append(f.Handlers, &hand, &hand2, &hand3, &hand4, &hand5)
+}
+
+func testPanicHendler(f *fabricHandlers) {
+	hand := handler.MyHandler{"/panic", Panic, http.MethodGet, false}
+	f.Handlers = append(f.Handlers, &hand)
 }

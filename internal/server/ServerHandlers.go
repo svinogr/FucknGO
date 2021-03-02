@@ -8,6 +8,7 @@ import (
 	"FucknGO/log"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -28,7 +29,7 @@ func Connect(w http.ResponseWriter, r *http.Request) {
 	}
 
 	database := repo.NewDataBase(c)
-	err = database.OpenDataBase(database.GetURLDataBAse())
+	err = database.OpenDataBase()
 
 	if err != nil {
 		fmt.Fprint(w, err)
@@ -179,4 +180,7 @@ func CreateServer(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Fprint(w, http.StatusBadRequest)
 	}
+}
+func Panic(w http.ResponseWriter, r *http.Request) {
+	log.NewLog().Fatal(errors.New("panic"))
 }

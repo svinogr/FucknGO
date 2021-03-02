@@ -1,18 +1,23 @@
 package jwt
 
 import (
+	"context"
 	jwtmiddleware "github.com/auth0/go-jwt-middleware"
 	"github.com/dgrijalva/jwt-go"
 	jwt2 "github.com/form3tech-oss/jwt-go"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
 var mySigningKey = []byte("SECRET")
 
+const EXP time.Duration = 300
+const USER_ID = "userId"
+
 // hadnler catch jwt token
-var JwtMiddleware = jwtmiddleware.New(jwtmiddleware.Options{
+var JwtVerifMiddleware = jwtmiddleware.New(jwtmiddleware.Options{
 	ValidationKeyGetter: func(token *jwt2.Token) (interface{}, error) {
 		return mySigningKey, nil
 	},
@@ -67,6 +72,7 @@ func CookieMiddleWare(handler http.Handler) http.Handler {
 	})
 }
 
+// это создает токен будь он не ладен
 func CreateJWT(id uint64) (string, error) {
 	var err error
 
@@ -75,8 +81,8 @@ func CreateJWT(id uint64) (string, error) {
 
 	atClaims := jwt.MapClaims{}
 	atClaims["authorized"] = true
-	atClaims["user_id"] = id
-	atClaims["exp"] = time.Now().Add(time.Minute * 15).Unix()
+	atClaims[USER_ID] = id
+	atClaims["EXP"] = time.Now().Add(time.Minute * EXP).Unix()
 
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
 
@@ -89,15 +95,26 @@ func CreateJWT(id uint64) (string, error) {
 	return token, nil
 }
 
-func ParseJWT(token string) bool {
-	/*	parseToken, err := jwt.Parse(token, func(token *jwt.Token) ([]byte, error) {
-			return myLookupKey(token.Header["jdnfksdmfksd"])
+func ParseJWT(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		//получаем заголовок
+		header := r.Header.Get("Authorization")
+		// получаем токен отбрасываем Bearer
+		token := strings.Split(header, " ")[1]
+		// библиотечная функция парсящая токен в claim
+		claims := jwt.MapClaims{}
+		_, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+			return mySigningKey, nil
 		})
-	*/
-	/*	if err != nil {
-			return false
-		}
 
-		return parseToken.Valid*/
-	return false
+		if err != nil {
+			return
+		}
+		// получаем id из токена
+		userId := claims["user_id"]
+		// пытаемся вставить в контекст чтоб гденить еще получмить по ключу
+		ctx := context.WithValue(r.Context(), "userId", userId)
+
+		handler.ServeHTTP(w, r.WithContext(ctx))
+	})
 }
