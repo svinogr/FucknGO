@@ -16,6 +16,12 @@ func init() {
 var conf config.Config
 
 func main() {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered", r)
+		}
+	}()
+
 	startServer(conf)
 }
 
