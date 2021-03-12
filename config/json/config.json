@@ -1,0 +1,50 @@
+{
+  "databases": {
+    "postgresql": {
+      "address": "db",
+      "port": 5432,
+      "basename": "postgres",
+      "user": "postgres",
+      "password": "pass"
+    },
+    "geoip": {
+      "address": "./GeoLite2-City.mmdb"
+    },
+    "redis": {
+      "address": "192.168.99.100",
+      "port": 6379,
+      "password": ""
+    }
+  },
+  "server": {
+    "port": 8080,
+    "ws": "ws://127.0.0.1:3005/ws/conn",
+    "middlewareTimeout": "15s",
+    "jwtSecret": "secret",
+    "jwtLifeTimeDays": 365
+  },
+  "additional": {
+    "maxUploadIconSize": 2,
+    "sessionServer": "127.0.0.1"
+  },
+  "ui": {
+    "app": {
+      "js": "../account_manager_frontend/build",
+      "static": "../account_manager_frontend/build/static",
+      "html": ""
+    },
+    "admin": {
+      "js": "./web/admin/build",
+      "static": "./web/admin/build/static",
+      "html": ""
+    },
+    "www": {
+      "js": "./web/client/build",
+      "html": "./web/templates",
+      "static": "./ui/web/static"
+    }
+  },
+  "log": {
+    "path": "./log.txt"
+  }
+}

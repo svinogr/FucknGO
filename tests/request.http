@@ -1,0 +1,18 @@
+POST http://localhost:8080/api/server
+Cache-Control: no-cache
+Content-Type: application/json
+
+{
+  "port": "8082",
+  "static_resource": "./ui/web2"
+}
+
+###
+GET http://localhost:8080/api/server
+Cache-Control: no-cache
+Content-Type: application/json
+
+###
+DELETE http://localhost:8080/api/server/1613454700
+Cache-Control: no-cache
+Content-Type: application/json
