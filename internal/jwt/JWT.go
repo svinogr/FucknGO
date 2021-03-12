@@ -13,7 +13,7 @@ import (
 
 var mySigningKey = []byte("SECRET")
 
-const EXP time.Duration = 300
+const EXP time.Duration = 300 // live time of token
 const USER_ID = "userId"
 
 // hadnler catch jwt token
@@ -72,7 +72,7 @@ func CookieMiddleWare(handler http.Handler) http.Handler {
 	})
 }
 
-// это создает токен будь он не ладен
+// CreateJWT creates JWT token by id
 func CreateJWT(id uint64) (string, error) {
 	var err error
 
@@ -95,13 +95,14 @@ func CreateJWT(id uint64) (string, error) {
 	return token, nil
 }
 
+// ParseJWT middleware parses token to get id user
 func ParseJWT(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		//получаем заголовок
+		//get header
 		header := r.Header.Get("Authorization")
 		// получаем токен отбрасываем Bearer
 		token := strings.Split(header, " ")[1]
-		// библиотечная функция парсящая токен в claim
+		// default function for parsing token into claim
 		claims := jwt.MapClaims{}
 		_, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
 			return mySigningKey, nil
@@ -110,10 +111,10 @@ func ParseJWT(handler http.Handler) http.Handler {
 		if err != nil {
 			return
 		}
-		// получаем id из токена
-		userId := claims["user_id"]
+		// get id from token
+		userId := claims[USER_ID]
 		// пытаемся вставить в контекст чтоб гденить еще получмить по ключу
-		ctx := context.WithValue(r.Context(), "userId", userId)
+		ctx := context.WithValue(r.Context(), USER_ID, userId)
 
 		handler.ServeHTTP(w, r.WithContext(ctx))
 	})

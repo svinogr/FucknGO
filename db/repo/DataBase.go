@@ -7,9 +7,11 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var driverSql = "postgres"
-var dbUrlStart = "postgresql"
-var sslMode = "sslmode=disable"
+const (
+	DRIVER_SQL   = "postgres"
+	DB_URL_START = "postgresql"
+	SSL_MODE     = "sslmode=disable"
+)
 
 type DataBase struct {
 	config      *config.Config
@@ -19,28 +21,24 @@ type DataBase struct {
 	tokenRepo   *TokenRepo
 }
 
+// get new db or return created db
 func NewDataBase(config *config.Config) *DataBase {
-	if config == nil {
-	}
 	return &DataBase{
 		config: config,
 	}
 }
 
-func (d *DataBase) OpenDataBase() error {
+func (d *DataBase) OpenDataBase() (err error) {
 	urlDB := fmt.Sprintf("%s://%s:%s@%s:%d/%s?%s",
-		dbUrlStart,
+		DB_URL_START,
 		d.config.JsonStr.DataBase.Postgres.User,
 		d.config.JsonStr.DataBase.Postgres.Password,
 		d.config.JsonStr.DataBase.Postgres.Address,
 		d.config.JsonStr.DataBase.Postgres.Port,
 		d.config.JsonStr.DataBase.Postgres.BaseName,
-		sslMode)
+		SSL_MODE)
 
-	var err error
-	d.Db, err = sql.Open("postgres", urlDB)
-
-	if err != nil {
+	if d.Db, err = sql.Open(DRIVER_SQL, urlDB); err != nil {
 		return err
 	}
 
@@ -48,13 +46,14 @@ func (d *DataBase) OpenDataBase() error {
 		return err
 	}
 
-	return nil
+	return err
 }
 
 func (d *DataBase) CloseDataBase() error {
 	return d.Db.Close()
 }
 
+// get UserRepository
 func (d *DataBase) User() *UserRepo {
 	if d.userRepo != nil {
 		return d.userRepo
@@ -67,6 +66,7 @@ func (d *DataBase) User() *UserRepo {
 	return d.userRepo
 }
 
+// // get TokenRepository
 func (d *DataBase) Token() *TokenRepo {
 	if d.tokenRepo != nil {
 		return d.tokenRepo

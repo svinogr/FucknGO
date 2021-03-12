@@ -140,7 +140,7 @@ func DeleteServerById(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, string(jsonStr))
 }
 
-//Crate new server
+// CreateServer creates new server
 func CreateServer(w http.ResponseWriter, r *http.Request) {
 	var sM model.ServerModel
 	if err := json.NewDecoder(r.Body).Decode(&sM); err != nil {
@@ -180,6 +180,8 @@ func CreateServer(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, http.StatusBadRequest)
 	}
 }
+
+//test function for  panic handler
 func Panic(w http.ResponseWriter, r *http.Request) {
 	log.NewLog().Fatal(errors.New("panic"))
 }

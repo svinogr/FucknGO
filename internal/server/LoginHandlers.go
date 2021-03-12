@@ -14,7 +14,7 @@ import (
 )
 
 // auth user and send jwt token
-
+// test handler for aut from html form
 func logPage(w http.ResponseWriter, r *http.Request) {
 	tmp, _ := template.ParseFiles("log.html")
 	tmp.Execute(w, "done")
@@ -23,6 +23,7 @@ func logPage(w http.ResponseWriter, r *http.Request) {
 // auth responses with token if log is success
 func auth(w http.ResponseWriter, r *http.Request) {
 	var uM model.UserModel
+
 	if err := json.NewDecoder(r.Body).Decode(&uM); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -77,6 +78,7 @@ func getValidUser(user model.UserModel) (*repo.UserModelRepo, error) {
 
 func GetUserIdFromContext(r *http.Request) (interface{}, error) {
 	value := r.Context().Value(jwt.USER_ID)
+
 	if value == nil {
 		return nil, errors.New("Not found id")
 	}

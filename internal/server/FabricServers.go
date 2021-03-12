@@ -17,8 +17,8 @@ type fabricServers struct {
 var instance *fabricServers
 var once sync.Once
 
-const apiSlave = "/api/slave"
-const apiMaster = "/api"
+const API_SLAVE = "/api/slave"
+const API_MASTER = "/api"
 
 // FabricServer construct singleton
 func FabricServer() (*fabricServers, error) {
@@ -84,19 +84,20 @@ func (f *fabricServers) RemoveServer(server server) {
 	}
 }
 
+//setupStaticResource setup server handler by type server slave/master and auth
 func setupHandlers(s *server) {
 	fabric := NewFabric()
 	if s.isSlave {
 		for _, e := range fabric.Handlers {
-			s.mux.HandleFunc(apiSlave+e.GetHandler().Path, e.GetHandler().HandlerFunc).Methods(e.GetHandler().Method)
+			s.mux.HandleFunc(API_SLAVE+e.GetHandler().Path, e.GetHandler().HandlerFunc).Methods(e.GetHandler().Method)
 		}
 	} else {
 		for _, e := range fabric.Handlers {
-			if e.GetHandler().NeedAuthToken { //TODO странный момент в докере не рабоатет connect
+			if e.GetHandler().NeedAuthToken {
 				fh := http.HandlerFunc(e.GetHandler().HandlerFunc)
-				s.mux.Handle(apiMaster+e.GetHandler().Path, jwt.JwtVerifMiddleware.Handler(jwt.ParseJWT(fh))).Methods(e.GetHandler().Method)
+				s.mux.Handle(API_MASTER+e.GetHandler().Path, jwt.JwtVerifMiddleware.Handler(jwt.ParseJWT(fh))).Methods(e.GetHandler().Method)
 			} else {
-				s.mux.HandleFunc(apiMaster+e.GetHandler().Path, e.GetHandler().HandlerFunc).Methods(e.GetHandler().Method)
+				s.mux.HandleFunc(API_MASTER+e.GetHandler().Path, e.GetHandler().HandlerFunc).Methods(e.GetHandler().Method)
 			}
 		}
 	}

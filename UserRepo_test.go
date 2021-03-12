@@ -19,7 +19,7 @@ func GetUserRepo() (*repo.UserRepo, error) {
 	return userRepo, nil
 }
 
-var testUser = repo.UserModelRepo{Name: "foo", Email: "emeil", Password: "pass"}
+var testUser = repo.UserModelRepo{Name: "foo", Email: "email", Password: "pass"}
 
 func TestCreateUser(t *testing.T) {
 	userRepo, err := GetUserRepo()
