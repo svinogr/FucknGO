@@ -2,11 +2,12 @@ package server
 
 import (
 	"FucknGO/config"
-	"FucknGO/db"
-	serModel "FucknGO/internal/model/server"
+	"FucknGO/db/repo"
+	"FucknGO/internal/server/model"
 	"FucknGO/log"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -26,17 +27,26 @@ func Connect(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, err)
 	}
 
-	database := db.NewDataBase(c)
+	database := repo.NewDataBase(c)
 	err = database.OpenDataBase()
 
 	if err != nil {
 		fmt.Fprint(w, err)
 	}
+	getConfig, err := config.GetConfig()
+	usR := repo.NewDataBase(getConfig).User()
+
+	usR.CreateUser(&repo.UserModelRepo{
+		Name:     "vasya",
+		Password: "123",
+		Email:    "123",
+	})
 
 	fmt.Fprint(w, "connect")
 
 }
 
+// GetAllServers gets all running servers
 func GetAllServers(w http.ResponseWriter, r *http.Request) {
 	if fb, err := FabricServer(); err != nil {
 		fmt.Fprint(w, err)
@@ -50,7 +60,7 @@ func GetAllServers(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if el.Port() != "" {
-				s, err := json.Marshal(serModel.ServerModel{el.Id(), el.StaticResource(), el.Port(), el.Address(), true})
+				s, err := json.Marshal(model.ServerModel{el.Id(), el.StaticResource(), el.Port(), el.Address(), true})
 
 				if err != nil {
 					continue
@@ -78,7 +88,7 @@ func Server(w http.ResponseWriter, r *http.Request) {
 
 // DeleteServerById deletes by id
 func DeleteServerById(w http.ResponseWriter, r *http.Request) {
-	var sM serModel.ServerModel
+	var sM model.ServerModel
 
 	vars := mux.Vars(r)
 
@@ -130,9 +140,9 @@ func DeleteServerById(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, string(jsonStr))
 }
 
-//Crate new server
+// CreateServer creates new server
 func CreateServer(w http.ResponseWriter, r *http.Request) {
-	var sM serModel.ServerModel
+	var sM model.ServerModel
 	if err := json.NewDecoder(r.Body).Decode(&sM); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -153,7 +163,7 @@ func CreateServer(w http.ResponseWriter, r *http.Request) {
 		} else {
 			go ser.RunServer()
 
-			s := serModel.ServerModel{ser.Id(), ser.StaticResource(), ser.Port(), ser.Address(), true}
+			s := model.ServerModel{ser.Id(), ser.StaticResource(), ser.Port(), ser.Address(), true}
 
 			data, err := json.Marshal(&s)
 
@@ -169,4 +179,9 @@ func CreateServer(w http.ResponseWriter, r *http.Request) {
 	} else {
 		fmt.Fprint(w, http.StatusBadRequest)
 	}
+}
+
+//test function for  panic handler
+func Panic(w http.ResponseWriter, r *http.Request) {
+	log.NewLog().Fatal(errors.New("panic"))
 }

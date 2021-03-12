@@ -1,4 +1,4 @@
-package server
+package model
 
 type ServerModel struct {
 	Id             uint64 `json:"id"`

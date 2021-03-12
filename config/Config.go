@@ -17,6 +17,7 @@ var once sync.Once
 // GetConfig return reading config from json
 func GetConfig() (*Config, error) {
 	var err error
+
 	once.Do(func() {
 		instance = &Config{}
 		instance, err = instance.readConfig()

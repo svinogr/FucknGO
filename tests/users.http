@@ -1,0 +1,10 @@
+###
+POST http://localhost:8080/api/user
+Cache-Control: no-cache
+Content-Type: application/json
+
+{
+  "name": "ivan",
+  "password": "123",
+  "email": "1@mail.ru"
+}

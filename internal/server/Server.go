@@ -2,8 +2,10 @@ package server
 
 import (
 	"FucknGO/log"
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"net/http"
+	"os"
 )
 
 type server struct {
@@ -44,12 +46,13 @@ func (s *server) setup(address string, port string, staticResource string, id ui
 
 // runServer run servers
 func (s *server) RunServer() {
-	s.server = http.Server{Addr: s.address + ":" + s.port, Handler: &s.mux}
+	s.server = http.Server{Addr: s.address + ":" + s.port, Handler: handlers.LoggingHandler(os.Stdout, &s.mux)} //TODO настроить запись в файл
 
 	err := s.server.ListenAndServe()
 
 	if err != nil {
 		if err.Error() != "http: Server closed" {
+			panic(err)
 			log.NewLog().Fatal(err)
 		}
 

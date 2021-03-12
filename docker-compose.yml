@@ -1,0 +1,29 @@
+version: "3.9"  # optional since v1.27.0
+services:
+ # app:
+  #  build: .
+ #   container_name: app
+ #   ports:
+ #     - 8080:8080
+  #  restart: always
+ #   depends_on:
+ #     - db
+     # - db_test
+  db:
+    image: postgres
+    container_name: db
+    ports:
+      - 54323:5432
+    volumes:
+      - ./sql.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      POSTGRES_PASSWORD: pass
+  #db_test:
+ #   image: postgres
+  #  container_name: test
+#    ports:
+  #    - 54322:54322
+  #  volumes:
+  #    - ./sql_test.sql:/docker-entrypoint-initdb.d/init.sql
+ #   environment:
+ #     POSTGRES_PASSWORD: pass

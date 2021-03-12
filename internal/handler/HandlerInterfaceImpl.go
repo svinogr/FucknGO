@@ -2,12 +2,13 @@ package handler
 
 import "net/http"
 
-type Handler struct {
-	Path        string
-	HandlerFunc func(w http.ResponseWriter, r *http.Request)
-	Method      string
+type MyHandler struct {
+	Path          string
+	HandlerFunc   func(w http.ResponseWriter, r *http.Request)
+	Method        string
+	NeedAuthToken bool
 }
 
-func (h *Handler) GetHandler() *Handler {
+func (h *MyHandler) GetHandler() *MyHandler {
 	return h
 }

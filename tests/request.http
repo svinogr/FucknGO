@@ -1,6 +1,19 @@
+
+###
 POST http://localhost:8080/api/server
 Cache-Control: no-cache
 Content-Type: application/json
+
+{
+  "port": "8082",
+  "static_resource": "./ui/web2"
+}
+
+### with token
+POST http://localhost:8080/api/server
+Cache-Control: no-cache
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2MTQ2MDM1NTUsInVzZXJfaWQiOjV9.quRrBeidEd_4_zP0rryjqUf06HfQtvkNyCihfRCxpmY
 
 {
   "port": "8082",
@@ -13,6 +26,55 @@ Cache-Control: no-cache
 Content-Type: application/json
 
 ###
-DELETE http://localhost:8080/api/server/1613454700
+DELETE http://localhost:8080/api/server/1614603334
+Cache-Control: no-cache
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2MTQ2MDM1NTUsInVzZXJfaWQiOjV9.quRrBeidEd_4_zP0rryjqUf06HfQtvkNyCihfRCxpmY
+
+###
+POST http://localhost:8080/api/auth
+Content-Type: application/json
+
+{
+  "email": "2@2.ru",
+  "password": "2"
+}
+
+###novalid registre
+POST http://localhost:8080/api/user
+Content-Type: application/json
+
+{
+  "email": "2@2.ru",
+  "password": "2"
+}
+###VALID
+POST http://localhost:8080/api/user
+Content-Type: application/json
+
+{
+  "name":"vasya",
+  "email": "2@22.ru",
+  "password": "2"
+}
+
+###
+GET http://localhost:8082/api/slave/server
+Cache-Control: no-cache
+Content-Type: application/json
+
+
+###
+GET http://localhost:8080/api/server
+Cache-Control: no-cache
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2MTQ2OTQyODYsInVzZXJfaWQiOjV9.NbUH3umlI9XjQONy0CNKhIid9uxNwDrnCBLwlJXsCzY
+### test conect bd
+GET http://localhost:8080/api/connect
+Cache-Control: no-cache
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2MTM2MzcxNzgsInVzZXJfaWQiOjV9.v5xpFOakFBAzKxm-f3BngHppJkrlKBGMrWf0XVW0_x4
+### Panic
+GET http://localhost:8080/api/panic
 Cache-Control: no-cache
 Content-Type: application/json
