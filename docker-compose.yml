@@ -9,6 +9,14 @@ services:
  #   depends_on:
  #     - db
      # - db_test
+
+  rabbitMQ:
+    image: rabbitmq:3-management
+    container_name: rabbitMQ
+    # нужно прописать два порта. один для вебморды 15672
+    ports:
+    - 5672:5672
+    - 15672:15672
   db:
     image: postgres
     container_name: db
