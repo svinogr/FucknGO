@@ -16,8 +16,20 @@ func NewFabric() fabricHandlers {
 	setupAuthHandlers(&f)
 	setupUserHandlers(&f)
 	testPanicHendler(&f)
-
+	setupWebInterfaceHandler(&f)
 	return f
+}
+
+// setupWebInterfaceHandler setup handlers for web
+func setupWebInterfaceHandler(f *fabricHandlers) {
+	hand := handler.MyHandler{
+		Path:          "/web",
+		HandlerFunc:   webInterface,
+		Method:        http.MethodGet,
+		NeedAuthToken: false,
+	}
+
+	f.Handlers = append(f.Handlers, &hand)
 }
 
 // setupUserHandlers setup handlers for actions with user

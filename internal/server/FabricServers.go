@@ -117,5 +117,5 @@ func setupStaticResource(staticResource string, server *server) {
 
 	fileServer := http.FileServer(http.Dir(staticResource))
 
-	server.mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+	server.mux.Handle("/static/", http.StripPrefix("/static/", fileServer))
 }
