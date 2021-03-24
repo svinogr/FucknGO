@@ -1,6 +1,7 @@
 package server
 
 import (
+	"FucknGO/broker"
 	"FucknGO/config"
 	"FucknGO/db/repo"
 	"FucknGO/internal/jwt"
@@ -77,6 +78,16 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 		log.NewLog().PrintError(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+	// постановка сообщения в очередь для отправки юзеру на почту
+	err = broker.PublishMessage(broker.MailMessage{
+		Name:     uM.Name,
+		Email:    uM.Email,
+		Password: uM.Password,
+	})
+
+	if err != nil {
+		log.NewLog().PrintCommon(err.Error())
 	}
 
 	w.Header().Set("Content-Type", "application/json")

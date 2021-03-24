@@ -2,7 +2,7 @@
   "databases": {
     "postgresql": {
       "address": "localhost",
-      "port": 5432,
+      "port": 54323,
       "basename": "db",
       "user": "user_test",
       "password": "123456"
@@ -47,10 +47,10 @@
   "log": {
     "path": "./log.txt"
   },
-  "rabbitmq": {
+  "rabbit_mq": {
     "user": "guest",
     "password": "guest",
-    "port": 15672,
+    "port": 5672,
     "address": "localhost"
   }
 }

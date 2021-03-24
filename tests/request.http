@@ -53,8 +53,8 @@ POST http://localhost:8080/api/user
 Content-Type: application/json
 
 {
-  "name":"vasya",
-  "email": "2@22.ru",
+  "name":"vwrawhessya",
+  "email": "2swrw2h@22.ru",
   "password": "2"
 }
 

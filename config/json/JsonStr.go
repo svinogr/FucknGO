@@ -3,6 +3,7 @@ package json
 import (
 	"FucknGO/config/db"
 	"FucknGO/config/log"
+	"FucknGO/config/rabbitmq"
 	"FucknGO/config/server"
 	"FucknGO/config/ui"
 )
@@ -14,4 +15,5 @@ type JsonStr struct {
 	UiConfig     ui.UiConfigStr         `json:"ui"`
 	Log          log.LogStr             `json:"log"`
 	DataBase     db.DataBaseStr         `json:"databases"`
+	RabbitMQ     rabbitmq.RabbitMQStr   `json:"rabbit_mq"`
 }
