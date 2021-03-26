@@ -103,3 +103,26 @@ func (u *UserRepo) FindUserByName(name string) (*UserModelRepo, error) {
 
 	return &user, nil
 }
+
+func (u *UserRepo) FindAllUser() (*[]UserModelRepo, error) {
+	userList := []UserModelRepo{}
+
+	row, err := u.db.Db.Query("SELECT " + COL_ID_USER + ", " + COL_NAME + ", " + COL_PASSWORD + ", " + COL_EMAIL + " from " + TABLE_NAME_USERS)
+	defer row.Close()
+
+	if err != nil {
+		return nil, err
+	}
+
+	for row.Next() {
+		user := UserModelRepo{}
+		err := row.Scan(&user.Id, &user.Name, &user.Password, &user.Email)
+
+		if err != nil {
+			return nil, err
+		}
+		userList = append(userList, user)
+	}
+
+	return &userList, nil
+}

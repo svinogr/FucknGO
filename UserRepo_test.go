@@ -158,6 +158,27 @@ func TestFindUserByName(t *testing.T) {
 
 }
 
+func TestFindAllUser(t *testing.T) {
+	userRepo, err := GetUserRepo()
+
+	if err != nil {
+		t.Errorf("%v", err)
+	}
+
+	userList, err := userRepo.FindAllUser()
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if userList != nil {
+		if len(*userList) < 1 {
+			t.Error()
+		}
+	}
+
+}
+
 func TestDeleteUser(t *testing.T) {
 	userRepo, err := GetUserRepo()
 

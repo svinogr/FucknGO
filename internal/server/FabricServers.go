@@ -114,8 +114,10 @@ func setupStaticResource(staticResource string, server *server) {
 			log.NewLog().Fatal(err)
 		}
 	}
-
+	// staticResource = "./ui/web/static"
 	fileServer := http.FileServer(http.Dir(staticResource))
 
-	server.mux.Handle("/static/", http.StripPrefix("/static/", fileServer))
+	//server.mux.Handle("/static/js/jquery-3.6.0.min.js", http.StripPrefix("/static", fileServer))
+	server.mux.PathPrefix("/static/{rest}").Handler(
+		http.StripPrefix("/static", fileServer))
 }
