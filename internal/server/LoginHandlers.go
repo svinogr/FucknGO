@@ -5,6 +5,7 @@ import (
 	"FucknGO/db/repo"
 	"FucknGO/internal/jwt"
 	"FucknGO/internal/server/model"
+	"FucknGO/log"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -77,11 +78,60 @@ func getValidUser(user model.UserModel) (*repo.UserModelRepo, error) {
 }
 
 func GetUserIdFromContext(r *http.Request) (interface{}, error) {
-	value := r.Context().Value(jwt.USER_ID)
+	value := r.Context().Value(jwt.UserId)
 
 	if value == nil {
 		return nil, errors.New("Not found id")
 	}
 
 	return value, nil
+}
+
+func logOut(w http.ResponseWriter, r *http.Request) {
+	var uM model.UserModel
+
+	if err := json.NewDecoder(r.Body).Decode(&uM); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	claims, err := jwt.GetClaims(uM.Token)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = claims.Valid()
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	//userId := claims[jwt.UserId]
+	var userId uint64 = 24
+
+	conf, err := config.GetConfig()
+
+	if err != nil {
+		log.NewLog().Fatal(err)
+	}
+
+	base := repo.NewDataBase(conf)
+
+	repo := base.Token()
+
+	if err != nil {
+		log.NewLog().Fatal(err)
+	}
+
+	// err = repo.DeleteTokenByUserId(userId.(uint64))
+	_, err = repo.DeleteTokenByUserId(userId)
+
+	if err != nil {
+		log.NewLog().Fatal(err)
+	}
+
+	fmt.Fprint(w, nil)
 }

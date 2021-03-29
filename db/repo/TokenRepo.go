@@ -31,6 +31,21 @@ func (t *TokenRepo) FindTokenByUserId(userId uint64) (*TokenModelRepo, error) {
 	return &token, nil
 }
 
+func (t *TokenRepo) DeleteTokenByUserId(userId uint64) (int64, error) {
+	result, err := t.Database.Db.Exec("DELETE from "+TABLE_NAME_TOKEN+" where "+COL_USER_ID+" = $1", userId)
+
+	if err != nil {
+		return 0, err
+	}
+	affected, err := result.RowsAffected()
+
+	if err != nil {
+		return 0, err
+	}
+
+	return affected, nil
+}
+
 func (t *TokenRepo) CreateToken(token *TokenModelRepo) (*TokenModelRepo, error) {
 	if err := t.Database.Db.QueryRow("INSERT into "+TABLE_NAME_TOKEN+" ("+COL_TOKEN+", "+COL_USER_ID+") "+
 		"VALUES ($1, $2) RETURNING "+COL_ID_TOKEN,

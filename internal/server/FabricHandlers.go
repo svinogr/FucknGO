@@ -23,13 +23,25 @@ func NewFabric() fabricHandlers {
 // setupWebInterfaceHandler setup handlers for web
 func setupWebInterfaceHandler(f *fabricHandlers) {
 	hand := handler.MyHandler{
-		Path:          "/web",
-		HandlerFunc:   webInterface,
+		Path:          "/login",
+		HandlerFunc:   loginPage,
+		Method:        http.MethodGet,
+		NeedAuthToken: false,
+	}
+	hand2 := handler.MyHandler{
+		Path:          "/mainpage",
+		HandlerFunc:   mainPage,
+		Method:        http.MethodGet,
+		NeedAuthToken: false,
+	}
+	hand3 := handler.MyHandler{
+		Path:          "/logout",
+		HandlerFunc:   logOut,
 		Method:        http.MethodGet,
 		NeedAuthToken: false,
 	}
 
-	f.Handlers = append(f.Handlers, &hand)
+	f.Handlers = append(f.Handlers, &hand, &hand2, &hand3)
 }
 
 // setupUserHandlers setup handlers for actions with user

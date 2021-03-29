@@ -33,39 +33,17 @@
                         //   result = $.parseJSON(response);
                         alert("error");
                     }
-
                 });
             });
 
-            $("#login").click(function () {
-                var form = $("#login_form").serializeArray();
-                var data = new Map();
-                $(form).each(function (index, obj) {
-                    data.set(obj.name, obj.value);
-                });
-
+            $("#logout").click(function () {
                 $.ajax({
-                    'url': '/api/auth',
-                    'method': 'POST',
-                    'dataType': 'json',
-                    'contentType': 'application/json',
-                    'data': JSON.stringify({
-                        "email": data.get('email'),
-                        "password": data.get('password')
-                    }),
-                    success: function (response) { //Данные отправлены успешно
-                        result = JSON.stringify(response);
-
-                        alert("rr" + result);
-                    },
-                    error: function (response) { // Данные не отправлены
-                        //   alert("что за говно ты написал в форму?!?");
-                        //   result = $.parseJSON(response);
-                        alert("error");
-                    }
-
+                    'url': '/api/logout',
+                    'method': 'GET'
+                    })
                 });
-            });
+
+
 
         });
     </script>
@@ -82,10 +60,8 @@
             </button>
             <div class="justify-content-end">
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <form class="d-flex" id="login_form" action="">
-                        <input class="form-control me-2 " type="email" placeholder="email" name="email">
-                        <input class="form-control me-2" type="text" placeholder="password" name="password">
-                        <button class="btn btn-outline-success" id="login">Войти</button>
+                    <form class="d-flex" id="logout_form" action="">
+                        <button class="btn btn-outline-success" id="logout">Выйти</button>
                     </form>
                 </div>
             </div>

@@ -31,14 +31,24 @@ Cache-Control: no-cache
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2MTQ2MDM1NTUsInVzZXJfaWQiOjV9.quRrBeidEd_4_zP0rryjqUf06HfQtvkNyCihfRCxpmY
 
-###
+### LOGIN
 POST http://localhost:8080/api/auth
 Content-Type: application/json
 
 {
-  "email": "2@2.ru",
-  "password": "2"
+  "email": "12",
+  "password": "12"
 }
+
+### LOGOUT
+GET http://localhost:8080/api/logout
+Content-Type: application/json
+
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjI0LCJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2MTcwMzgxMTN9.IquMUjsQaYXccYLBNrXprjraD3fmIKw7zeyD52Ezt6k"
+}
+
+
 
 ###novalid registre
 POST http://localhost:8080/api/user
@@ -53,9 +63,9 @@ POST http://localhost:8080/api/user
 Content-Type: application/json
 
 {
-  "name":"vwrawhessya",
-  "email": "2swrw2h@22.ru",
-  "password": "2"
+  "name":"12",
+  "email": "12",
+  "password": "12"
 }
 
 ###
@@ -68,7 +78,7 @@ Content-Type: application/json
 GET http://localhost:8080/api/server
 Cache-Control: no-cache
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2MTQ2OTQyODYsInVzZXJfaWQiOjV9.NbUH3umlI9XjQONy0CNKhIid9uxNwDrnCBLwlJXsCzY
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjI0LCJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2MTcwNDIwNTh9.AyfXZWiRxypEHyYDvl5m8BGBB3I03V8jclUoljbCmjw
 ### test conect bd
 GET http://localhost:8080/api/connect
 Cache-Control: no-cache

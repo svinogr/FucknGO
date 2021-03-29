@@ -1,6 +1,9 @@
 package jwt
 
 import (
+	"FucknGO/config"
+	"FucknGO/db/repo"
+	"FucknGO/log"
 	"context"
 	jwtmiddleware "github.com/auth0/go-jwt-middleware"
 	"github.com/dgrijalva/jwt-go"
@@ -13,8 +16,8 @@ import (
 
 var mySigningKey = []byte("SECRET")
 
-const EXP time.Duration = 300 // live time of token
-const USER_ID = "userId"
+const exp time.Duration = 300 // live time of token
+const UserId = "UserId"
 
 // hadnler catch jwt token
 var JwtVerifMiddleware = jwtmiddleware.New(jwtmiddleware.Options{
@@ -65,6 +68,7 @@ func CookieMiddleWare(handler http.Handler) http.Handler {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+
 		if !tkn.Valid {
 			handler.ServeHTTP(w, r)
 		}
@@ -81,8 +85,8 @@ func CreateJWT(id uint64) (string, error) {
 
 	atClaims := jwt.MapClaims{}
 	atClaims["authorized"] = true
-	atClaims[USER_ID] = id
-	atClaims["EXP"] = time.Now().Add(time.Minute * EXP).Unix()
+	atClaims[UserId] = id
+	atClaims["exp"] = time.Now().Add(time.Minute * exp).Unix()
 
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
 
@@ -103,19 +107,58 @@ func ParseJWT(handler http.Handler) http.Handler {
 		// получаем токен отбрасываем Bearer
 		token := strings.Split(header, " ")[1]
 		// default function for parsing token into claim
-		claims := jwt.MapClaims{}
-		_, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
-			return mySigningKey, nil
-		})
-
+		claims, err := GetClaims(token)
+		// get id from token
 		if err != nil {
 			return
 		}
-		// get id from token
-		userId := claims[USER_ID]
+
+		userId := claims[UserId]
+
+		if HasTokenInDB(token, 24) {
+			return
+		}
+
 		// пытаемся вставить в контекст чтоб гденить еще получмить по ключу
-		ctx := context.WithValue(r.Context(), USER_ID, userId)
+		ctx := context.WithValue(r.Context(), userId, userId)
 
 		handler.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+func HasTokenInDB(token string, userId uint64) bool {
+	conf, err := config.GetConfig()
+
+	if err != nil {
+		log.NewLog().Fatal(err)
+	}
+
+	base := repo.NewDataBase(conf)
+
+	repoToken := base.Token()
+
+	tokenRepo, err := repoToken.FindTokenByUserId(userId)
+
+	if err != nil {
+		log.NewLog().Fatal(err)
+	}
+
+	if strings.Compare(token, tokenRepo.Token) == 0 {
+		return true
+	}
+
+	return false
+}
+
+func GetClaims(token string) (jwt.MapClaims, error) {
+	claims := jwt.MapClaims{}
+	_, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+		return mySigningKey, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return claims, nil
 }
