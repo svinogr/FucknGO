@@ -37,7 +37,8 @@ func auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, _ := jwt.CreateJWTToken(validUser.Id)
+	tokenAccess, _ := jwt.CreateJWTToken(validUser.Id)
+	tokenRefresh, _ := jwt.CreateJWTRefreshToken(validUser.Id)
 
 	/*	c := http.Cookie{
 			Name:     "token",
@@ -48,8 +49,13 @@ func auth(w http.ResponseWriter, r *http.Request) {
 
 		http.SetCookie(w, &c)*/
 
+	token := model.TokenModel{
+		AccessToken:  tokenAccess,
+		RefreshToken: tokenRefresh,
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprint(w, "{ \"token\": \""+token+"\"}")
+	fmt.Fprint(w, token)
 }
 
 // validUser gets valid user by email and password
