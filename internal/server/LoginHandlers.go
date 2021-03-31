@@ -206,11 +206,9 @@ func logOut(w http.ResponseWriter, r *http.Request) {
 		log.NewLog().Fatal(err)
 	}
 
-	_, err = repo.DeleteSessionByUserId(userId.(uint64))
+	_, err = repo.DeleteSessionByUserId(uint64(userId.(float64)))
 
 	if err != nil {
 		log.NewLog().Fatal(err)
 	}
-
-	http.Redirect(w, r, "/api/login", http.StatusMovedPermanently)
 }
