@@ -43,31 +43,23 @@ func auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tokenAccess, _ := jwt.CreateJWTToken(validUser.Id)
-	tokenRefresh, _ := jwt.CreateJWTRefreshToken(validUser.Id)
+	accessToken, _ := jwt.CreateJWTToken(validUser.Id)
+	refreshToken, _ := jwt.CreateJWTRefreshToken(validUser.Id)
 
 	// есть ли уже сесиия для данного юзера
-	ok := hasSessionForUserId(validUser.Id)
-
-	if ok {
-		session := repo.SessionModelRepo{
-			UserId:       validUser.Id,
-			RefreshToken: tokenRefresh,
-			UserAgent:    "",
-			Fingerprint:  "",
-			Ip:           "",
-			ExpireIn:     0,
-		}
-
+	session, err := getSessionForUserIdIfIs(validUser.Id)
+	// TODOD можно добавить проверку на срок сессии
+	if err == nil {
+		session.RefreshToken = refreshToken
 		updateSession(session)
 	} else {
 		session := repo.SessionModelRepo{
 			UserId:       validUser.Id,
-			RefreshToken: tokenRefresh,
+			RefreshToken: refreshToken,
 			UserAgent:    "",
 			Fingerprint:  "",
 			Ip:           "",
-			ExpireIn:     0,
+			ExpireIn:     time.Now().Add(repo.Exp_session),
 			CreatedAt:    time.Now(),
 		}
 
@@ -75,15 +67,20 @@ func auth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token := model.TokenModel{
-		AccessToken:  tokenAccess,
-		RefreshToken: tokenRefresh,
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprint(w, token)
+	marshal, err := json.Marshal(token)
+	if err != nil {
+		log.NewLog().Fatal(err)
+	}
+
+	fmt.Fprint(w, string(marshal))
 }
 
-func updateSession(session repo.SessionModelRepo) {
+func updateSession(session *repo.SessionModelRepo) {
 	conf, err := config.GetConfig()
 	if err != nil {
 		log.NewLog().Fatal(err)
@@ -93,14 +90,14 @@ func updateSession(session repo.SessionModelRepo) {
 
 	sessionRepo := base.Sessions()
 
-	_, err = sessionRepo.UpdateSession(&session)
+	_, err = sessionRepo.UpdateSession(session)
 
 	if err != nil {
 		log.NewLog().Fatal(err)
 	}
 }
 
-func hasSessionForUserId(id uint64) bool {
+func getSessionForUserIdIfIs(id uint64) (*repo.SessionModelRepo, error) {
 	conf, err := config.GetConfig()
 	if err != nil {
 		log.NewLog().Fatal(err)
@@ -112,14 +109,11 @@ func hasSessionForUserId(id uint64) bool {
 	session, err := sessionRepo.FindSessionByUserId(id)
 
 	if err != nil {
-		log.NewLog().Fatal(err)
+
+		return nil, err
 	}
 
-	if session.Id > 0 {
-		return true
-	}
-
-	return false
+	return session, nil
 }
 
 func createSession(session repo.SessionModelRepo) {

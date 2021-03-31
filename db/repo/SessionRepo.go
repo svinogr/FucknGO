@@ -16,6 +16,8 @@ const (
 	COL_CREATED_AT              = "created_at"
 )
 
+const Exp_session = time.Hour * 60
+
 type SessionModelRepo struct {
 	Id           uint64
 	UserId       uint64
@@ -30,21 +32,6 @@ type SessionModelRepo struct {
 type SessionRepo struct {
 	Database *DataBase
 }
-
-/*func (t *SessionRepo) DeleteSessionByUserId(userId uint64) (int64, error) {
-	result, err := t.Database.Db.Exec("DELETE from "+TABLE_NAME_REFRESH_SESSIONS+"where "+COL_USER_ID+" = $1", userId)
-
-	if err != nil {
-		return 0, err
-	}
-	affected, err := result.RowsAffected()
-
-	if err != nil {
-		return 0, err
-	}
-
-	return affected, nil
-}*/
 
 func (t *SessionRepo) CreateSession(session *SessionModelRepo) (*SessionModelRepo, error) {
 	if err := t.Database.Db.QueryRow("INSERT into "+TABLE_NAME_REFRESH_SESSIONS+" ("+
