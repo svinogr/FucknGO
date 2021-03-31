@@ -25,6 +25,6 @@ CREATE TABLE if not exists refresh_sessions  (
     "user_agent" character varying(200) NOT NULL, /* user-agent */
     "fingerprint" character varying(200) NOT NULL,
     "ip" character varying(15) NOT NULL,
-    "expires_in" bigint NOT NULL,
+    "expires_in" timestamp NOT NULL,
     "created_at" timestamp with time zone NOT NULL DEFAULT now()
 );

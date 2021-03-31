@@ -32,14 +32,14 @@ func auth(w http.ResponseWriter, r *http.Request) {
 	var uM model.UserModel
 
 	if err := json.NewDecoder(r.Body).Decode(&uM); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 	// юзер есть с таким паролем
 	validUser, err := getValidUser(uM)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 
@@ -61,7 +61,17 @@ func auth(w http.ResponseWriter, r *http.Request) {
 
 		updateSession(session)
 	} else {
-		createSession(tokenRefresh)
+		session := repo.SessionModelRepo{
+			UserId:       validUser.Id,
+			RefreshToken: tokenRefresh,
+			UserAgent:    "",
+			Fingerprint:  "",
+			Ip:           "",
+			ExpireIn:     0,
+			CreatedAt:    time.Now(),
+		}
+
+		createSession(session)
 	}
 
 	token := model.TokenModel{
@@ -112,7 +122,7 @@ func hasSessionForUserId(id uint64) bool {
 	return false
 }
 
-func createSession(refreshToken string) {
+func createSession(session repo.SessionModelRepo) {
 	conf, err := config.GetConfig()
 	if err != nil {
 		log.NewLog().Fatal(err)
@@ -121,16 +131,6 @@ func createSession(refreshToken string) {
 	base := repo.NewDataBase(conf)
 
 	sessionRepo := base.Sessions()
-
-	session := repo.SessionModelRepo{
-		UserId:       0,
-		RefreshToken: refreshToken,
-		UserAgent:    "",
-		Fingerprint:  "",
-		Ip:           "",
-		ExpireIn:     0,
-		CreatedAt:    time.Now(),
-	}
 
 	_, err = sessionRepo.CreateSession(&session)
 
@@ -196,8 +196,7 @@ func logOut(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//userId := claims[jwt.UserId]
-	var userId uint64 = 24
+	userId := claims[jwt.UserId]
 
 	conf, err := config.GetConfig()
 
@@ -207,18 +206,17 @@ func logOut(w http.ResponseWriter, r *http.Request) {
 
 	base := repo.NewDataBase(conf)
 
-	repo := base.Token()
+	repo := base.Sessions()
 
 	if err != nil {
 		log.NewLog().Fatal(err)
 	}
 
-	// err = repo.DeleteTokenByUserId(userId.(uint64))
-	_, err = repo.DeleteTokenByUserId(userId)
+	_, err = repo.DeleteSessionByUserId(userId.(uint64))
 
 	if err != nil {
 		log.NewLog().Fatal(err)
 	}
 
-	fmt.Fprint(w, nil)
+	http.Redirect(w, r, "/api/login", http.StatusMovedPermanently)
 }

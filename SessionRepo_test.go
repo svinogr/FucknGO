@@ -64,10 +64,10 @@ func TestCreateSession(t *testing.T) {
 	session = &repo.SessionModelRepo{
 		UserId:       testUserWithToken.Id,
 		RefreshToken: refreshToken,
-		UserAgent:    "",
-		Fingerprint:  "",
-		Ip:           "",
-		ExpireIn:     0,
+		UserAgent:    "pc",
+		Fingerprint:  "hrome",
+		Ip:           "2.2.2.2",
+		ExpireIn:     time.Now().Add(time.Minute),
 		CreatedAt:    time.Now(),
 	}
 
@@ -89,99 +89,56 @@ func TestFindSessionByUserId(t *testing.T) {
 		t.Error(err)
 	}
 
-	findToken, err := sessionRepo.FindSessionByUserId(testUserWithToken.Id)
+	findSession, err := sessionRepo.FindSessionByUserId(testUserWithToken.Id)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if findToken.Id < 0 {
+	if findSession.Id < 0 {
 		t.Error()
 	}
 }
 
-/*
-func TestFindTokenByUserId(t *testing.T) {
-	tokenRepo, err := GetTokenRepo()
+func TestUpdateSession(t *testing.T) {
+	sessionRepo, err := GetSessionRepo()
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	findToken, err := tokenRepo.FindTokenByUserId(testUserWithToken.Id)
+	session.RefreshToken = "newToken"
+	session.UserAgent = "device"
+	session.Fingerprint = "browser"
+	session.Ip = "1.1.1.1"
+
+	updateSession, err := sessionRepo.UpdateSession(session)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if findToken.Id < 0 {
+	if updateSession.Id != session.Id && updateSession.RefreshToken != session.RefreshToken &&
+		updateSession.UserAgent != session.UserAgent && updateSession.Fingerprint != session.Fingerprint &&
+		updateSession.Ip != session.Ip {
 		t.Error()
-	}
-}
-
-func TestFindTokenByIdNotAddedInDB(t *testing.T) {
-	tokenRepo, err := GetTokenRepo()
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	_, err = tokenRepo.FindTokenByUserId(testUserWithToken.Id + 1)
-
-	if err != sql.ErrNoRows {
-		t.Error(err)
-	}
-}
-
-func TestUpdateToken(t *testing.T) {
-	tokenRepo, err := GetTokenRepo()
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	newToken := "newToken"
-	token.Token = newToken
-
-	updateToken, err := tokenRepo.UpdateToken(token)
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	if updateToken.Id != token.Id && updateToken.Token != newToken && updateToken.UserId != token.UserId {
-		t.Error()
-	}
-}
-
-func TestUpdateTokenNotAddedInDB(t *testing.T) {
-	tokenRepo, err := GetTokenRepo()
-
-	if err != nil {
-		t.Error(err)
-	}
-
-	newToken := "newToken"
-	token.Token = newToken
-	token.UserId = testUserWithToken.Id + 1
-
-	_, err = tokenRepo.UpdateToken(token)
-
-	if err != sql.ErrNoRows {
-		t.Error(err)
 	}
 }
 
 func TestDeleteToken(t *testing.T) {
-	tokenRepo, err := GetTokenRepo()
-
-	if err != nil {
-		t.Errorf("%v", err)
-	}
-
-	_, err = tokenRepo.DeleteToken(token)
+	sessionRepo, err := GetSessionRepo()
 
 	if err != nil {
 		t.Error(err)
 	}
-}*/
+
+	rows, err := sessionRepo.DeleteSessionByUserId(session.UserId)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if rows < 1 {
+		t.Error()
+	}
+}
