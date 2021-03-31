@@ -12,6 +12,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"html/template"
 	"net/http"
+	"time"
 )
 
 // auth user and send jwt token
@@ -22,6 +23,11 @@ func logPage(w http.ResponseWriter, r *http.Request) {
 }
 
 // auth responses with token if log is success
+
+func refreshTokekn() {
+
+}
+
 func auth(w http.ResponseWriter, r *http.Request) {
 	var uM model.UserModel
 
@@ -40,6 +46,12 @@ func auth(w http.ResponseWriter, r *http.Request) {
 	tokenAccess, _ := jwt.CreateJWTToken(validUser.Id)
 	tokenRefresh, _ := jwt.CreateJWTRefreshToken(validUser.Id)
 
+	ok, err := createSession(tokenRefresh)
+
+	if !ok {
+		log.NewLog().Fatal(err)
+	}
+
 	/*	c := http.Cookie{
 			Name:     "token",
 			Value:    token,
@@ -56,6 +68,35 @@ func auth(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprint(w, token)
+}
+
+func createSession(refreshToken string) (bool, error) {
+	conf, err := config.GetConfig()
+	if err != nil {
+		log.NewLog().Fatal(err)
+	}
+
+	base := repo.NewDataBase(conf)
+
+	sessionRepo := base.Sessions()
+
+	session := repo.SessionModelRepo{
+		UserId:       0,
+		RefreshToken: refreshToken,
+		UserAgent:    "",
+		Fingerprint:  "",
+		Ip:           "",
+		ExpireIn:     0,
+		CreatedAt:    time.Now(),
+	}
+
+	_, err = sessionRepo.CreateSession(&session)
+
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 // validUser gets valid user by email and password
