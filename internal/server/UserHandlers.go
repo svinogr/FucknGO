@@ -65,7 +65,7 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 
 	uM.Password = " "
 
-	createJWT, err := jwt.CreateJWT(uM.Id)
+	createJWT, err := jwt.CreateJWTToken(uM.Id)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

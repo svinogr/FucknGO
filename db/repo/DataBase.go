@@ -19,6 +19,7 @@ type DataBase struct {
 	Db          *sql.DB
 	userRepo    *UserRepo
 	tokenRepo   *TokenRepo
+	sessionRepo *SessionRepo
 }
 
 // get new db or return created db
@@ -77,4 +78,16 @@ func (d *DataBase) Token() *TokenRepo {
 	}
 
 	return d.tokenRepo
+}
+
+func (d *DataBase) Sessions() *SessionRepo {
+	if d.sessionRepo != nil {
+		return d.sessionRepo
+	}
+	d.OpenDataBase()
+	d.sessionRepo = &SessionRepo{
+		d,
+	}
+
+	return d.sessionRepo
 }

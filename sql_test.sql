@@ -18,3 +18,13 @@ CREATE TABLE if not exists tokens
     UNIQUE(Id)
     );
 
+CREATE TABLE if not exists refreshSessions  (
+    "id" SERIAL PRIMARY KEY,
+    "userId" uuid,
+    "refreshToken" uuid NOT NULL,
+    "ua" character varying(200) NOT NULL, /* user-agent */
+    "fingerprint" character varying(200) NOT NULL,
+    "ip" character varying(15) NOT NULL,
+    "expiresIn" bigint NOT NULL,
+    "createdAt" timestamp with time zone NOT NULL DEFAULT now()
+);

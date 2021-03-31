@@ -37,7 +37,7 @@ func auth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, _ := jwt.CreateJWT(validUser.Id)
+	token, _ := jwt.CreateJWTToken(validUser.Id)
 
 	/*	c := http.Cookie{
 			Name:     "token",

@@ -16,8 +16,11 @@ import (
 
 var mySigningKey = []byte("SECRET")
 
-const exp time.Duration = 300 // live time of token
-const UserId = "UserId"
+const (
+	expToken        time.Duration = time.Minute * 5    // live time of token
+	expRefreshToken time.Duration = time.Hour * 24 * 7 // live time of refresh token
+	UserId                        = "UserId"
+)
 
 // hadnler catch jwt token
 var JwtVerifMiddleware = jwtmiddleware.New(jwtmiddleware.Options{
@@ -76,8 +79,8 @@ func CookieMiddleWare(handler http.Handler) http.Handler {
 	})
 }
 
-// CreateJWT creates JWT token by id
-func CreateJWT(id uint64) (string, error) {
+// CreateJWTToken creates JWT token by id
+func CreateJWTToken(id uint64) (string, error) {
 	var err error
 
 	//Creating Access Token
@@ -86,7 +89,29 @@ func CreateJWT(id uint64) (string, error) {
 	atClaims := jwt.MapClaims{}
 	atClaims["authorized"] = true
 	atClaims[UserId] = id
-	atClaims["exp"] = time.Now().Add(time.Minute * exp).Unix()
+	atClaims["expToken"] = time.Now().Add(expToken).Unix()
+
+	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
+
+	token, err := at.SignedString([]byte(os.Getenv("ACCESS_SECRET"))) //TODO написать нормальный секретный код
+
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
+}
+
+func CreateJWTRefreshToken(id uint64) (string, error) {
+	var err error
+
+	//Creating Access Token
+	os.Setenv("ACCESS_SECRET", string(mySigningKey)) //TODO this should be in an env file
+
+	atClaims := jwt.MapClaims{}
+	atClaims["authorized"] = true
+	atClaims[UserId] = id
+	atClaims["expToken"] = time.Now().Add(expRefreshToken).Unix()
 
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
 

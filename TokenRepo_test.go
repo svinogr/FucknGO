@@ -54,7 +54,7 @@ func TestCreateToken(t *testing.T) {
 		t.Errorf("%v", err)
 	}
 
-	createJWT, err := CreateJWT(1)
+	createJWT, err := CreateJWTToken(1)
 
 	if err != nil {
 		t.Error(err)
