@@ -4,7 +4,6 @@ import (
 	"FucknGO/config"
 	"FucknGO/db/repo"
 	. "FucknGO/internal/jwt"
-	"fmt"
 	"log"
 	"testing"
 	"time"
@@ -40,6 +39,7 @@ func CreatTestUser() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 }
 
 func TestCreateSession(t *testing.T) {
@@ -62,7 +62,7 @@ func TestCreateSession(t *testing.T) {
 	}
 
 	session = &repo.SessionModelRepo{
-		UserId:       0,
+		UserId:       testUserWithToken.Id,
 		RefreshToken: refreshToken,
 		UserAgent:    "",
 		Fingerprint:  "",
@@ -80,8 +80,24 @@ func TestCreateSession(t *testing.T) {
 	if createSession.Id < 0 {
 		t.Error()
 	}
+}
 
-	fmt.Print(session)
+func TestFindSessionByUserId(t *testing.T) {
+	sessionRepo, err := GetSessionRepo()
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	findToken, err := sessionRepo.FindSessionByUserId(testUserWithToken.Id)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	if findToken.Id < 0 {
+		t.Error()
+	}
 }
 
 /*

@@ -35,7 +35,7 @@ func auth(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
+	// юзер есть с таким паролем
 	validUser, err := getValidUser(uM)
 
 	if err != nil {
@@ -46,10 +46,22 @@ func auth(w http.ResponseWriter, r *http.Request) {
 	tokenAccess, _ := jwt.CreateJWTToken(validUser.Id)
 	tokenRefresh, _ := jwt.CreateJWTRefreshToken(validUser.Id)
 
-	ok, err := createSession(tokenRefresh)
+	// есть ли уже сесиия для данного юзера
+	ok := hasSessionForUserId(validUser.Id)
 
-	if !ok {
-		log.NewLog().Fatal(err)
+	if ok {
+		session := repo.SessionModelRepo{
+			UserId:       validUser.Id,
+			RefreshToken: tokenRefresh,
+			UserAgent:    "",
+			Fingerprint:  "",
+			Ip:           "",
+			ExpireIn:     0,
+		}
+
+		updateSession(session)
+	} else {
+		createSession(tokenRefresh)
 	}
 
 	token := model.TokenModel{
@@ -61,7 +73,46 @@ func auth(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, token)
 }
 
-func createSession(refreshToken string) (bool, error) {
+func updateSession(session repo.SessionModelRepo) {
+	conf, err := config.GetConfig()
+	if err != nil {
+		log.NewLog().Fatal(err)
+	}
+
+	base := repo.NewDataBase(conf)
+
+	sessionRepo := base.Sessions()
+
+	_, err = sessionRepo.UpdateSession(&session)
+
+	if err != nil {
+		log.NewLog().Fatal(err)
+	}
+}
+
+func hasSessionForUserId(id uint64) bool {
+	conf, err := config.GetConfig()
+	if err != nil {
+		log.NewLog().Fatal(err)
+	}
+
+	base := repo.NewDataBase(conf)
+
+	sessionRepo := base.Sessions()
+	session, err := sessionRepo.FindSessionByUserId(id)
+
+	if err != nil {
+		log.NewLog().Fatal(err)
+	}
+
+	if session.Id > 0 {
+		return true
+	}
+
+	return false
+}
+
+func createSession(refreshToken string) {
 	conf, err := config.GetConfig()
 	if err != nil {
 		log.NewLog().Fatal(err)
@@ -84,10 +135,8 @@ func createSession(refreshToken string) (bool, error) {
 	_, err = sessionRepo.CreateSession(&session)
 
 	if err != nil {
-		return false, err
+		log.NewLog().Fatal(err)
 	}
-
-	return true, nil
 }
 
 // validUser gets valid user by email and password
