@@ -4,26 +4,27 @@ import (
 	"FucknGO/config"
 	"FucknGO/db/repo"
 	. "FucknGO/internal/jwt"
-	"database/sql"
+	"fmt"
 	"log"
 	"testing"
+	"time"
 )
 
-func GetTokenRepo() (*repo.TokenRepo, error) {
+func GetSessionRepo() (*repo.SessionRepo, error) {
 	conf, err := config.GetConfig()
 
 	if err != nil {
 		return nil, err
 	}
 
-	tokenRepo := repo.NewDataBase(conf).Token()
+	sessionRepo := repo.NewDataBase(conf).Sessions()
 
-	return tokenRepo, nil
+	return sessionRepo, nil
 }
 
 var testUserWithToken *repo.UserModelRepo
-var token *repo.TokenModelRepo
-var tokenRepo *repo.TokenRepo
+var session *repo.SessionModelRepo
+var sessionRepo *repo.SessionRepo
 
 func CreatTestUser() {
 	userRepo, err := GetUserRepo()
@@ -41,8 +42,8 @@ func CreatTestUser() {
 	}
 }
 
-func TestCreateToken(t *testing.T) {
-	tokenRepo, err := GetTokenRepo()
+func TestCreateSession(t *testing.T) {
+	sessionRepo, err := GetSessionRepo()
 
 	if err != nil {
 		t.Error(err)
@@ -54,28 +55,36 @@ func TestCreateToken(t *testing.T) {
 		t.Errorf("%v", err)
 	}
 
-	createJWT, err := CreateJWTToken(1)
+	refreshToken, err := CreateJWTRefreshToken(testUserWithToken.Id)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	token = &repo.TokenModelRepo{
-		Token:  createJWT,
-		UserId: testUserWithToken.Id,
+	session = &repo.SessionModelRepo{
+		UserId:       0,
+		RefreshToken: refreshToken,
+		UserAgent:    "",
+		Fingerprint:  "",
+		Ip:           "",
+		ExpireIn:     0,
+		CreatedAt:    time.Now(),
 	}
 
-	createToken, err := tokenRepo.CreateToken(token)
+	createSession, err := sessionRepo.CreateSession(session)
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	if createToken.Id < 0 {
+	if createSession.Id < 0 {
 		t.Error()
 	}
+
+	fmt.Print(session)
 }
 
+/*
 func TestFindTokenByUserId(t *testing.T) {
 	tokenRepo, err := GetTokenRepo()
 
@@ -159,4 +168,4 @@ func TestDeleteToken(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-}
+}*/

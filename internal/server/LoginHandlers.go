@@ -52,15 +52,6 @@ func auth(w http.ResponseWriter, r *http.Request) {
 		log.NewLog().Fatal(err)
 	}
 
-	/*	c := http.Cookie{
-			Name:     "token",
-			Value:    token,
-			Expires:  time.Now().Add(600 * time.Second),
-			HttpOnly: true,
-		}
-
-		http.SetCookie(w, &c)*/
-
 	token := model.TokenModel{
 		AccessToken:  tokenAccess,
 		RefreshToken: tokenRefresh,

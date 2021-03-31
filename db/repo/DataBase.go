@@ -18,7 +18,6 @@ type DataBase struct {
 	dataBaseUrl string
 	Db          *sql.DB
 	userRepo    *UserRepo
-	tokenRepo   *TokenRepo
 	sessionRepo *SessionRepo
 }
 
@@ -67,19 +66,7 @@ func (d *DataBase) User() *UserRepo {
 	return d.userRepo
 }
 
-// // get TokenRepository
-func (d *DataBase) Token() *TokenRepo {
-	if d.tokenRepo != nil {
-		return d.tokenRepo
-	}
-	d.OpenDataBase()
-	d.tokenRepo = &TokenRepo{
-		d,
-	}
-
-	return d.tokenRepo
-}
-
+//Get SessionRepository
 func (d *DataBase) Sessions() *SessionRepo {
 	if d.sessionRepo != nil {
 		return d.sessionRepo

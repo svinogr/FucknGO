@@ -1,9 +1,6 @@
 package jwt
 
 import (
-	"FucknGO/config"
-	"FucknGO/db/repo"
-	"FucknGO/log"
 	"context"
 	jwtmiddleware "github.com/auth0/go-jwt-middleware"
 	"github.com/dgrijalva/jwt-go"
@@ -140,10 +137,10 @@ func ParseJWT(handler http.Handler) http.Handler {
 
 		userId := claims[UserId]
 
-		if HasTokenInDB(token, 24) {
+		/*if HasTokenInDB(token, 24) {
 			return
 		}
-
+		*/
 		// пытаемся вставить в контекст чтоб гденить еще получмить по ключу
 		ctx := context.WithValue(r.Context(), userId, userId)
 
@@ -151,7 +148,7 @@ func ParseJWT(handler http.Handler) http.Handler {
 	})
 }
 
-func HasTokenInDB(token string, userId uint64) bool {
+/*func HasTokenInDB(token string, userId uint64) bool {
 	conf, err := config.GetConfig()
 
 	if err != nil {
@@ -173,7 +170,7 @@ func HasTokenInDB(token string, userId uint64) bool {
 	}
 
 	return false
-}
+}*/
 
 func GetClaims(token string) (jwt.MapClaims, error) {
 	claims := jwt.MapClaims{}
