@@ -48,7 +48,13 @@ Content-Type: application/json
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjI0LCJhdXRob3JpemVkIjp0cnVlLCJleHBUb2tlbiI6MTYxNzE5Mjg0MX0.sus6zWZ7fajD2if3XMrptaSWSjE9_skFpI9GlrGCSsI"
 }
 
+### RefreshToken
+POST http://localhost:8080/api/auth/refreshtoken
+Content-Type: application/json
 
+{
+  "refresh_token" : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjI0LCJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2MTc4Njg1NjJ9.YuZ6NMIb03dg7dqETd9_lLPf0sa1RfS5_QBoOs1da2I"
+}
 
 ###novalid registre
 POST http://localhost:8080/api/user

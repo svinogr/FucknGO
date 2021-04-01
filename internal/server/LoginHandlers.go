@@ -51,6 +51,7 @@ func auth(w http.ResponseWriter, r *http.Request) {
 	// TODOD можно добавить проверку на срок сессии
 	if err == nil {
 		session.RefreshToken = refreshToken
+		session.ExpireIn = time.Now().Add(repo.Exp_session)
 		updateSession(session)
 	} else {
 		session := repo.SessionModelRepo{
@@ -192,6 +193,15 @@ func logOut(w http.ResponseWriter, r *http.Request) {
 
 	userId := claims[jwt.UserId]
 
+	//TODO проверить есть ли уже сессия ?? рабоатет без проверки
+	err = deleteSession(uint64(userId.(float64)))
+
+	if err != nil {
+		log.NewLog().Fatal(err)
+	}
+}
+
+func deleteSession(userId uint64) error {
 	conf, err := config.GetConfig()
 
 	if err != nil {
@@ -202,13 +212,87 @@ func logOut(w http.ResponseWriter, r *http.Request) {
 
 	repo := base.Sessions()
 
+	_, err = repo.DeleteSessionByUserId(userId)
+
+	return err
+
+}
+
+//auth/refresh-tokens
+func refreshToken(w http.ResponseWriter, r *http.Request) {
+	tM := model.TokenModel{}
+	if err := json.NewDecoder(r.Body).Decode(&tM); err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	refreshToken := tM.RefreshToken
+
+	claims, err := jwt.GetClaims(refreshToken)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	userId := uint64(claims[jwt.UserId].(float64))
+	expToken := time.Unix(int64(claims[jwt.ExpToken].(float64)), 0)
+
+	// проверяем если срок токена меньше данного момента то
+	if expToken.Before(time.Now()) {
+		http.Error(w, errors.New("Token is expired").Error(), http.StatusUnauthorized)
+		return
+	}
+
+	session, err := getSessionForUserIdIfIs(userId)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	//удаляем старую сессию сохранив ее сначало в переменную
+
+	err = deleteSession(userId)
+
 	if err != nil {
 		log.NewLog().Fatal(err)
 	}
 
-	_, err = repo.DeleteSessionByUserId(uint64(userId.(float64)))
+	in := session.ExpireIn
 
+	if in.Before(time.Now()) {
+		http.Error(w, errors.New("Session expired").Error(), http.StatusUnauthorized)
+		return
+	}
+
+	// сравниваем получены рефреш токен и в токен в сессии
+
+	if refreshToken != session.RefreshToken {
+		http.Error(w, errors.New("session expired").Error(), http.StatusUnauthorized)
+		return
+	}
+
+	// создаем новые токены
+	accessToken, err := jwt.CreateJWTToken(userId)
+	newRefreshToken, err := jwt.CreateJWTRefreshToken(userId)
+
+	session.RefreshToken = newRefreshToken
+	session.ExpireIn = time.Now().Add(repo.Exp_session)
+
+	// создаем новую сессию с новым токеном
+	createSession(*session)
+
+	token := model.TokenModel{
+		AccessToken:  accessToken,
+		RefreshToken: newRefreshToken,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	marshal, err := json.Marshal(token)
 	if err != nil {
 		log.NewLog().Fatal(err)
 	}
+
+	fmt.Fprint(w, string(marshal))
 }

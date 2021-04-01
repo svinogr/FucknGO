@@ -55,8 +55,9 @@ func setupUserHandlers(f *fabricHandlers) {
 func setupAuthHandlers(f *fabricHandlers) {
 	hand := handler.MyHandler{"/auth", auth, http.MethodPost, false}
 	hand2 := handler.MyHandler{"/log", logPage, http.MethodGet, false}
+	hand3 := handler.MyHandler{"/auth/refreshtoken", refreshToken, http.MethodPost, false}
 
-	f.Handlers = append(f.Handlers, &hand, &hand2)
+	f.Handlers = append(f.Handlers, &hand, &hand2, &hand3)
 }
 
 // setupServerHandlers setup handlers for actions with server

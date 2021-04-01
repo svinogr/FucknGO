@@ -17,6 +17,7 @@ const (
 	expToken        time.Duration = time.Minute * 5    // live time of token
 	expRefreshToken time.Duration = time.Hour * 24 * 7 // live time of refresh token
 	UserId                        = "UserId"
+	ExpToken                      = "exp" // задано библиотекой!?
 )
 
 // hadnler catch jwt token
@@ -86,7 +87,7 @@ func CreateJWTToken(id uint64) (string, error) {
 	atClaims := jwt.MapClaims{}
 	atClaims["authorized"] = true
 	atClaims[UserId] = id
-	atClaims["expToken"] = time.Now().Add(expToken).Unix()
+	atClaims[ExpToken] = time.Now().Add(expToken).Unix()
 
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
 
@@ -108,7 +109,7 @@ func CreateJWTRefreshToken(id uint64) (string, error) {
 	atClaims := jwt.MapClaims{}
 	atClaims["authorized"] = true
 	atClaims[UserId] = id
-	atClaims["expToken"] = time.Now().Add(expRefreshToken).Unix()
+	atClaims[ExpToken] = time.Now().Add(expRefreshToken).Unix()
 
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
 
