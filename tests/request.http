@@ -45,7 +45,7 @@ GET http://localhost:8080/api/logout
 Content-Type: application/json
 
 {
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjI0LCJhdXRob3JpemVkIjp0cnVlLCJleHBUb2tlbiI6MTYxNzE5Mjg0MX0.sus6zWZ7fajD2if3XMrptaSWSjE9_skFpI9GlrGCSsI"
+  "access_token" : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjI0LCJhdXRob3JpemVkIjp0cnVlLCJleHBUb2tlbiI6MTYxNzE5Mjg0MX0.sus6zWZ7fajD2if3XMrptaSWSjE9_skFpI9GlrGCSsI"
 }
 
 ### RefreshToken

@@ -35,6 +35,8 @@ func auth(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
+	fmt.Print(r.UserAgent())
+
 	// юзер есть с таким паролем
 	validUser, err := getValidUser(uM)
 
@@ -47,26 +49,29 @@ func auth(w http.ResponseWriter, r *http.Request) {
 	refreshToken, _ := jwt.CreateJWTRefreshToken(validUser.Id)
 
 	// есть ли уже сесиия для данного юзера
-	session, err := getSessionForUserIdIfIs(validUser.Id)
-	// TODOD можно добавить проверку на срок сессии
-	if err == nil {
-		session.RefreshToken = refreshToken
-		session.ExpireIn = time.Now().Add(repo.Exp_session)
-		updateSession(session)
-	} else {
-		session := repo.SessionModelRepo{
-			UserId:       validUser.Id,
-			RefreshToken: refreshToken,
-			UserAgent:    "",
-			Fingerprint:  "",
-			Ip:           "",
-			ExpireIn:     time.Now().Add(repo.Exp_session),
-			CreatedAt:    time.Now(),
-		}
+	_, err = getSessionForUserIdIfIs(validUser.Id)
 
-		createSession(session)
+	if err == nil {
+		err := deleteSession(validUser.Id)
+
+		if err != nil {
+			log.NewLog().Fatal(err)
+		}
+	}
+	// создаем новую сессию
+	session := repo.SessionModelRepo{
+		UserId:       validUser.Id,
+		RefreshToken: refreshToken,
+		UserAgent:    r.UserAgent(),
+		Fingerprint:  "",
+		Ip:           r.RemoteAddr,
+		ExpireIn:     time.Now().Add(repo.Exp_session),
+		CreatedAt:    time.Now(),
 	}
 
+	createSession(session)
+
+	// добавляем новые новые токены в ответ
 	token := model.TokenModel{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
@@ -170,14 +175,14 @@ func GetUserIdFromContext(r *http.Request) (interface{}, error) {
 }
 
 func logOut(w http.ResponseWriter, r *http.Request) {
-	var uM model.UserModel
+	uT := model.TokenModel{}
 
-	if err := json.NewDecoder(r.Body).Decode(&uM); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&uT); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	claims, err := jwt.GetClaims(uM.Token)
+	claims, err := jwt.GetClaims(uT.AccessToken)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -210,15 +215,14 @@ func deleteSession(userId uint64) error {
 
 	base := repo.NewDataBase(conf)
 
-	repo := base.Sessions()
+	repoSession := base.Sessions()
 
-	_, err = repo.DeleteSessionByUserId(userId)
+	_, err = repoSession.DeleteSessionByUserId(userId)
 
 	return err
-
 }
 
-//auth/refresh-tokens
+//  auth/refresh-tokens
 func refreshToken(w http.ResponseWriter, r *http.Request) {
 	tM := model.TokenModel{}
 	if err := json.NewDecoder(r.Body).Decode(&tM); err != nil {
@@ -244,7 +248,7 @@ func refreshToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, err := getSessionForUserIdIfIs(userId)
+	sessionOld, err := getSessionForUserIdIfIs(userId)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
@@ -259,7 +263,7 @@ func refreshToken(w http.ResponseWriter, r *http.Request) {
 		log.NewLog().Fatal(err)
 	}
 
-	in := session.ExpireIn
+	in := sessionOld.ExpireIn
 
 	if in.Before(time.Now()) {
 		http.Error(w, errors.New("Session expired").Error(), http.StatusUnauthorized)
@@ -268,8 +272,17 @@ func refreshToken(w http.ResponseWriter, r *http.Request) {
 
 	// сравниваем получены рефреш токен и в токен в сессии
 
-	if refreshToken != session.RefreshToken {
+	if refreshToken != sessionOld.RefreshToken {
 		http.Error(w, errors.New("session expired").Error(), http.StatusUnauthorized)
+		return
+	}
+
+	// проверяем сессию на клиента и ip
+
+	ok := validSession(sessionOld, r)
+
+	if !ok {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 
@@ -277,11 +290,11 @@ func refreshToken(w http.ResponseWriter, r *http.Request) {
 	accessToken, err := jwt.CreateJWTToken(userId)
 	newRefreshToken, err := jwt.CreateJWTRefreshToken(userId)
 
-	session.RefreshToken = newRefreshToken
-	session.ExpireIn = time.Now().Add(repo.Exp_session)
+	sessionOld.RefreshToken = newRefreshToken
+	sessionOld.ExpireIn = time.Now().Add(repo.Exp_session)
 
 	// создаем новую сессию с новым токеном
-	createSession(*session)
+	createSession(*sessionOld)
 
 	token := model.TokenModel{
 		AccessToken:  accessToken,
@@ -295,4 +308,16 @@ func refreshToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Fprint(w, string(marshal))
+}
+
+func validSession(session *repo.SessionModelRepo, r *http.Request) bool {
+	if session.UserAgent != r.UserAgent() {
+		return false
+	}
+
+	if session.Ip != r.RemoteAddr {
+		return false
+	}
+
+	return true
 }
