@@ -11,7 +11,7 @@ import (
 )
 
 func mainPage(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("token")
+	cookie, err := r.Cookie("access_token")
 
 	if err != nil {
 		http.Redirect(w, r, "/api/login", http.StatusMovedPermanently)

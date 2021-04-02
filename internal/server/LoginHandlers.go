@@ -78,12 +78,7 @@ func auth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	marshal, err := json.Marshal(token)
-	if err != nil {
-		log.NewLog().Fatal(err)
-	}
-
-	fmt.Fprint(w, string(marshal))
+	json.NewEncoder(w).Encode(token)
 }
 
 func updateSession(session *repo.SessionModelRepo) {
@@ -192,7 +187,7 @@ func logOut(w http.ResponseWriter, r *http.Request) {
 	err = claims.Valid()
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 

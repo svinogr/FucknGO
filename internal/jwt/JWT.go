@@ -39,6 +39,22 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
+func GetAccessTokenFromCookie(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		c, err := r.Cookie("access_token")
+
+		if err != nil {
+			handler.ServeHTTP(w, r)
+		}
+
+		tknStr := c.Value                               // получаем токен из кук
+		r.Header.Add("Authorization", "Bearer "+tknStr) //добавляем токен в реквест чтоб проврить в уже готово CheckJWT
+
+		handler.ServeHTTP(w, r)
+	})
+}
+
+/*
 func CookieMiddleWare(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// если нет авторизованого токена то го хом
@@ -54,6 +70,7 @@ func CookieMiddleWare(handler http.Handler) http.Handler {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+
 		tknStr := c.Value
 		claims := Claims{}
 
@@ -76,7 +93,7 @@ func CookieMiddleWare(handler http.Handler) http.Handler {
 
 	})
 }
-
+*/
 // CreateJWTToken creates JWT token by id
 func CreateJWTToken(id uint64) (string, error) {
 	var err error

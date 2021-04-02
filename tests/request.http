@@ -80,11 +80,18 @@ Cache-Control: no-cache
 Content-Type: application/json
 
 
-###
+### get server VALID
 GET http://localhost:8080/api/server
 Cache-Control: no-cache
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjI0LCJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2MTcwNDIwNTh9.AyfXZWiRxypEHyYDvl5m8BGBB3I03V8jclUoljbCmjw
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjI0LCJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2MTczNDQ5MDd9.vFWjESeGtyvPBzkXZX-8De-JqlKteEpE1lb32A4GYkY
+
+### get server UNVALID
+GET http://localhost:8080/api/server
+Cache-Control: no-cache
+Content-Type: application/json
+
+
 ### test conect bd
 GET http://localhost:8080/api/connect
 Cache-Control: no-cache

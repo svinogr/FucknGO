@@ -95,7 +95,8 @@ func setupHandlers(s *server) {
 		for _, e := range fabric.Handlers {
 			if e.GetHandler().NeedAuthToken {
 				fh := http.HandlerFunc(e.GetHandler().HandlerFunc)
-				s.mux.Handle(API_MASTER+e.GetHandler().Path, jwt.JwtVerifMiddleware.Handler(jwt.ParseJWT(fh))).Methods(e.GetHandler().Method)
+				//	s.mux.Handle(API_MASTER + e.GetHandler().Path, jwt.JwtVerifMiddleware.Handler(jwt.ParseJWT(fh))).Methods(e.GetHandler().Method)
+				s.mux.Handle(API_MASTER+e.GetHandler().Path, jwt.GetAccessTokenFromCookie(jwt.JwtVerifMiddleware.Handler(fh))).Methods(e.GetHandler().Method)
 			} else {
 				s.mux.HandleFunc(API_MASTER+e.GetHandler().Path, e.GetHandler().HandlerFunc).Methods(e.GetHandler().Method)
 			}

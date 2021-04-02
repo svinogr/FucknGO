@@ -25,13 +25,13 @@
                         "password": data.get("password")
                     }),
                     success: function (response) { //Данные отправлены успешно
-                        var token = response.token
-                        $.cookie("token", token);
-                        window.location.href = "/api/mainpage";
+                        $.cookie("access_token", response.access_token);
+                        $.cookie("refresh_token", response.refresh_token);
+                         window.location.href = "/api/mainpage";
 
                     },
                     error: function (response) { // Данные не отправлены
-                        alert("error");
+                        alert("err");
                     }
 
                 });
