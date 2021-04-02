@@ -45,6 +45,7 @@ func GetAccessTokenFromCookie(handler http.Handler) http.Handler {
 
 		if err != nil {
 			handler.ServeHTTP(w, r)
+			return
 		}
 
 		tknStr := c.Value                               // получаем токен из кук

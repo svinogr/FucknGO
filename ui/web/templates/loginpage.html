@@ -28,7 +28,6 @@
                         $.cookie("access_token", response.access_token);
                         $.cookie("refresh_token", response.refresh_token);
                          window.location.href = "/api/mainpage";
-
                     },
                     error: function (response) { // Данные не отправлены
                         alert("err");

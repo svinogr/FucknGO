@@ -40,7 +40,6 @@ func (f *fabricServers) GetNewMasterServer(address string, port string, staticRe
 	server.setup(address, port, staticResource, uint64(idServer), false)
 
 	setupStaticResource(staticResource, &server)
-
 	setupHandlers(&server)
 
 	f.servers = append(f.servers, &server)
@@ -50,7 +49,6 @@ func (f *fabricServers) GetNewMasterServer(address string, port string, staticRe
 
 // GetNewSlaveServer creates and returns new slave  servers
 func (f *fabricServers) GetNewSlaveServer(address string, port string, staticResource string) (*server, error) {
-
 	for _, el := range f.servers {
 
 		if el == nil {
@@ -68,7 +66,6 @@ func (f *fabricServers) GetNewSlaveServer(address string, port string, staticRes
 	server.setup(address, port, staticResource, uint64(idServer), true)
 
 	setupStaticResource(staticResource, &server)
-
 	setupHandlers(&server)
 
 	f.servers = append(f.servers, &server)

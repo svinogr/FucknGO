@@ -5,7 +5,6 @@ import (
 	"FucknGO/db/repo"
 	"FucknGO/internal/jwt"
 	"FucknGO/log"
-	"fmt"
 	"html/template"
 	"net/http"
 )
@@ -48,7 +47,7 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.NewLog().Fatal(err)
 	}
-	fmt.Print(allUser)
+
 	files.Execute(w, allUser)
 }
 
