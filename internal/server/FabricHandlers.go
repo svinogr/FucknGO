@@ -22,57 +22,42 @@ func NewFabric() fabricHandlers {
 
 // setupWebInterfaceHandler setup handlers for web
 func setupWebInterfaceHandler(f *fabricHandlers) {
-	hand := handler.MyHandler{
-		Path:          "/login",
-		HandlerFunc:   loginPage,
-		Method:        http.MethodGet,
-		NeedAuthToken: false,
-	}
-	hand2 := handler.MyHandler{
-		Path:          "/mainpage",
-		HandlerFunc:   mainPage,
-		Method:        http.MethodGet,
-		NeedAuthToken: false,
-	}
-	hand3 := handler.MyHandler{
-		Path:          "/logout",
-		HandlerFunc:   logOut,
-		Method:        http.MethodGet,
-		NeedAuthToken: false,
-	}
+	hand := handler.MyHandler{"/login", loginPage, http.MethodGet, false, handler.TypeWeb}
+	hand2 := handler.MyHandler{"/mainpage", mainPage, http.MethodGet, false, handler.TypeWeb}
+	hand3 := handler.MyHandler{"/logout", logOut, http.MethodGet, false, handler.TypeWeb}
 
 	f.Handlers = append(f.Handlers, &hand, &hand2, &hand3)
 }
 
 // setupUserHandlers setup handlers for actions with user
 func setupUserHandlers(f *fabricHandlers) {
-	hand := handler.MyHandler{"/user", user, http.MethodPost, false}
+	hand := handler.MyHandler{"/user", user, http.MethodPost, true, handler.TypeApi}
 
 	f.Handlers = append(f.Handlers, &hand)
 }
 
 // setupAuthHandlers setup handlers for actions with auth
 func setupAuthHandlers(f *fabricHandlers) {
-	hand := handler.MyHandler{"/auth", auth, http.MethodPost, false}
-	hand2 := handler.MyHandler{"/log", logPage, http.MethodGet, false}
-	hand3 := handler.MyHandler{"/auth/refreshtoken", refreshToken, http.MethodPost, false}
+	hand := handler.MyHandler{"/auth", auth, http.MethodPost, false, handler.TypeApi}
+	hand2 := handler.MyHandler{"/log", logPage, http.MethodGet, false, handler.TypeApi}
+	hand3 := handler.MyHandler{"/auth/refreshtoken", refreshToken, http.MethodPost, false, handler.TypeApi}
 
 	f.Handlers = append(f.Handlers, &hand, &hand2, &hand3)
 }
 
 // setupServerHandlers setup handlers for actions with server
 func setupServerHandlers(f *fabricHandlers) {
-	hand := handler.MyHandler{"/", MainPage, http.MethodGet, false}
-	hand2 := handler.MyHandler{"/server", Server, http.MethodGet, true}
-	hand3 := handler.MyHandler{"/server", Server, http.MethodPost, true}
-	hand4 := handler.MyHandler{"/server/{id}", Server, http.MethodDelete, true}
-	hand5 := handler.MyHandler{"/connect", Connect, http.MethodGet, false}
+	hand := handler.MyHandler{"/", MainPage, http.MethodGet, false, handler.TypeWeb}
+	hand2 := handler.MyHandler{"/server", Server, http.MethodGet, true, handler.TypeApi}
+	hand3 := handler.MyHandler{"/server", Server, http.MethodPost, true, handler.TypeApi}
+	hand4 := handler.MyHandler{"/server/{id}", Server, http.MethodDelete, true, handler.TypeApi}
+	hand5 := handler.MyHandler{"/connect", Connect, http.MethodGet, false, handler.TypeApi}
 
 	f.Handlers = append(f.Handlers, &hand, &hand2, &hand3, &hand4, &hand5)
 }
 
 // test handler for imitation panic
 func testPanicHendler(f *fabricHandlers) {
-	hand := handler.MyHandler{"/panic", Panic, http.MethodGet, false}
+	hand := handler.MyHandler{"/panic", Panic, http.MethodGet, false, handler.TypeApi}
 	f.Handlers = append(f.Handlers, &hand)
 }
