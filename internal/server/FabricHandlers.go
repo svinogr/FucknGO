@@ -47,13 +47,12 @@ func setupAuthHandlers(f *fabricHandlers) {
 
 // setupServerHandlers setup handlers for actions with server
 func setupServerHandlers(f *fabricHandlers) {
-	hand := handler.MyHandler{"/", MainPage, http.MethodGet, false, handler.TypeWeb}
 	hand2 := handler.MyHandler{"/server", Server, http.MethodGet, true, handler.TypeApi}
 	hand3 := handler.MyHandler{"/server", Server, http.MethodPost, true, handler.TypeApi}
 	hand4 := handler.MyHandler{"/server/{id}", Server, http.MethodDelete, true, handler.TypeApi}
 	hand5 := handler.MyHandler{"/connect", Connect, http.MethodGet, false, handler.TypeApi}
 
-	f.Handlers = append(f.Handlers, &hand, &hand2, &hand3, &hand4, &hand5)
+	f.Handlers = append(f.Handlers, &hand2, &hand3, &hand4, &hand5)
 }
 
 // test handler for imitation panic

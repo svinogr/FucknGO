@@ -1,6 +1,7 @@
 package server
 
 import (
+	"FucknGO/internal/handler"
 	"FucknGO/internal/jwt"
 	"FucknGO/log"
 	"errors"
@@ -90,13 +91,20 @@ func setupHandlers(s *server) {
 		}
 	} else {
 		for _, e := range fabric.Handlers {
-			if e.GetHandler().NeedAuthToken {
-				fh := http.HandlerFunc(e.GetHandler().HandlerFunc)
-				//	s.mux.Handle(API_MASTER + e.GetHandler().Path, jwt.JwtVerifMiddleware.Handler(jwt.ParseJWT(fh))).Methods(e.GetHandler().Method)
-				s.mux.Handle(API_MASTER+e.GetHandler().Path, jwt.GetAccessTokenFromCookie(jwt.JwtVerifMiddleware.Handler(fh))).Methods(e.GetHandler().Method)
-			} else {
-				s.mux.HandleFunc(API_MASTER+e.GetHandler().Path, e.GetHandler().HandlerFunc).Methods(e.GetHandler().Method)
+			fh := http.HandlerFunc(e.GetHandler().HandlerFunc)
+
+			switch e.GetHandler().TypeRequest {
+			case handler.TypeWeb:
+				if e.GetHandler().NeedAuthToken {
+					s.mux.Handle(API_MASTER+e.GetHandler().Path, jwt.GetAccessTokenFromCookie(fh)).Methods(e.GetHandler().Method)
+				}
+			case handler.TypeApi:
+				if e.GetHandler().NeedAuthToken {
+					s.mux.Handle(API_MASTER+e.GetHandler().Path, jwt.JwtVerifMiddleware.Handler(fh)).Methods(e.GetHandler().Method)
+				}
 			}
+
+			s.mux.HandleFunc(API_MASTER+e.GetHandler().Path, e.GetHandler().HandlerFunc).Methods(e.GetHandler().Method)
 		}
 	}
 }
