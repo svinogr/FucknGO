@@ -1,23 +1,17 @@
 package server
 
 import (
-	"FucknGO/config"
 	"FucknGO/db/repo"
 	"FucknGO/log"
+	"fmt"
 	"html/template"
 	"net/http"
 )
 
 func mainPage(w http.ResponseWriter, r *http.Request) {
-	files, err := template.ParseFiles("ui/web/templates/mainpage.html")
-	conf, err := config.GetConfig()
+	files := template.Must(template.ParseFiles("ui/web/templates/mainpage.html", "ui/web/templates/header.html"))
 
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusServiceUnavailable)
-		return
-	}
-
-	base := repo.NewDataBase(conf)
+	base := repo.NewDataBaseWithConfig()
 	userRepo := base.User()
 
 	allUser, err := userRepo.FindAllUser()
@@ -26,7 +20,22 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 		log.NewLog().Fatal(err)
 	}
 
-	files.Execute(w, allUser)
+	files.ExecuteTemplate(w, "main", &allUser)
+}
+
+func serverPage(w http.ResponseWriter, r *http.Request) {
+	files := template.Must(template.ParseFiles("ui/web/templates/serverpage.html", "ui/web/templates/header.html"))
+
+	fabricServer, err := FabricServer()
+
+	if err != nil {
+		log.NewLog().Fatal(err)
+	}
+
+	servers := fabricServer.servers
+	fmt.Print(len(servers))
+
+	files.ExecuteTemplate(w, "server", &servers)
 }
 
 func loginPage(w http.ResponseWriter, r *http.Request) {

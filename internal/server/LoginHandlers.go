@@ -1,7 +1,6 @@
 package server
 
 import (
-	"FucknGO/config"
 	"FucknGO/db/repo"
 	"FucknGO/internal/jwt"
 	"FucknGO/internal/server/model"
@@ -82,16 +81,11 @@ func auth(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateSession(session *repo.SessionModelRepo) {
-	conf, err := config.GetConfig()
-	if err != nil {
-		log.NewLog().Fatal(err)
-	}
-
-	base := repo.NewDataBase(conf)
+	base := repo.NewDataBaseWithConfig()
 
 	sessionRepo := base.Sessions()
 
-	_, err = sessionRepo.UpdateSession(session)
+	_, err := sessionRepo.UpdateSession(session)
 
 	if err != nil {
 		log.NewLog().Fatal(err)
@@ -99,12 +93,7 @@ func updateSession(session *repo.SessionModelRepo) {
 }
 
 func getSessionForUserIdIfIs(id uint64) (*repo.SessionModelRepo, error) {
-	conf, err := config.GetConfig()
-	if err != nil {
-		log.NewLog().Fatal(err)
-	}
-
-	base := repo.NewDataBase(conf)
+	base := repo.NewDataBaseWithConfig()
 
 	sessionRepo := base.Sessions()
 	session, err := sessionRepo.FindSessionByUserId(id)
@@ -118,16 +107,11 @@ func getSessionForUserIdIfIs(id uint64) (*repo.SessionModelRepo, error) {
 }
 
 func createSession(session repo.SessionModelRepo) {
-	conf, err := config.GetConfig()
-	if err != nil {
-		log.NewLog().Fatal(err)
-	}
-
-	base := repo.NewDataBase(conf)
+	base := repo.NewDataBaseWithConfig()
 
 	sessionRepo := base.Sessions()
 
-	_, err = sessionRepo.CreateSession(&session)
+	_, err := sessionRepo.CreateSession(&session)
 
 	if err != nil {
 		log.NewLog().Fatal(err)
@@ -136,13 +120,7 @@ func createSession(session repo.SessionModelRepo) {
 
 // validUser gets valid user by email and password
 func getValidUser(user model.UserModel) (*repo.UserModelRepo, error) {
-	conf, err := config.GetConfig()
-
-	if err != nil {
-		return nil, err
-	}
-
-	userRepo := repo.NewDataBase(conf).User()
+	userRepo := repo.NewDataBaseWithConfig().User()
 
 	uBemail, err := userRepo.FindUserByEmail(user.Email)
 
@@ -202,17 +180,11 @@ func logOut(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteSession(userId uint64) error {
-	conf, err := config.GetConfig()
-
-	if err != nil {
-		log.NewLog().Fatal(err)
-	}
-
-	base := repo.NewDataBase(conf)
+	base := repo.NewDataBaseWithConfig()
 
 	repoSession := base.Sessions()
 
-	_, err = repoSession.DeleteSessionByUserId(userId)
+	_, err := repoSession.DeleteSessionByUserId(userId)
 
 	return err
 }

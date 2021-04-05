@@ -2,7 +2,6 @@ package server
 
 import (
 	"FucknGO/broker"
-	"FucknGO/config"
 	"FucknGO/db/repo"
 	"FucknGO/internal/jwt"
 	"FucknGO/internal/server/model"
@@ -48,14 +47,8 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 		user.Password = string(passwordCrypted)
 	}
 
-	conf, err := config.GetConfig()
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-
-	db := repo.NewDataBase(conf)
-	_, err = db.User().CreateUser(&user)
+	db := repo.NewDataBaseWithConfig()
+	_, err := db.User().CreateUser(&user)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -108,15 +101,13 @@ func validRegInfo(user repo.UserModelRepo) bool {
 		return false
 	}
 
-	config, err := config.GetConfig()
-
-	if err != nil {
-		return false
-	}
-
-	userRepo := repo.NewDataBase(config).User()
+	userRepo := repo.NewDataBaseWithConfig().User()
 
 	email, err := userRepo.FindUserByEmail(user.Email)
+
+	if err != nil {
+		log.NewLog().Fatal(err)
+	}
 
 	if email != nil {
 		return false

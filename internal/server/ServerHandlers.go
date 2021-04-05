@@ -1,7 +1,6 @@
 package server
 
 import (
-	"FucknGO/config"
 	"FucknGO/db/repo"
 	"FucknGO/internal/server/model"
 	"FucknGO/log"
@@ -14,27 +13,18 @@ import (
 	"strconv"
 )
 
-//main page
-func MainPage(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Главная страница")
-}
-
 //test conection
 func Connect(w http.ResponseWriter, r *http.Request) {
 	fmt.Print("test connect")
-	c, err := config.GetConfig()
-	if err != nil {
-		fmt.Fprint(w, err)
-	}
 
-	database := repo.NewDataBase(c)
-	err = database.OpenDataBase()
+	database := repo.NewDataBaseWithConfig()
+	err := database.OpenDataBase()
 
 	if err != nil {
 		fmt.Fprint(w, err)
 	}
-	getConfig, err := config.GetConfig()
-	usR := repo.NewDataBase(getConfig).User()
+
+	usR := repo.NewDataBaseWithConfig().User()
 
 	usR.CreateUser(&repo.UserModelRepo{
 		Name:     "vasya",

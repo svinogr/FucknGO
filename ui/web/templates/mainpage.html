@@ -1,79 +1,40 @@
-<!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>WebInterface</title>
-    <script src="/static/js/jquery-3.6.0.min.js" type="text/javascript"></script>
-    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
-    <script> $(document).ready(function () {
-            $("#registration").click(function () {
-                var form = $("#registration_form").serializeArray();
-                var data = new Map();
-                $(form).each(function (index, obj) {
-                    data.set(obj.name, obj.value);
-                });
+{{ define "main"}}
+{{ template "header" .}}
 
-                $.ajax({
-                    'url': '/api/user',
-                    'method': 'POST',
-                    'dataType': 'json',
-                    'contentType': 'application/json',
-                    'data': JSON.stringify({
-                        "name": data.get('name'),
-                        "password": data.get('password'),
-                        "email": data.get('email')
-                    }),
-                    success: function (response) { //Данные отправлены успешно
-                        result = JSON.stringify(response);
-                        alert("rr" + result);
-                        window.location.href = "/api/web";
-                    },
-                    error: function (response) { // Данные не отправлены
-                        //   alert("что за говно ты написал в форму?!?");
-                        //   result = $.parseJSON(response);
-                        alert("error");
-                    }
-                });
+<script> $(document).ready(function () {
+        $("#registration").click(function () {
+            var form = $("#registration_form").serializeArray();
+            var data = new Map();
+            $(form).each(function (index, obj) {
+                data.set(obj.name, obj.value);
             });
 
-            $("#logout").click(function () {
-                $.ajax({
-                    'url': '/api/logout',
-                    'method': 'GET'
-                    })
-                });
-
-
-
+            $.ajax({
+                'url': '/api/user',
+                'method': 'POST',
+                'dataType': 'json',
+                'contentType': 'application/json',
+                'data': JSON.stringify({
+                    "name": data.get('name'),
+                    "password": data.get('password'),
+                    "email": data.get('email')
+                }),
+                success: function (response) { //Данные отправлены успешно
+                    result = JSON.stringify(response);
+                    alert("rr" + result);
+                    window.location.href = "/api/mainpage";
+                },
+                error: function (response) { // Данные не отправлены
+                    //   alert("что за говно ты написал в форму?!?");
+                    //   result = $.parseJSON(response);
+                    alert("error");
+                }
+            });
         });
-    </script>
-</head>
-<body>
-<div class="container">
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">WebInterface</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#navbarSupportedContent"
-                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="justify-content-end">
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <form class="d-flex" id="logout_form" action="">
-                        <button class="btn btn-outline-success" id="logout">Выйти</button>
-                    </form>
-                </div>
-            </div>
-
-        </div>
-    </nav>
-</div>
-
+    });
+</script>
 <script src="/static/bootstrap/js/bootstrap.min.js"></script>
-{{/*<script type="text/javascript">
-    alert("Javacript подключен");
-</script>*/}}
+
 <div class="container" style="margin-top:50px;" >
     <div class="row">
         <div class="col">
@@ -96,27 +57,8 @@
 
     </div>
 </div>
-{{/*
-<p> Войти</p>
-<form id="login_form" action="" method="POST">
-    <p>password</p><input type="text" name="password">
-    <p>email</p><input type="email" name="email"><br>
-</form>
-<p>
-    <button id="registration">Войти</button>
-<p> Выйти</p>
-    <button id="registration">Выйти</button>
-
-
-<p> Создать новый сервер</p>
-<form id="server_form" action="" method="POST">
-    <p>Port</p><input type="text" name="port">
-    <p>email</p><input type="email" name="email"><br>
-</form>
-<p>
-    <button id="registration"> Создать новый сервер</button>
-*/}}
-
 
 </body>
 </html>
+
+{{end}}

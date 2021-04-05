@@ -71,7 +71,7 @@ func GetAccessTokenFromCookie(handler http.Handler) http.Handler {
 			http.Redirect(w, r, "/api/login", http.StatusMovedPermanently)
 			return
 		}
-
+		// кладем данные пользователя
 		ctx := context.WithValue(r.Context(), Claims, claims)
 
 		handler.ServeHTTP(w, r.WithContext(ctx))

@@ -2,6 +2,7 @@ package repo
 
 import (
 	"FucknGO/config"
+	"FucknGO/log"
 	"database/sql"
 	"fmt"
 	_ "github.com/lib/pq"
@@ -22,7 +23,19 @@ type DataBase struct {
 }
 
 // get new db or return created db
-func NewDataBase(config *config.Config) *DataBase {
+/*func NewDataBase(config *config.Config) *DataBase {
+	return &DataBase{
+		config: config,
+	}
+}*/
+
+func NewDataBaseWithConfig() *DataBase {
+	config, err := config.GetConfig()
+
+	if err != nil {
+		log.NewLog().Fatal(err)
+	}
+
 	return &DataBase{
 		config: config,
 	}
@@ -59,6 +72,7 @@ func (d *DataBase) User() *UserRepo {
 		return d.userRepo
 	}
 	d.OpenDataBase()
+
 	d.userRepo = &UserRepo{
 		d,
 	}
