@@ -18,6 +18,7 @@ const (
 	expRefreshToken time.Duration = time.Hour * 24 * 7 // live time of refresh token
 	UserId                        = "UserId"
 	ExpToken                      = "exp" // задано библиотекой!?
+	Claims                        = "claims"
 )
 
 // hadnler catch jwt token
@@ -34,24 +35,46 @@ var JwtVerifMiddleware = jwtmiddleware.New(jwtmiddleware.Options{
 	SigningMethod:       jwt.SigningMethodHS256,
 })
 
-type Claims struct {
+/*type Claims struct {
 	Username string `json:"username"`
 	jwt.StandardClaims
 }
-
+*/
 func GetAccessTokenFromCookie(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		c, err := r.Cookie("access_token")
+		c, err := r.Cookie("access_token") // получаем куку
 
 		if err != nil {
-			handler.ServeHTTP(w, r)
+			http.Redirect(w, r, "/api/login", http.StatusMovedPermanently)
 			return
 		}
 
-		tknStr := c.Value                               // получаем токен из кук
-		r.Header.Add("Authorization", "Bearer "+tknStr) //добавляем токен в реквест чтоб проврить в уже готово CheckJWT
+		token := c.Value // получаем значение токена из куки
 
-		handler.ServeHTTP(w, r)
+		_, err = jwt2.Parse(token, func(token *jwt2.Token) (interface{}, error) {
+			return mySigningKey, nil
+		})
+		// проверяем токен на ошибку и на валидность токена. если все плохо идем логинится и получать новый токен
+		if err != nil {
+			http.Redirect(w, r, "/api/login", http.StatusMovedPermanently)
+			return
+		}
+
+		claims, err := GetClaims(token)
+
+		if err != nil {
+			http.Redirect(w, r, "/api/login", http.StatusMovedPermanently)
+			return
+		}
+
+		if err = claims.Valid(); err != nil {
+			http.Redirect(w, r, "/api/login", http.StatusMovedPermanently)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), Claims, claims)
+
+		handler.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
