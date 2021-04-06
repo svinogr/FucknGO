@@ -3,6 +3,31 @@
 
 <script> $(document).ready(function () {
         $("#registration").click(function () {
+            var accessToken = $.cookie("access_token");
+            var refreshToken = $.cookie("refresh_token");
+
+            var accessTokenSplit = JSON.parse(atob(accessToken.split('.')[1]));
+            alert(accessTokenSplit.exp - (new Date().getTime() + 1) / 1000);
+            if (accessTokenSplit.exp <= (new Date().getTime() + 1) / 1000) {
+                $.ajax({
+                    'url': '/api/auth/refresh-tokens',
+                    'method': 'POST',
+                    'dataType': 'json',
+                    'contentType': 'application/json',
+                    'data': JSON.stringify({
+                        "refresh_token": refreshToken
+                    }),
+                    success: function (response) { //Данные отправлены успешно
+                        $.cookie("access_token", response.access_token);
+                        $.cookie("refresh_token", response.refresh_token);
+                    },
+                    error: function (response) { // Данные не отправлены
+                        alert("error");
+                        window.location.href = "/api/login";
+                    }
+                })
+            }
+
             var form = $("#registration_form").serializeArray();
             var data = new Map();
             $(form).each(function (index, obj) {
@@ -14,14 +39,13 @@
                 'method': 'POST',
                 'dataType': 'json',
                 'contentType': 'application/json',
+                'headers': {'Authorization': 'Bearer ' + $.cookie("access_token")},
                 'data': JSON.stringify({
                     "name": data.get('name'),
                     "password": data.get('password'),
                     "email": data.get('email')
                 }),
                 success: function (response) { //Данные отправлены успешно
-                    result = JSON.stringify(response);
-                    alert("rr" + result);
                     window.location.href = "/api/mainpage";
                 },
                 error: function (response) { // Данные не отправлены

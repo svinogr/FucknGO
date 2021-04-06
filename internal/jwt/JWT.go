@@ -11,13 +11,13 @@ import (
 	"time"
 )
 
-var mySigningKey = []byte("SECRET")
+var mySigningKey = []byte("SECRET") //TODO поменяит ключ
 
 const (
-	expToken        time.Duration = time.Second * 10   // live time of token
+	expToken        time.Duration = time.Minute * 10   // live time of token
 	expRefreshToken time.Duration = time.Hour * 24 * 7 // live time of refresh token
 	UserId                        = "UserId"
-	ExpToken                      = "exp" // задано библиотекой!?
+	ExpToken                      = "exp" // задано стандартом
 	Claims                        = "claims"
 )
 

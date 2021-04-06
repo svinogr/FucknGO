@@ -42,25 +42,24 @@ func GetAllServers(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, err)
 	} else {
 		servers := fb.servers
-		jsonStr := ""
 
+		serverToJSon := []model.ServerModel{}
 		for _, el := range servers {
 			if el == nil {
 				continue
 			}
 
-			if el.Port() != "" {
-				s, err := json.Marshal(model.ServerModel{el.Id(), el.StaticResource(), el.Port(), el.Address(), true})
-
-				if err != nil {
-					continue
-				}
-
-				jsonStr = jsonStr + string(s)
+			server := model.ServerModel{
+				Id:             el.Id(),
+				StaticResource: el.StaticResource(),
+				Port:           el.Port(),
+				Address:        el.Address(),
+				IsRun:          true,
 			}
+			serverToJSon = append(serverToJSon, server)
 		}
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprint(w, jsonStr)
+		json.NewEncoder(w).Encode(serverToJSon)
 	}
 }
 

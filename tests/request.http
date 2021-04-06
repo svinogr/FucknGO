@@ -84,7 +84,7 @@ Content-Type: application/json
 GET http://localhost:8080/api/server
 Cache-Control: no-cache
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjI0LCJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2MTc5NTY3ODR9.Wn5mmsYhAwoigEDoxeG1mykX1eT5jbjmGtEUAyOgVD8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjI0LCJhdXRob3JpemVkIjp0cnVlLCJleHAiOjE2MTc3MDk4ODF9.kqe2QM9EDp9VJxHVuXsgdueV1jG9BqvM6FJjBu9vzoA
 
 ### get server UNVALID
 GET http://localhost:8080/api/server

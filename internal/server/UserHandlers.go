@@ -3,12 +3,10 @@ package server
 import (
 	"FucknGO/broker"
 	"FucknGO/db/repo"
-	"FucknGO/internal/jwt"
 	"FucknGO/internal/server/model"
 	"FucknGO/log"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 )
@@ -58,20 +56,20 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 
 	uM.Password = " "
 
-	createJWT, err := jwt.CreateJWTToken(uM.Id)
+	//	createJWT, err := jwt.CreateJWTToken(uM.Id)
 
-	if err != nil {
+	/*if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+	*/
+	//uM.Token = createJWT
+	//jsonStr, err := json.Marshal(&uM)
 
-	uM.Token = createJWT
-	jsonStr, err := json.Marshal(&uM)
-
-	if err != nil {
+	/*	if err != nil {
 		log.NewLog().PrintError(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
-	}
+	}*/
 	// постановка сообщения в очередь для отправки юзеру на почту
 	err = broker.PublishMessage(broker.MailMessage{
 		Name:     uM.Name,
@@ -84,7 +82,7 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprint(w, string(jsonStr))
+	json.NewEncoder(w).Encode(uM)
 }
 
 // validRegInfo validation register data
@@ -106,7 +104,9 @@ func validRegInfo(user repo.UserModelRepo) bool {
 	email, err := userRepo.FindUserByEmail(user.Email)
 
 	if err != nil {
-		log.NewLog().Fatal(err)
+		if err.Error() != "sql: no rows in result set" {
+			log.NewLog().Fatal(err)
+		}
 	}
 
 	if email != nil {
