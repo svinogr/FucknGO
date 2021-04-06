@@ -249,7 +249,7 @@ func refreshToken(w http.ResponseWriter, r *http.Request) {
 	ok := validSession(sessionOld, r)
 
 	if !ok {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		http.Error(w, errors.New("session expired").Error(), http.StatusUnauthorized)
 		return
 	}
 
@@ -269,22 +269,17 @@ func refreshToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	marshal, err := json.Marshal(token)
-	if err != nil {
-		log.NewLog().Fatal(err)
-	}
-
-	fmt.Fprint(w, string(marshal))
+	err = json.NewEncoder(w).Encode(token)
 }
 
 func validSession(session *repo.SessionModelRepo, r *http.Request) bool {
 	if session.UserAgent != r.UserAgent() {
 		return false
 	}
-
-	if session.Ip != r.RemoteAddr {
-		return false
-	}
-
+	// данная проверка не работает почему то
+	/*	if session.Ip != r.RemoteAddr {
+			return false
+		}
+	*/
 	return true
 }

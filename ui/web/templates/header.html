@@ -11,11 +11,8 @@
     <script>
         $(document).ready(function () {
             // какое то действие
-           var accessToken =  $.cookie("access_token");
-
-
-
-
+            var accessToken = $.cookie("access_token");
+            var refreshToken = $.cookie("refresh_token");
 
 
             $("#logout").click(function () {
@@ -34,14 +31,30 @@
             });
 
             $("#users").click(function () {
-               accessToken = JSON.parse(atob(accessToken.split('.')[1]));
-              if (accessToken.exp <= (new Date().getTime() + 1) / 1000) {
-
-              }
-
-
-
-                window.location.href = "/api/mainpage";
+              var accessTokenSplit = JSON.parse(atob(accessToken.split('.')[1]));
+                alert(accessTokenSplit.exp - (new Date().getTime() + 1) / 1000);
+                if (accessTokenSplit.exp <= (new Date().getTime() + 1) / 1000) {
+                    $.ajax({
+                        'url': '/api/auth/refresh-tokens',
+                        'method': 'POST',
+                        'dataType': 'json',
+                        'contentType': 'application/json',
+                        'data': JSON.stringify({
+                            "refresh_token": refreshToken
+                        }),
+                        success: function (response) { //Данные отправлены успешно
+                            $.cookie("access_token", response.access_token);
+                            $.cookie("refresh_token", response.refresh_token);
+                            window.location.href = "/api/mainpage";
+                        },
+                        error: function (response) { // Данные не отправлены
+                            alert("error");
+                            window.location.href = "/api/login";
+                        }
+                    })
+                } else {
+                    window.location.href = "/api/mainpage";
+                }
             });
 
             $("#servers").click(function () {

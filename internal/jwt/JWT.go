@@ -14,7 +14,7 @@ import (
 var mySigningKey = []byte("SECRET")
 
 const (
-	expToken        time.Duration = time.Minute * 5    // live time of token
+	expToken        time.Duration = time.Second * 10   // live time of token
 	expRefreshToken time.Duration = time.Hour * 24 * 7 // live time of refresh token
 	UserId                        = "UserId"
 	ExpToken                      = "exp" // задано библиотекой!?

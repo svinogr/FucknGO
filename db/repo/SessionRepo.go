@@ -46,7 +46,7 @@ func (t *SessionRepo) CreateSession(session *SessionModelRepo) (*SessionModelRep
 		session.RefreshToken,
 		session.UserAgent,
 		session.Fingerprint,
-		session.Id,
+		session.Ip,
 		session.ExpireIn).
 		Scan(&session.Id, &session.CreatedAt); err != nil {
 		return nil, err
