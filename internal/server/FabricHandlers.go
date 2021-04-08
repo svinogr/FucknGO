@@ -2,7 +2,10 @@ package server
 
 import (
 	"FucknGO/internal/handler"
+	"FucknGO/internal/jwt"
+	"FucknGO/internal/server/model"
 	"net/http"
+	"time"
 )
 
 type fabricHandlers struct {
@@ -60,4 +63,28 @@ func setupServerHandlers(f *fabricHandlers) {
 func testPanicHendler(f *fabricHandlers) {
 	hand := handler.MyHandler{"/panic", Panic, http.MethodGet, false, handler.TypeApi}
 	f.Handlers = append(f.Handlers, &hand)
+}
+
+func SetCookieWithToken(w *http.ResponseWriter, token model.TokenModel) {
+	cookieWithToken := jwt.CreateCookieWithToken(token.Name, token.Value, token.ExpTime)
+	http.SetCookie(*w, &cookieWithToken)
+}
+
+func DeleteCookie(w *http.ResponseWriter) {
+	cookie := http.Cookie{
+		Name:       "",
+		Value:      "",
+		Path:       "",
+		Domain:     "",
+		Expires:    time.Unix(0, 0),
+		RawExpires: "",
+		MaxAge:     0,
+		Secure:     false,
+		HttpOnly:   true,
+		SameSite:   0,
+		Raw:        "",
+		Unparsed:   nil,
+	}
+
+	http.SetCookie(*w, &cookie)
 }

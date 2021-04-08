@@ -45,7 +45,7 @@ func auth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	accessToken, _ := jwt.CreateJWTToken(validUser.Id)
-	refreshToken, _ := jwt.CreateJWTRefreshToken(validUser.Id)
+	refreshToken, _ := jwt.CreateJwtRefreshToken(validUser.Id)
 
 	// есть ли уже сесиия для данного юзера
 	_, err = getSessionForUserIdIfIs(validUser.Id)
@@ -60,7 +60,7 @@ func auth(w http.ResponseWriter, r *http.Request) {
 	// создаем новую сессию
 	session := repo.SessionModelRepo{
 		UserId:       validUser.Id,
-		RefreshToken: refreshToken,
+		RefreshToken: refreshToken.Value,
 		UserAgent:    r.UserAgent(),
 		Fingerprint:  "",
 		Ip:           r.RemoteAddr,
@@ -69,15 +69,14 @@ func auth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	createSession(session)
-
+	// добавляем httpOnly Cookie
+	SetCookieWithToken(&w, accessToken)
+	SetCookieWithToken(&w, refreshToken)
 	// добавляем новые новые токены в ответ
-	token := model.TokenModel{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
-	}
-
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(token)
+
+	tokenStr := model.MarshalTokenToJsonStr(accessToken, refreshToken)
+	json.NewEncoder(w).Encode(tokenStr)
 }
 
 func updateSession(session *repo.SessionModelRepo) {
@@ -157,6 +156,8 @@ func logOut(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.NewLog().Fatal(err)
 	}
+
+	DeleteCookie(&w)
 }
 
 func deleteSession(userId uint64) error {
@@ -176,6 +177,8 @@ func refreshToken(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
+
+	r.Cookie(model.RefreshTokenName)
 
 	refreshToken := tM.RefreshToken
 
@@ -235,7 +238,7 @@ func refreshToken(w http.ResponseWriter, r *http.Request) {
 
 	// создаем новые токены
 	accessToken, err := jwt.CreateJWTToken(userId)
-	newRefreshToken, err := jwt.CreateJWTRefreshToken(userId)
+	newRefreshToken, err := jwt.CreateJwtRefreshToken(userId)
 
 	sessionOld.RefreshToken = newRefreshToken
 	sessionOld.ExpireIn = time.Now().Add(repo.Exp_session)

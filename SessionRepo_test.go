@@ -55,7 +55,7 @@ func TestCreateSession(t *testing.T) {
 		t.Errorf("%v", err)
 	}
 
-	refreshToken, err := CreateJWTRefreshToken(testUserWithToken.Id)
+	refreshToken, err := CreateJwtRefreshToken(testUserWithToken.Id)
 
 	if err != nil {
 		t.Error(err)

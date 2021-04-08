@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"FucknGO/internal/server/model"
 	"context"
 	jwtmiddleware "github.com/auth0/go-jwt-middleware"
 	"github.com/dgrijalva/jwt-go"
@@ -119,7 +120,7 @@ func CookieMiddleWare(handler http.Handler) http.Handler {
 }
 */
 // CreateJWTToken creates JWT token by id
-func CreateJWTToken(id uint64) (string, error) {
+func CreateJWTToken(id uint64) (model.TokenModel, error) {
 	var err error
 
 	//Creating Access Token
@@ -128,39 +129,72 @@ func CreateJWTToken(id uint64) (string, error) {
 	atClaims := jwt.MapClaims{}
 	atClaims["authorized"] = true
 	atClaims[UserId] = id
+	expTime := time.Now().Add(expToken)
 	atClaims[ExpToken] = time.Now().Add(expToken).Unix()
 
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
 
-	token, err := at.SignedString([]byte(os.Getenv("ACCESS_SECRET"))) //TODO написать нормальный секретный код
+	tokenValue, err := at.SignedString([]byte(os.Getenv("ACCESS_SECRET"))) //TODO написать нормальный секретный код
 
 	if err != nil {
-		return "", err
+		return model.TokenModel{}, err
+	}
+
+	token := model.TokenModel{
+		Name:    model.AccessTokenName,
+		Value:   tokenValue,
+		ExpTime: expTime,
 	}
 
 	return token, nil
 }
 
-func CreateJWTRefreshToken(id uint64) (string, error) {
+func CreateJwtRefreshToken(id uint64) (model.TokenModel, error) {
 	var err error
-
 	//Creating Access Token
 	os.Setenv("ACCESS_SECRET", string(mySigningKey)) //TODO this should be in an env file
 
 	atClaims := jwt.MapClaims{}
 	atClaims["authorized"] = true
 	atClaims[UserId] = id
+	expTime := time.Now().Add(expToken)
 	atClaims[ExpToken] = time.Now().Add(expRefreshToken).Unix()
 
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
 
-	token, err := at.SignedString([]byte(os.Getenv("ACCESS_SECRET"))) //TODO написать нормальный секретный код
+	tokenValue, err := at.SignedString([]byte(os.Getenv("ACCESS_SECRET"))) //TODO написать нормальный секретный код
 
 	if err != nil {
-		return "", err
+		return model.TokenModel{}, err
+	}
+
+	token := model.TokenModel{
+		Name:    model.AccessTokenName,
+		Value:   tokenValue,
+		ExpTime: expTime,
 	}
 
 	return token, nil
+}
+
+// CreateCookieWithToken creates  cookie with token by id
+func CreateCookieWithToken(name string, value string, expTime time.Time) http.Cookie {
+	cookie := http.Cookie{
+		Name:       name,
+		Value:      value,
+		Path:       "/",
+		Domain:     "",
+		Expires:    expTime,
+		RawExpires: "",
+		MaxAge:     0,
+		Secure:     false,
+		HttpOnly:   true, // attention
+		SameSite:   0,
+		Raw:        "",
+		Unparsed:   nil,
+	}
+
+	return cookie
 }
 
 // ParseJWT middleware parses token to get id user
@@ -178,41 +212,12 @@ func ParseJWT(handler http.Handler) http.Handler {
 		}
 
 		userId := claims[UserId]
-
-		/*if HasTokenInDB(token, 24) {
-			return
-		}
-		*/
-		// пытаемся вставить в контекст чтоб гденить еще получмить по ключу
+		//TODO возможно стоит сюда проверку userId вставить
 		ctx := context.WithValue(r.Context(), UserId, userId)
 
 		handler.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
-
-/*func HasTokenInDB(token string, userId uint64) bool {
-	conf, err := config.GetConfig()
-
-	if err != nil {
-		log.NewLog().Fatal(err)
-	}
-
-	base := repo.NewDataBase(conf)
-
-	repoToken := base.Token()
-
-	tokenRepo, err := repoToken.FindTokenByUserId(userId)
-
-	if err != nil {
-		log.NewLog().Fatal(err)
-	}
-
-	if strings.Compare(token, tokenRepo.Token) == 0 {
-		return true
-	}
-
-	return false
-}*/
 
 func GetClaims(token string) (jwt.MapClaims, error) {
 	claims := jwt.MapClaims{}
