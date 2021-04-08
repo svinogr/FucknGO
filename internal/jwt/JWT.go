@@ -184,7 +184,7 @@ func ParseJWT(handler http.Handler) http.Handler {
 		}
 		*/
 		// пытаемся вставить в контекст чтоб гденить еще получмить по ключу
-		ctx := context.WithValue(r.Context(), userId, userId)
+		ctx := context.WithValue(r.Context(), UserId, userId)
 
 		handler.ServeHTTP(w, r.WithContext(ctx))
 	})

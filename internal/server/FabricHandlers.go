@@ -40,7 +40,7 @@ func setupUserHandlers(f *fabricHandlers) {
 func setupAuthHandlers(f *fabricHandlers) {
 	hand := handler.MyHandler{"/auth", auth, http.MethodPost, false, handler.TypeApi}
 	hand2 := handler.MyHandler{"/log", logPage, http.MethodGet, false, handler.TypeApi}
-	hand4 := handler.MyHandler{"/logout", logOut, http.MethodGet, false, handler.TypeWeb}
+	hand4 := handler.MyHandler{"/logout", logOut, http.MethodGet, true, handler.TypeApi}
 	hand3 := handler.MyHandler{"/auth/refresh-tokens", refreshToken, http.MethodPost, false, handler.TypeApi}
 
 	f.Handlers = append(f.Handlers, &hand, &hand2, &hand3, &hand4)

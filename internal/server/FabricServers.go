@@ -100,7 +100,7 @@ func setupHandlers(s *server) {
 				}
 			case handler.TypeApi:
 				if e.GetHandler().NeedAuthToken {
-					s.mux.Handle(API_MASTER+e.GetHandler().Path, jwt.JwtVerifMiddleware.Handler(fh)).Methods(e.GetHandler().Method)
+					s.mux.Handle(API_MASTER+e.GetHandler().Path, jwt.JwtVerifMiddleware.Handler(jwt.ParseJWT(fh))).Methods(e.GetHandler().Method)
 				}
 			}
 

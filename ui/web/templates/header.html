@@ -7,6 +7,7 @@
         <script src="/static/js/jquery-3.6.0.min.js" type="text/javascript"></script>
         <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
         <script src="/static/js/jquery.cookie.js" type="text/javascript"></script>
+        <script src="/static/js/refreshtoken.js" type="text/javascript"></script>
     </head>
     <script>
         $(document).ready(function () {
@@ -15,10 +16,10 @@
 
 
             $("#logout").click(function () {
-                // дописать очиску кук
                 $.ajax({
                     'url': '/api/logout',
                     'method': 'GET',
+                    'headers': {'Authorization': 'Bearer ' + $.cookie("access_token")},
                     success: function (response) { //Данные отправлены успешно
                         window.location.href = "/api/login";
                     },
@@ -27,59 +28,24 @@
                         window.location.href = "/api/login";
                     }
                 })
+
+                $.removeCookie("access_token")
+                $.removeCookie("refresh_token")
             });
 
             $("#users").click(function () {
-              var accessTokenSplit = JSON.parse(atob(accessToken.split('.')[1]));
-                alert(accessTokenSplit.exp - (new Date().getTime() + 1) / 1000);
-                if (accessTokenSplit.exp <= (new Date().getTime() + 1) / 1000) {
-                    $.ajax({
-                        'url': '/api/auth/refresh-tokens',
-                        'method': 'POST',
-                        'dataType': 'json',
-                        'contentType': 'application/json',
-                        'data': JSON.stringify({
-                            "refresh_token": refreshToken
-                        }),
-                        success: function (response) { //Данные отправлены успешно
-                            $.cookie("access_token", response.access_token);
-                            $.cookie("refresh_token", response.refresh_token);
-                            window.location.href = "/api/mainpage";
-                        },
-                        error: function (response) { // Данные не отправлены
-                            alert("error");
-                            window.location.href = "/api/login";
-                        }
-                    })
-                } else {
+                if (refreshTokenIfNeed()){
                     window.location.href = "/api/mainpage";
+                } else {
+                    window.location.href = "/api/login";
                 }
             });
 
             $("#servers").click(function () {
-                var accessTokenSplit = JSON.parse(atob(accessToken.split('.')[1]));
-                alert(accessTokenSplit.exp - (new Date().getTime() + 1) / 1000);
-                if (accessTokenSplit.exp <= (new Date().getTime() + 1) / 1000) {
-                    $.ajax({
-                        'url': '/api/auth/refresh-tokens',
-                        'method': 'POST',
-                        'dataType': 'json',
-                        'contentType': 'application/json',
-                        'data': JSON.stringify({
-                            "refresh_token": refreshToken
-                        }),
-                        success: function (response) { //Данные отправлены успешно
-                            $.cookie("access_token", response.access_token);
-                            $.cookie("refresh_token", response.refresh_token);
-                            window.location.href = "/api/serverpage";
-                        },
-                        error: function (response) { // Данные не отправлены
-                            alert("error");
-                            window.location.href = "/api/login";
-                        }
-                    })
-                } else {
+                if (refreshTokenIfNeed()){
                     window.location.href = "/api/serverpage";
+                } else {
+                    window.location.href = "/api/login";
                 }
             });
         });

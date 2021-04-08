@@ -148,31 +148,11 @@ func GetUserIdFromContext(r *http.Request) (interface{}, error) {
 }
 
 func logOut(w http.ResponseWriter, r *http.Request) {
-	uT := model.TokenModel{}
-
-	if err := json.NewDecoder(r.Body).Decode(&uT); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	claims, err := jwt.GetClaims(uT.AccessToken)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	err = claims.Valid()
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
-		return
-	}
-
-	userId := claims[jwt.UserId]
+	context := r.Context()
+	userId := context.Value(jwt.UserId)
 
 	//TODO проверить есть ли уже сессия ?? рабоатет без проверки
-	err = deleteSession(uint64(userId.(float64)))
+	err := deleteSession(uint64(userId.(float64)))
 
 	if err != nil {
 		log.NewLog().Fatal(err)
