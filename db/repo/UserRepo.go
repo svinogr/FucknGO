@@ -1,5 +1,10 @@
 package repo
 
+import (
+	"FucknGO/internal/server/model"
+	"golang.org/x/crypto/bcrypt"
+)
+
 const (
 	TABLE_NAME_USERS = "users"
 	COL_ID_USER      = "id"
@@ -125,4 +130,21 @@ func (u *UserRepo) FindAllUser() (*[]UserModelRepo, error) {
 	}
 
 	return &userList, nil
+}
+
+// validUser gets valid user by email and password
+func (u *UserRepo) GetValidUser(user model.UserModel) (*UserModelRepo, error) {
+	uBemail, err := u.FindUserByEmail(user.Email)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(uBemail.Password), []byte(user.Password))
+
+	if err != nil {
+		return nil, err
+	}
+
+	return uBemail, nil
 }

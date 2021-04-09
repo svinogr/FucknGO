@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>Login</title>
     <script src="/static/js/jquery-3.6.0.min.js" type="text/javascript"></script>
-    <script src="/static/js/jquery.cookie.js" type="text/javascript"></script>
     <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
 
     <script> $(document).ready(function () {
@@ -18,27 +17,23 @@
                 $.ajax({
                     url: "/api/auth",
                     method: "POST",
-                    dataType: "json",
+                  //  dataType: "json",
                     contentType: "application/json",
                     data: JSON.stringify({
                         "email": data.get("email"),
                         "password": data.get("password")
                     }),
-                    success: function (response) { //Данные отправлены успешно
-                        $.cookie("access_token", response.access_token);
-                        $.cookie("refresh_token", response.refresh_token);
+                    success: function (response) {
+                        alert("suc");
                          window.location.href = "/api/mainpage";
                     },
-                    error: function (response) { // Данные не отправлены
-                        alert("err");
+                    error: function (response) {
+                        alert("err " + response);
                     }
-
                 });
             });
-
         });
     </script>
-
 </head>
 <body>
 

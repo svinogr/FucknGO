@@ -2,10 +2,7 @@ package server
 
 import (
 	"FucknGO/internal/handler"
-	"FucknGO/internal/jwt"
-	"FucknGO/internal/server/model"
 	"net/http"
-	"time"
 )
 
 type fabricHandlers struct {
@@ -42,11 +39,11 @@ func setupUserHandlers(f *fabricHandlers) {
 // setupAuthHandlers setup handlers for actions with auth
 func setupAuthHandlers(f *fabricHandlers) {
 	hand := handler.MyHandler{"/auth", auth, http.MethodPost, false, handler.TypeApi}
-	hand2 := handler.MyHandler{"/log", logPage, http.MethodGet, false, handler.TypeApi}
+	//	hand2 := handler.MyHandler{"/log", logPage, http.MethodGet, false, handler.TypeApi}
 	hand4 := handler.MyHandler{"/logout", logOut, http.MethodGet, true, handler.TypeApi}
 	hand3 := handler.MyHandler{"/auth/refresh-tokens", refreshToken, http.MethodPost, false, handler.TypeApi}
 
-	f.Handlers = append(f.Handlers, &hand, &hand2, &hand3, &hand4)
+	f.Handlers = append(f.Handlers, &hand, &hand3, &hand4)
 }
 
 // setupServerHandlers setup handlers for actions with server
@@ -63,28 +60,4 @@ func setupServerHandlers(f *fabricHandlers) {
 func testPanicHendler(f *fabricHandlers) {
 	hand := handler.MyHandler{"/panic", Panic, http.MethodGet, false, handler.TypeApi}
 	f.Handlers = append(f.Handlers, &hand)
-}
-
-func SetCookieWithToken(w *http.ResponseWriter, token model.TokenModel) {
-	cookieWithToken := jwt.CreateCookieWithToken(token.Name, token.Value, token.ExpTime)
-	http.SetCookie(*w, &cookieWithToken)
-}
-
-func DeleteCookie(w *http.ResponseWriter) {
-	cookie := http.Cookie{
-		Name:       "",
-		Value:      "",
-		Path:       "",
-		Domain:     "",
-		Expires:    time.Unix(0, 0),
-		RawExpires: "",
-		MaxAge:     0,
-		Secure:     false,
-		HttpOnly:   true,
-		SameSite:   0,
-		Raw:        "",
-		Unparsed:   nil,
-	}
-
-	http.SetCookie(*w, &cookie)
 }

@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"net/http"
 	"time"
 )
 
@@ -33,8 +34,8 @@ type SessionRepo struct {
 	Database *DataBase
 }
 
-func (t *SessionRepo) CreateSession(session *SessionModelRepo) (*SessionModelRepo, error) {
-	if err := t.Database.Db.QueryRow("INSERT into "+TABLE_NAME_REFRESH_SESSIONS+" ("+
+func (s *SessionRepo) CreateSession(session *SessionModelRepo) (*SessionModelRepo, error) {
+	if err := s.Database.Db.QueryRow("INSERT into "+TABLE_NAME_REFRESH_SESSIONS+" ("+
 		COL_USER_ID_REF+
 		", "+COL_REFRESH_TOKEN+
 		", "+COL_USERAGENT+
@@ -55,10 +56,10 @@ func (t *SessionRepo) CreateSession(session *SessionModelRepo) (*SessionModelRep
 	return session, nil
 }
 
-func (t *SessionRepo) FindSessionByUserId(userId uint64) (*SessionModelRepo, error) {
+func (s *SessionRepo) FindSessionByUserId(userId uint64) (*SessionModelRepo, error) {
 	session := SessionModelRepo{}
 
-	if err := t.Database.Db.QueryRow("SELECT "+
+	if err := s.Database.Db.QueryRow("SELECT "+
 		COL_ID_REFRESH_SESSIONS+", "+
 		COL_USER_ID_REF+", "+
 		COL_REFRESH_TOKEN+", "+
@@ -76,8 +77,8 @@ func (t *SessionRepo) FindSessionByUserId(userId uint64) (*SessionModelRepo, err
 	return &session, nil
 }
 
-func (t *SessionRepo) UpdateSession(session *SessionModelRepo) (*SessionModelRepo, error) {
-	if err := t.Database.Db.QueryRow("UPDATE "+TABLE_NAME_REFRESH_SESSIONS+
+func (s *SessionRepo) UpdateSession(session *SessionModelRepo) (*SessionModelRepo, error) {
+	if err := s.Database.Db.QueryRow("UPDATE "+TABLE_NAME_REFRESH_SESSIONS+
 		" set "+
 		COL_REFRESH_TOKEN+" = $1, "+
 		COL_USERAGENT+" = $2, "+
@@ -100,8 +101,8 @@ func (t *SessionRepo) UpdateSession(session *SessionModelRepo) (*SessionModelRep
 	return session, nil
 }
 
-func (t *SessionRepo) DeleteSessionByUserId(userId uint64) (int64, error) {
-	result, err := t.Database.Db.Exec("DELETE from "+TABLE_NAME_REFRESH_SESSIONS+" where "+COL_USER_ID_REF+" = $1", userId)
+func (s *SessionRepo) DeleteSessionByUserId(userId uint64) (int64, error) {
+	result, err := s.Database.Db.Exec("DELETE from "+TABLE_NAME_REFRESH_SESSIONS+" where "+COL_USER_ID_REF+" = $1", userId)
 
 	if err != nil {
 		return 0, err
@@ -113,4 +114,28 @@ func (t *SessionRepo) DeleteSessionByUserId(userId uint64) (int64, error) {
 	}
 
 	return affected, nil
+}
+
+func (s *SessionRepo) GetSessionForUserIdIfIs(id uint64) (*SessionModelRepo, error) {
+
+	session, err := s.FindSessionByUserId(id)
+
+	if err != nil {
+
+		return nil, err
+	}
+
+	return session, nil
+}
+
+func ValidSession(session *SessionModelRepo, r *http.Request) bool {
+	if session.UserAgent != r.UserAgent() {
+		return false
+	}
+	// данная проверка не работает почему то
+	/*	if session.Ip != r.RemoteAddr {
+			return false
+		}
+	*/
+	return true
 }
