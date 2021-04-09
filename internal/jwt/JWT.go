@@ -5,6 +5,7 @@ import (
 	"FucknGO/internal/server/model"
 	"context"
 	"errors"
+	"fmt"
 	jwtmiddleware "github.com/auth0/go-jwt-middleware"
 	"github.com/dgrijalva/jwt-go"
 	jwt2 "github.com/form3tech-oss/jwt-go"
@@ -61,6 +62,7 @@ func GetAccessTokenFromCookie(handler http.Handler) http.Handler {
 		})
 
 		if err != nil {
+			fmt.Print(err.Error())
 			http.Redirect(w, r, "/api/login", http.StatusMovedPermanently)
 			return
 		}
@@ -78,6 +80,107 @@ func GetAccessTokenFromCookie(handler http.Handler) http.Handler {
 			http.Redirect(w, r, "/api/login", http.StatusMovedPermanently)
 			return
 		}
+
+		tokenValue = c.Value // получаем значение токена из куки
+
+		claims = jwt2.MapClaims{}
+
+		token, err = jwt2.ParseWithClaims(tokenValue, claims, func(token *jwt2.Token) (interface{}, error) {
+			return mySigningKey, nil
+		})
+
+		if err != nil {
+			http.Redirect(w, r, "/api/login", http.StatusMovedPermanently)
+			return
+		}
+
+		if token.Valid {
+			userId := uint64(claims[UserId].(float64))
+			base := repo.NewDataBaseWithConfig()
+			sessionRepo := base.Sessions()
+
+			session, err := sessionRepo.GetSessionForUserIdIfIs(userId)
+
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			refreshTokenFromSessionRepo := session.RefreshToken
+
+			//если токен соответсвует токену в базе сессий
+			if refreshTokenFromSessionRepo != token.Raw {
+				if _, err := sessionRepo.DeleteSessionByUserId(userId); err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				} // удаляем сессию
+				// создаем новые токены
+				accessToken, _ := CreateJWTToken(userId)
+				refreshToken, _ := CreateJwtRefreshToken(userId)
+
+				newSession := repo.SessionModelRepo{
+					UserId:       userId,
+					RefreshToken: refreshToken.Value,
+					UserAgent:    r.UserAgent(),
+					Fingerprint:  "",
+					Ip:           r.RemoteAddr,
+					ExpireIn:     time.Now().Add(repo.Exp_session),
+					CreatedAt:    time.Now(),
+				}
+
+				sessionRepo.CreateSession(&newSession)
+				// добавляем httpOnly Cookie
+				SetCookieWithToken(&w, accessToken)
+				SetCookieWithToken(&w, refreshToken)
+				ctx := context.WithValue(r.Context(), Claims, claims)
+				handler.ServeHTTP(w, r.WithContext(ctx))
+				return
+			}
+
+		}
+
+		http.Redirect(w, r, "/api/login", http.StatusMovedPermanently)
+	})
+}
+func GetAccessTokenFromCookie2(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		cR, err := r.Cookie(model.RefreshTokenName) // получаем куку
+
+		if err != nil {
+			http.Redirect(w, r, "/api/login", http.StatusMovedPermanently)
+			return
+		}
+
+		c, err := r.Cookie(model.AccessTokenName) // получаем куку
+
+		if err != nil {
+			http.Redirect(w, r, "/api/login", http.StatusMovedPermanently)
+			return
+		}
+
+		tokenValue := c.Value // получаем значение токена из куки
+
+		claims := jwt2.MapClaims{}
+
+		token, err := jwt2.ParseWithClaims(tokenValue, claims, func(token *jwt2.Token) (interface{}, error) {
+			return mySigningKey, nil
+		})
+
+		if err != nil {
+			fmt.Print(err.Error())
+			http.Redirect(w, r, "/api/login", http.StatusMovedPermanently)
+			return
+		}
+
+		if token.Valid {
+			ctx := context.WithValue(r.Context(), Claims, claims)
+			handler.ServeHTTP(w, r.WithContext(ctx))
+			return
+		}
+
+		// если что то не так с токеном проверяем рефреш
+		//-----------------------
 
 		tokenValue = c.Value // получаем значение токена из куки
 
