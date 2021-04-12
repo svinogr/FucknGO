@@ -7,10 +7,8 @@ import (
 	"FucknGO/log"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"html/template"
 	"net/http"
-	"time"
 )
 
 // auth user and send jwt token
@@ -33,7 +31,6 @@ func auth(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
-	fmt.Print(r.UserAgent())
 
 	// юзер есть с таким паролем
 	db := repo.NewDataBaseWithConfig()
@@ -58,28 +55,33 @@ func auth(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 	// есть ли уже сесиия для данного юзера
-	sessionRepo := db.Sessions()
-	_, err = sessionRepo.GetSessionForUserIdIfIs(validUser.Id)
+	session := repo.SessionModelRepo{UserId: validUser.Id, UserAgent: r.UserAgent(), Ip: r.RemoteAddr}
 
-	if err == nil {
-		_, err := sessionRepo.DeleteSessionByUserId(validUser.Id)
+	_, err = jwt.CreateNewSessionForToken(&session, refreshToken)
 
-		if err != nil {
-			log.NewLog().Fatal(err)
-		}
-	}
+	/*
+		sessionRepo := db.Sessions()
+		_, err = sessionRepo.GetSessionForUserIdIfIs(validUser.Id)
+
+		if err == nil {
+			_, err := sessionRepo.DeleteSessionByUserId(validUser.Id)
+
+			if err != nil {
+				log.NewLog().Fatal(err)
+			}
+		}*/
 	// создаем новую сессию
-	session := repo.SessionModelRepo{
-		UserId:       validUser.Id,
-		RefreshToken: refreshToken.Value,
-		UserAgent:    r.UserAgent(),
-		Fingerprint:  "",
-		Ip:           r.RemoteAddr,
-		ExpireIn:     time.Now().Add(repo.Exp_session),
-		CreatedAt:    time.Now(),
-	}
+	/*	session := repo.SessionModelRepo{
+			UserId:       validUser.Id,
+			RefreshToken: refreshToken.Value,
+			UserAgent:    r.UserAgent(),
+			Fingerprint:  "",
+			Ip:           r.RemoteAddr,
+			ExpireIn:     time.Now().Add(repo.Exp_session),
+			CreatedAt:    time.Now(),
+		}
 
-	_, err = sessionRepo.CreateSession(&session)
+		_, err = sessionRepo.CreateSession(&session)*/
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

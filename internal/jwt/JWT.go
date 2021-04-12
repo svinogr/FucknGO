@@ -76,8 +76,8 @@ func CheckTokensInCookie(handler http.Handler) http.Handler {
 
 		}
 
-		context.WithValue(r.Context(), Refresh, refresh) // все ок. идем далее
-		handler.ServeHTTP(w, r)
+		ctx := context.WithValue(r.Context(), Refresh, refresh) // все ок. идем далее
+		handler.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
@@ -147,15 +147,16 @@ func GetValidSessionByCookie(r *http.Request) (*repo.SessionModelRepo, bool) {
 	return byCookie, true
 }
 
-func CreateNewSessionForToken(session *repo.SessionModelRepo, tokenModel model.TokenModel) {
+func CreateNewSessionForToken(session *repo.SessionModelRepo, tokenModel model.TokenModel) (*repo.SessionModelRepo, error) {
 	db := repo.NewDataBaseWithConfig()
 	sessionsRepo := db.Sessions()
 	sessionsRepo.DeleteSessionByUserId(session.UserId) // удаляем старую сессию
 
 	session.RefreshToken = tokenModel.Value
 	session.ExpireIn = time.Now().Add(repo.Exp_session)
-	sessionsRepo.CreateSession(session)
+	session.CreatedAt = time.Now()
 
+	return sessionsRepo.CreateSession(session)
 }
 
 func ValidSession(session *repo.SessionModelRepo, r *http.Request) bool {
