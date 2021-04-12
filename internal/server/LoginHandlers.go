@@ -38,16 +38,25 @@ func auth(w http.ResponseWriter, r *http.Request) {
 	// юзер есть с таким паролем
 	db := repo.NewDataBaseWithConfig()
 	userRepo := db.User()
-	validUser, err := userRepo.GetValidUser(uM)
+	user := repo.UserModelRepo{Name: uM.Name, Password: uM.Password, Email: uM.Email}
+
+	validUser, err := userRepo.GetValidUser(user)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 
-	accessToken, _ := jwt.CreateJWTToken(validUser.Id)
-	refreshToken, _ := jwt.CreateJwtRefreshToken(validUser.Id)
+	accessToken, err := jwt.CreateJWTToken(validUser.Id, model.AccessTokenName)
 
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	refreshToken, _ := jwt.CreateJWTToken(validUser.Id, model.RefreshTokenName)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 	// есть ли уже сесиия для данного юзера
 	sessionRepo := db.Sessions()
 	_, err = sessionRepo.GetSessionForUserIdIfIs(validUser.Id)
@@ -112,7 +121,33 @@ func logOut(w http.ResponseWriter, r *http.Request) {
 
 //  auth/refresh-tokens
 func refreshToken(w http.ResponseWriter, r *http.Request) {
-	/*tM := model.TokenModel{}
+
+	sessionByCookieOld, ok := jwt.GetValidSessionByCookie(r) // получаем  сессию по куки
+
+	if !ok {
+		http.Error(w, errors.New("session is expired").Error(), http.StatusUnauthorized)
+	}
+
+	// создаем новые токены
+	accessToken, err := jwt.CreateJWTToken(sessionByCookieOld.UserId, model.AccessTokenName) // не боимся нила так как нил невозможен
+
+	if err != nil {
+		log.NewLog().Fatal(err)
+	}
+	newRefreshToken, err := jwt.CreateJWTToken(sessionByCookieOld.UserId, model.RefreshTokenName)
+
+	if err != nil {
+		log.NewLog().Fatal(err)
+	}
+	// удаляем старую сессию и создалем
+	jwt.CreateNewSessionForToken(sessionByCookieOld, newRefreshToken)
+
+	jwt.SetCookieWithToken(&w, accessToken)
+	jwt.SetCookieWithToken(&w, newRefreshToken)
+}
+
+/*func refreshToken(w http.ResponseWriter, r *http.Request) {
+	tM := model.TokenModel{}
 	if err := json.NewDecoder(r.Body).Decode(&tM); err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
@@ -120,13 +155,15 @@ func refreshToken(w http.ResponseWriter, r *http.Request) {
 
 	r.Cookie(model.RefreshTokenName)
 
-	refreshToken := tM.RefreshToken*/
+	refreshToken := tM.RefreshToken
 
 	cookie, err := r.Cookie(model.RefreshTokenName) // получаем куки по ключу рефреш
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 	}
+
+	createAndSetCookieWithRefresh(cookie)
 
 	tokenValue := cookie.Value
 
@@ -199,3 +236,95 @@ func refreshToken(w http.ResponseWriter, r *http.Request) {
 	jwt.SetCookieWithToken(&w, accessToken)
 	jwt.SetCookieWithToken(&w, newRefreshToken)
 }
+*/
+
+// попробовать перенести в jwt
+/*func GetUserByToken(token string) *repo.UserModelRepo {
+	claims := jwt2.MapClaims{}
+	var user *repo.UserModelRepo
+	_, err := jwt2.ParseWithClaims(token, claims, func(token *jwt2.Token) (interface{}, error) {
+		return jwt.MySigningKey, nil
+	})
+
+	if err != nil {
+		return user
+	}
+
+	userId := uint64(claims[jwt.UserId].(float64))
+
+	db := repo.NewDataBaseWithConfig()
+	userRepo := db.User()
+	user, err = userRepo.FindUserById(userId)
+
+	return user
+}
+*/
+
+/*func createAndSetCookieWithRefresh(cookie *http.Cookie) error {
+
+	repo.ValidSession(sessionOld)
+
+	refreshTokenFromSessionRepo := sessionOld.RefreshToken // получаем токен по id
+
+	// сраниваем токен из бд с полученым из куки
+	if tokenStr == refreshTokenFromSessionRepo {
+		// если все ок удалем сессию и создаем новую
+		sessionRepo.DeleteSessionByUserId(userId)
+		// создаем новыеы токены
+		accessToken, _ := jwt.CreateJWTToken(userId)
+		refreshToken, _ := jwt.CreateJwtRefreshToken(userId)
+
+	}
+
+	sessionOld, err := sessionRepo.GetSessionForUserIdIfIs(userId)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	//удаляем старую сессию сохранив ее сначало в переменную
+
+	_, err = sessionRepo.DeleteSessionByUserId(userId)
+
+	if err != nil {
+		log.NewLog().Fatal(err)
+	}
+
+	in := sessionOld.ExpireIn
+
+	if in.Before(time.Now()) {
+		http.Error(w, errors.New("session expired").Error(), http.StatusUnauthorized)
+		return
+	}
+
+	// сравниваем получены рефреш токен и в токен в сессии
+
+	if tokenStr != sessionOld.RefreshToken {
+		http.Error(w, errors.New("session expired").Error(), http.StatusUnauthorized)
+		return
+	}
+
+	// проверяем сессию на клиента и ip
+
+	ok := repo.ValidSession(sessionOld, r)
+
+	if !ok {
+		http.Error(w, errors.New("session expired").Error(), http.StatusUnauthorized)
+		return
+	}
+
+	// создаем новые токены
+	accessToken, err := jwt.CreateJWTToken(userId)
+	newRefreshToken, err := jwt.CreateJwtRefreshToken(userId)
+
+	sessionOld.RefreshToken = newRefreshToken.Value
+	sessionOld.ExpireIn = time.Now().Add(repo.Exp_session)
+
+	// создаем новую сессию с новым токеном
+	sessionRepo.CreateSession(sessionOld)
+
+	jwt.SetCookieWithToken(&w, accessToken)
+	jwt.SetCookieWithToken(&w, newRefreshToken)
+}
+*/

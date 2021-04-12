@@ -1,7 +1,6 @@
 package repo
 
 import (
-	"net/http"
 	"time"
 )
 
@@ -126,16 +125,4 @@ func (s *SessionRepo) GetSessionForUserIdIfIs(id uint64) (*SessionModelRepo, err
 	}
 
 	return session, nil
-}
-
-func ValidSession(session *SessionModelRepo, r *http.Request) bool {
-	if session.UserAgent != r.UserAgent() {
-		return false
-	}
-	// данная проверка не работает почему то
-	/*	if session.Ip != r.RemoteAddr {
-			return false
-		}
-	*/
-	return true
 }

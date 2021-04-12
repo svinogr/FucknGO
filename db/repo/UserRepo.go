@@ -1,7 +1,6 @@
 package repo
 
 import (
-	"FucknGO/internal/server/model"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -133,7 +132,7 @@ func (u *UserRepo) FindAllUser() (*[]UserModelRepo, error) {
 }
 
 // validUser gets valid user by email and password
-func (u *UserRepo) GetValidUser(user model.UserModel) (*UserModelRepo, error) {
+func (u *UserRepo) GetValidUser(user UserModelRepo) (*UserModelRepo, error) {
 	uBemail, err := u.FindUserByEmail(user.Email)
 
 	if err != nil {

@@ -96,7 +96,7 @@ func setupHandlers(s *server) {
 			switch e.GetHandler().TypeRequest {
 			case handler.TypeWeb:
 				if e.GetHandler().NeedAuthToken {
-					s.mux.Handle(API_MASTER+e.GetHandler().Path, jwt.GetAccessTokenFromCookie(fh)).Methods(e.GetHandler().Method)
+					s.mux.Handle(API_MASTER+e.GetHandler().Path, jwt.CheckTokensInCookie(jwt.AccessOrRefresh(fh))).Methods(e.GetHandler().Method)
 				}
 			case handler.TypeApi:
 				if e.GetHandler().NeedAuthToken {
