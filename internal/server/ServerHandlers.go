@@ -1,7 +1,6 @@
 package server
 
 import (
-	"FucknGO/db/repo"
 	"FucknGO/internal/server/model"
 	"FucknGO/log"
 	"context"
@@ -14,7 +13,7 @@ import (
 )
 
 //test conection
-func Connect(w http.ResponseWriter, r *http.Request) {
+/*func Connect(w http.ResponseWriter, r *http.Request) {
 	fmt.Print("test connect")
 
 	database := repo.NewDataBaseWithConfig()
@@ -35,7 +34,7 @@ func Connect(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "connect")
 
 }
-
+*/
 // GetAllServers gets all running servers
 func GetAllServers(w http.ResponseWriter, r *http.Request) {
 	if fb, err := FabricServer(); err != nil {

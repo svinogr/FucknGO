@@ -11,8 +11,10 @@ import (
 func mainPage(w http.ResponseWriter, r *http.Request) {
 	files := template.Must(template.ParseFiles("ui/web/templates/mainpage.html", "ui/web/templates/header.html"))
 
-	base := repo.NewDataBaseWithConfig()
-	userRepo := base.User()
+	db := repo.NewDataBaseWithConfig()
+	defer db.CloseDataBase()
+
+	userRepo := db.User()
 
 	allUser, err := userRepo.FindAllUser()
 

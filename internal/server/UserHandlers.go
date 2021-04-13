@@ -46,6 +46,8 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	db := repo.NewDataBaseWithConfig()
+	defer db.CloseDataBase()
+
 	_, err := db.User().CreateUser(&user)
 
 	if err != nil {
@@ -98,9 +100,10 @@ func validRegInfo(user repo.UserModelRepo) bool {
 	if user.Name == "" {
 		return false
 	}
+	db := repo.NewDataBaseWithConfig()
+	defer db.CloseDataBase()
 
-	userRepo := repo.NewDataBaseWithConfig().User()
-
+	userRepo := db.User()
 	email, err := userRepo.FindUserByEmail(user.Email)
 
 	if err != nil {

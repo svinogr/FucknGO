@@ -34,6 +34,8 @@ func auth(w http.ResponseWriter, r *http.Request) {
 
 	// юзер есть с таким паролем
 	db := repo.NewDataBaseWithConfig()
+	defer db.CloseDataBase()
+
 	userRepo := db.User()
 
 	user := repo.UserModelRepo{Name: uM.Name, Password: uM.Password, Email: uM.Email}
@@ -70,9 +72,10 @@ func auth(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateSession(session *repo.SessionModelRepo) {
-	base := repo.NewDataBaseWithConfig()
+	db := repo.NewDataBaseWithConfig()
+	defer db.CloseDataBase()
 
-	sessionRepo := base.Sessions()
+	sessionRepo := db.Sessions()
 
 	_, err := sessionRepo.UpdateSession(session)
 
@@ -87,6 +90,8 @@ func logOut(w http.ResponseWriter, r *http.Request) {
 	//TODO проверить есть ли уже сессия ?? рабоатет без проверки
 
 	db := repo.NewDataBaseWithConfig()
+	defer db.CloseDataBase()
+
 	sessionsRepo := db.Sessions()
 	_, err := sessionsRepo.DeleteSessionByUserId(user.Id)
 

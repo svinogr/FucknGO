@@ -148,6 +148,7 @@ func GetValidSessionByCookie(r *http.Request) (*repo.SessionModelRepo, bool) {
 
 func CreateNewSessionForToken(session *repo.SessionModelRepo, tokenModel model.TokenModel) (*repo.SessionModelRepo, error) {
 	db := repo.NewDataBaseWithConfig()
+	defer db.CloseDataBase()
 	sessionsRepo := db.Sessions()
 	sessionsRepo.DeleteSessionByUserId(session.UserId) // удаляем старую сессию
 
@@ -199,6 +200,8 @@ func SetUserToRequest(r *http.Request) (err error, ctx context.Context) {
 
 func FindUserByCookie(cookie *http.Cookie) (*repo.UserModelRepo, error) {
 	db := repo.NewDataBaseWithConfig()
+	defer db.CloseDataBase()
+
 	userRepo := db.User()
 
 	tokenStr := cookie.Value
@@ -234,6 +237,8 @@ func FindSessionByCookie(cookie http.Cookie) (*repo.SessionModelRepo, error) {
 	userId := uint64(claims[UserId].(float64))
 
 	db := repo.NewDataBaseWithConfig()
+	defer db.CloseDataBase()
+
 	sessionsRepo := db.Sessions()
 
 	return sessionsRepo.FindSessionByUserId(userId)

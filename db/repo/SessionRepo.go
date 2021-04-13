@@ -30,11 +30,12 @@ type SessionModelRepo struct {
 }
 
 type SessionRepo struct {
-	Database *DataBase
+	db *DataBase
 }
 
 func (s *SessionRepo) CreateSession(session *SessionModelRepo) (*SessionModelRepo, error) {
-	if err := s.Database.Db.QueryRow("INSERT into "+TABLE_NAME_REFRESH_SESSIONS+" ("+
+	//defer s.db.CloseDataBase()
+	if err := s.db.Db.QueryRow("INSERT into "+TABLE_NAME_REFRESH_SESSIONS+" ("+
 		COL_USER_ID_REF+
 		", "+COL_REFRESH_TOKEN+
 		", "+COL_USERAGENT+
@@ -56,9 +57,10 @@ func (s *SessionRepo) CreateSession(session *SessionModelRepo) (*SessionModelRep
 }
 
 func (s *SessionRepo) FindSessionByUserId(userId uint64) (*SessionModelRepo, error) {
+	//defer s.db.CloseDataBase()
 	session := SessionModelRepo{}
 
-	if err := s.Database.Db.QueryRow("SELECT "+
+	if err := s.db.Db.QueryRow("SELECT "+
 		COL_ID_REFRESH_SESSIONS+", "+
 		COL_USER_ID_REF+", "+
 		COL_REFRESH_TOKEN+", "+
@@ -77,7 +79,8 @@ func (s *SessionRepo) FindSessionByUserId(userId uint64) (*SessionModelRepo, err
 }
 
 func (s *SessionRepo) UpdateSession(session *SessionModelRepo) (*SessionModelRepo, error) {
-	if err := s.Database.Db.QueryRow("UPDATE "+TABLE_NAME_REFRESH_SESSIONS+
+	//defer s.db.CloseDataBase()
+	if err := s.db.Db.QueryRow("UPDATE "+TABLE_NAME_REFRESH_SESSIONS+
 		" set "+
 		COL_REFRESH_TOKEN+" = $1, "+
 		COL_USERAGENT+" = $2, "+
@@ -101,7 +104,8 @@ func (s *SessionRepo) UpdateSession(session *SessionModelRepo) (*SessionModelRep
 }
 
 func (s *SessionRepo) DeleteSessionByUserId(userId uint64) (int64, error) {
-	result, err := s.Database.Db.Exec("DELETE from "+TABLE_NAME_REFRESH_SESSIONS+" where "+COL_USER_ID_REF+" = $1", userId)
+	//defer s.db.CloseDataBase()
+	result, err := s.db.Db.Exec("DELETE from "+TABLE_NAME_REFRESH_SESSIONS+" where "+COL_USER_ID_REF+" = $1", userId)
 
 	if err != nil {
 		return 0, err
@@ -116,7 +120,7 @@ func (s *SessionRepo) DeleteSessionByUserId(userId uint64) (int64, error) {
 }
 
 func (s *SessionRepo) GetSessionForUserIdIfIs(id uint64) (*SessionModelRepo, error) {
-
+	//	defer s.db.CloseDataBase()
 	session, err := s.FindSessionByUserId(id)
 
 	if err != nil {

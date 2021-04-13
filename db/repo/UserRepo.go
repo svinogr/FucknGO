@@ -24,7 +24,7 @@ type UserRepo struct {
 }
 
 func (u *UserRepo) CreateUser(user *UserModelRepo) (*UserModelRepo, error) {
-	//defer u.db.CloseDataBase()
+	defer u.db.CloseDataBase()
 	if err := u.db.Db.QueryRow("INSERT into "+TABLE_NAME_USERS+" ("+COL_NAME+", "+COL_PASSWORD+", "+COL_EMAIL+") VALUES ($1, $2, $3) RETURNING "+COL_ID_USER,
 		user.Name,
 		user.Password,
@@ -36,12 +36,13 @@ func (u *UserRepo) CreateUser(user *UserModelRepo) (*UserModelRepo, error) {
 	return user, nil
 }
 
-func (u *UserRepo) openAndCloseDb() {
+/*func (u *UserRepo) openAndCloseDb() {
 	u.db.OpenDataBase()
 	//defer u.db.CloseDataBase()
-}
+}*/
 
 func (u *UserRepo) UpdateUser(user *UserModelRepo) (*UserModelRepo, error) {
+	defer u.db.CloseDataBase()
 	err := u.db.Db.QueryRow("UPDATE "+TABLE_NAME_USERS+" set "+
 		COL_NAME+"= $1, "+
 		COL_PASSWORD+"= $2, "+
@@ -60,6 +61,7 @@ func (u *UserRepo) UpdateUser(user *UserModelRepo) (*UserModelRepo, error) {
 }
 
 func (u *UserRepo) FindUserById(id uint64) (*UserModelRepo, error) {
+	defer u.db.CloseDataBase()
 	user := UserModelRepo{}
 
 	if err := u.db.Db.QueryRow("SELECT "+COL_ID_USER+", "+COL_NAME+", "+COL_PASSWORD+", "+COL_EMAIL+" from "+TABLE_NAME_USERS+" where "+COL_ID_USER+"=$1",
@@ -73,6 +75,7 @@ func (u *UserRepo) FindUserById(id uint64) (*UserModelRepo, error) {
 }
 
 func (u *UserRepo) DeleteUser(user *UserModelRepo) (*UserModelRepo, error) {
+	defer u.db.CloseDataBase()
 	_, err := u.db.Db.Exec("DELETE from "+TABLE_NAME_USERS+" where "+COL_ID_USER+" = $1", user.Id)
 
 	if err != nil {
@@ -83,6 +86,7 @@ func (u *UserRepo) DeleteUser(user *UserModelRepo) (*UserModelRepo, error) {
 }
 
 func (u *UserRepo) FindUserByEmail(email string) (*UserModelRepo, error) {
+	defer u.db.CloseDataBase()
 	user := UserModelRepo{}
 
 	if err := u.db.Db.QueryRow("SELECT "+COL_ID_USER+", "+COL_NAME+", "+COL_PASSWORD+", "+COL_EMAIL+" from "+TABLE_NAME_USERS+" where "+COL_EMAIL+"=$1",
@@ -96,6 +100,7 @@ func (u *UserRepo) FindUserByEmail(email string) (*UserModelRepo, error) {
 }
 
 func (u *UserRepo) FindUserByName(name string) (*UserModelRepo, error) {
+	defer u.db.CloseDataBase()
 	user := UserModelRepo{}
 
 	if err := u.db.Db.QueryRow("SELECT "+COL_ID_USER+", "+COL_NAME+", "+COL_PASSWORD+", "+COL_EMAIL+" from "+TABLE_NAME_USERS+" where "+COL_NAME+"=$1",
@@ -109,13 +114,13 @@ func (u *UserRepo) FindUserByName(name string) (*UserModelRepo, error) {
 }
 
 func (u *UserRepo) FindAllUser() (*[]UserModelRepo, error) {
+	defer u.db.CloseDataBase()
 	userList := []UserModelRepo{}
 
 	row, err := u.db.Db.Query("SELECT " + COL_ID_USER + ", " + COL_NAME + ", " + COL_PASSWORD + ", " + COL_EMAIL + " from " + TABLE_NAME_USERS)
-	defer row.Close()
 
 	if err != nil {
-		return nil, err
+		return &userList, err
 	}
 
 	for row.Next() {
@@ -133,6 +138,7 @@ func (u *UserRepo) FindAllUser() (*[]UserModelRepo, error) {
 
 // validUser gets valid user by email and password
 func (u *UserRepo) GetValidUser(user UserModelRepo) (*UserModelRepo, error) {
+	defer u.db.CloseDataBase()
 	uBemail, err := u.FindUserByEmail(user.Email)
 
 	if err != nil {
