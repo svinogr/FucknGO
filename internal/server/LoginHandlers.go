@@ -35,6 +35,7 @@ func auth(w http.ResponseWriter, r *http.Request) {
 	// юзер есть с таким паролем
 	db := repo.NewDataBaseWithConfig()
 	userRepo := db.User()
+
 	user := repo.UserModelRepo{Name: uM.Name, Password: uM.Password, Email: uM.Email}
 
 	validUser, err := userRepo.GetValidUser(user)
@@ -59,30 +60,6 @@ func auth(w http.ResponseWriter, r *http.Request) {
 
 	_, err = jwt.CreateNewSessionForToken(&session, refreshToken)
 
-	/*
-		sessionRepo := db.Sessions()
-		_, err = sessionRepo.GetSessionForUserIdIfIs(validUser.Id)
-
-		if err == nil {
-			_, err := sessionRepo.DeleteSessionByUserId(validUser.Id)
-
-			if err != nil {
-				log.NewLog().Fatal(err)
-			}
-		}*/
-	// создаем новую сессию
-	/*	session := repo.SessionModelRepo{
-			UserId:       validUser.Id,
-			RefreshToken: refreshToken.Value,
-			UserAgent:    r.UserAgent(),
-			Fingerprint:  "",
-			Ip:           r.RemoteAddr,
-			ExpireIn:     time.Now().Add(repo.Exp_session),
-			CreatedAt:    time.Now(),
-		}
-
-		_, err = sessionRepo.CreateSession(&session)*/
-
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -106,24 +83,23 @@ func updateSession(session *repo.SessionModelRepo) {
 
 func logOut(w http.ResponseWriter, r *http.Request) {
 	context := r.Context()
-	userId := context.Value(jwt.UserId)
-
+	user := context.Value(jwt.User).(repo.UserModelRepo)
 	//TODO проверить есть ли уже сессия ?? рабоатет без проверки
 
 	db := repo.NewDataBaseWithConfig()
 	sessionsRepo := db.Sessions()
-	_, err := sessionsRepo.DeleteSessionByUserId(uint64(userId.(float64)))
+	_, err := sessionsRepo.DeleteSessionByUserId(user.Id)
 
 	if err != nil {
 		log.NewLog().Fatal(err)
 	}
 
-	jwt.DeleteCookie(&w)
+	jwt.DeleteCookie(w, model.RefreshTokenName)
+	jwt.DeleteCookie(w, model.AccessTokenName)
 }
 
 //  auth/refresh-tokens
 func refreshToken(w http.ResponseWriter, r *http.Request) {
-
 	sessionByCookieOld, ok := jwt.GetValidSessionByCookie(r) // получаем  сессию по куки
 
 	if !ok {

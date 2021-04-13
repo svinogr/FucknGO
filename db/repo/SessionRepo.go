@@ -16,7 +16,7 @@ const (
 	COL_CREATED_AT              = "created_at"
 )
 
-const Exp_session = time.Hour * 60
+const Exp_session = time.Hour * 24 * 7
 
 type SessionModelRepo struct {
 	Id           uint64

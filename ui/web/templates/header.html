@@ -11,15 +11,10 @@
     </head>
     <script>
         $(document).ready(function () {
-            var accessToken = $.cookie("access_token");
-            var refreshToken = $.cookie("refresh_token");
-
-
             $("#logout").click(function () {
                 $.ajax({
                     'url': '/api/logout',
                     'method': 'GET',
-                    'headers': {'Authorization': 'Bearer ' + $.cookie("access_token")},
                     success: function (response) { //Данные отправлены успешно
                         window.location.href = "/api/login";
                     },
@@ -28,25 +23,20 @@
                         window.location.href = "/api/login";
                     }
                 })
-
-                $.removeCookie("access_token")
-                $.removeCookie("refresh_token")
             });
 
-            $("#users").click(function () {
-                if (refreshTokenIfNeed()){
-                    window.location.href = "/api/mainpage";
-                } else {
-                    window.location.href = "/api/login";
-                }
-            });
+  /*          $("#users").click(function () {
+
+                        window.location.href = "/api/mainpage";
+
+
+
+            });*/
 
             $("#servers").click(function () {
-                if (refreshTokenIfNeed()){
+
                     window.location.href = "/api/serverpage";
-                } else {
-                    window.location.href = "/api/login";
-                }
+
             });
         });
 
@@ -64,7 +54,8 @@
                 </button>
 
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <button class="btn btn-outline-success" id="users">Пользователи</button>
+                    <a class="btn btn-outline-success" href="/api/mainpage" role="button">Пользователи</a>
+                    <button class="btn btn-outline-success" value="/api/mainpage" id="users">Пользователи</button>
                     <button class="btn btn-outline-success" id="servers">Серверы</button>
                     <button class="btn btn-outline-success" id="#">Что нить еще</button>
                     <form class="d-flex" id="logout_form" action="">
