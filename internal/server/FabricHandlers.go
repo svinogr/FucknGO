@@ -31,9 +31,10 @@ func setupWebInterfaceHandler(f *fabricHandlers) {
 
 // setupUserHandlers setup handlers for actions with user
 func setupUserHandlers(f *fabricHandlers) {
-	hand := handler.MyHandler{"/user", user, http.MethodPost, true, handler.TypeApi}
+	hand := handler.MyHandler{"/user", userApi, http.MethodPost, true, handler.TypeWeb}
+	hand2 := handler.MyHandler{"/user/{id}", userApi, http.MethodDelete, true, handler.TypeWeb}
 
-	f.Handlers = append(f.Handlers, &hand)
+	f.Handlers = append(f.Handlers, &hand, &hand2)
 }
 
 // setupAuthHandlers setup handlers for actions with auth
@@ -46,11 +47,11 @@ func setupAuthHandlers(f *fabricHandlers) {
 	f.Handlers = append(f.Handlers, &hand, &hand3, &hand4)
 }
 
-// setupServerHandlers setup handlers for actions with server
+// setupServerHandlers setup handlers for actions with serverApi
 func setupServerHandlers(f *fabricHandlers) {
-	hand2 := handler.MyHandler{"/server", Server, http.MethodGet, true, handler.TypeApi}
-	hand3 := handler.MyHandler{"/server", Server, http.MethodPost, true, handler.TypeApi}
-	hand4 := handler.MyHandler{"/server/{id}", Server, http.MethodDelete, true, handler.TypeApi}
+	hand2 := handler.MyHandler{"/server", serverApi, http.MethodGet, true, handler.TypeWeb}
+	hand3 := handler.MyHandler{"/server", serverApi, http.MethodPost, true, handler.TypeWeb}
+	hand4 := handler.MyHandler{"/server/{id}", serverApi, http.MethodDelete, true, handler.TypeWeb}
 
 	f.Handlers = append(f.Handlers, &hand2, &hand3, &hand4)
 }

@@ -1,6 +1,8 @@
 package server
 
 import (
+	"FucknGO/config"
+	"FucknGO/config/ui"
 	"FucknGO/internal/handler"
 	"FucknGO/internal/jwt"
 	"FucknGO/log"
@@ -34,14 +36,11 @@ func FabricServer() (*fabricServers, error) {
 }
 
 // GetNewMasterServer creates and returns new master servers
-func (f *fabricServers) GetNewMasterServer(address string, port string, staticResource string) *server {
+func (f *fabricServers) GetNewMasterServer(address string, port string) *server {
 	idServer := time.Now().Unix()
 
 	server := server{}
-	server.setup(address, port, staticResource, uint64(idServer), false)
-
-	setupStaticResource(staticResource, &server)
-	setupHandlers(&server)
+	server.setup(address, port, uint64(idServer), false)
 
 	f.servers = append(f.servers, &server)
 
@@ -49,12 +48,13 @@ func (f *fabricServers) GetNewMasterServer(address string, port string, staticRe
 }
 
 // GetNewSlaveServer creates and returns new slave  servers
-func (f *fabricServers) GetNewSlaveServer(address string, port string, staticResource string) (*server, error) {
+func (f *fabricServers) GetNewSlaveServer(address string, port string) (*server, error) {
+
 	for _, el := range f.servers {
 
-		if el == nil {
+		/*	if el == nil {
 			continue
-		}
+		}*/
 
 		if el.port == port {
 			return nil, errors.New("port is uses yet")
@@ -64,9 +64,10 @@ func (f *fabricServers) GetNewSlaveServer(address string, port string, staticRes
 	idServer := time.Now().Unix()
 
 	server := server{}
-	server.setup(address, port, staticResource, uint64(idServer), true)
 
-	setupStaticResource(staticResource, &server)
+	server.setup(address, port, uint64(idServer), true)
+
+	setupStaticResource(&server)
 	setupHandlers(&server)
 
 	f.servers = append(f.servers, &server)
@@ -77,12 +78,13 @@ func (f *fabricServers) GetNewSlaveServer(address string, port string, staticRes
 func (f *fabricServers) RemoveServer(server server) {
 	for i, el := range f.servers {
 		if el.port == server.port {
-			f.servers[i] = nil
+			f.servers = append(f.servers[:i], f.servers[i+1:]...)
+			//	f.servers[i] = nil
 		}
 	}
 }
 
-//setupStaticResource setup server handler by type server slave/master and auth
+//setupStaticResource setup serverApi handler by type serverApi slave/master and auth
 func setupHandlers(s *server) {
 	fabric := NewFabric()
 	if s.isSlave {
@@ -110,21 +112,39 @@ func setupHandlers(s *server) {
 	}
 }
 
-//setupStaticResource set static dir for server
-func setupStaticResource(staticResource string, server *server) {
-	_, err := os.Stat(staticResource)
+//setupStaticResource set static dir for serverApi
+func setupStaticResource(server *server) {
+	conf, err := config.GetConfig()
 
 	if err != nil {
-		err = os.MkdirAll(staticResource, 0777)
+		log.NewLog().Fatal(err)
+	}
+
+	defaultStaticResource := conf.JsonStr.UiConfig.WWW.Static
+	storageStaticResource := conf.JsonStr.UiConfig.WWW.Storage
+
+	server.staticResource = defaultStaticResource
+
+	_, err = os.Stat(defaultStaticResource)
+
+	if err != nil {
+		/*	err = os.MkdirAll(defaultStaticResource, 0777)
+
+			if err != nil {
+				log.NewLog().Fatal(err)
+			}
+		*/
+		err := ui.CopyResource(storageStaticResource, defaultStaticResource)
 
 		if err != nil {
 			log.NewLog().Fatal(err)
 		}
+
 	}
 	// staticResource = "./ui/web/static"
-	fileServer := http.FileServer(http.Dir(staticResource))
+	fileServer := http.FileServer(http.Dir(defaultStaticResource))
 
-	//server.mux.Handle("/static/js/jquery-3.6.0.min.js", http.StripPrefix("/static", fileServer))
+	//serverApi.mux.Handle("/static/js/jquery-3.6.0.min.js", http.StripPrefix("/static", fileServer))
 	server.mux.PathPrefix("/static/{rest}").Handler(
 		http.StripPrefix("/static", fileServer))
 }

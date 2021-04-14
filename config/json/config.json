@@ -41,7 +41,8 @@
     "www": {
       "js": "./web/client/build",
       "html": "./web/templates",
-      "static": "./ui/web/static"
+      "static": "./ui",
+      "storage": "./uistorage"
     }
   },
   "log": {

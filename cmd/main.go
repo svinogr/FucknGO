@@ -50,7 +50,6 @@ func getConfig() *config.Config {
 
 func startServer(config config.Config) {
 	port := fmt.Sprint(config.JsonStr.ServerConfig.Port)
-	staticPath := config.JsonStr.UiConfig.WWW.Static
 
 	fb, err := server.FabricServer()
 
@@ -58,6 +57,13 @@ func startServer(config config.Config) {
 		//log.NewLog().Fatal(err)
 	}
 
-	ser := fb.GetNewMasterServer("0.0.0.0", port, staticPath)
-	ser.RunServer()
+	ser := fb.GetNewMasterServer("0.0.0.0", port)
+	err = ser.RunServer()
+
+	if err.Error() != "http: serverApi closed" {
+		panic(err)
+		log.NewLog().Fatal(err)
+	}
+
+	log.NewLog().PrintError(err)
 }

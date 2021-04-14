@@ -35,8 +35,8 @@ import (
 
 }
 */
-// GetAllServers gets all running servers
-func GetAllServers(w http.ResponseWriter, r *http.Request) {
+// getAllServers gets all running servers
+func getAllServers(w http.ResponseWriter, r *http.Request) {
 	if fb, err := FabricServer(); err != nil {
 		fmt.Fprint(w, err)
 	} else {
@@ -63,19 +63,19 @@ func GetAllServers(w http.ResponseWriter, r *http.Request) {
 }
 
 // newServer creates new servers
-func Server(w http.ResponseWriter, r *http.Request) {
+func serverApi(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
-		CreateServer(w, r)
+		createServer(w, r)
 	case http.MethodGet:
-		GetAllServers(w, r)
+		getAllServers(w, r)
 	case http.MethodDelete:
-		DeleteServerById(w, r)
+		deleteServerById(w, r)
 	}
 }
 
-// DeleteServerById deletes by id
-func DeleteServerById(w http.ResponseWriter, r *http.Request) {
+// deleteServerById deletes by id
+func deleteServerById(w http.ResponseWriter, r *http.Request) {
 	var sM model.ServerModel
 
 	vars := mux.Vars(r)
@@ -116,57 +116,47 @@ func DeleteServerById(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	jsonStr, err := json.Marshal(&sM)
-
-	if err != nil {
-		log.NewLog().PrintError(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
 	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprint(w, string(jsonStr))
+	json.NewEncoder(w).Encode(sM)
 }
 
-// CreateServer creates new server
-func CreateServer(w http.ResponseWriter, r *http.Request) {
+// createServer creates new serverApi
+func createServer(w http.ResponseWriter, r *http.Request) {
 	var sM model.ServerModel
 	if err := json.NewDecoder(r.Body).Decode(&sM); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
-	port := sM.Port
-	staticPath := sM.StaticResource
-
-	if port != "" && staticPath != "" {
-		fb, err := FabricServer()
-
-		if err != nil {
-			log.NewLog().Fatal(err)
-		}
-
-		if ser, err := fb.GetNewSlaveServer("0.0.0.0", port, staticPath); err != nil {
-			fmt.Fprint(w, err)
-		} else {
-			go ser.RunServer()
-
-			s := model.ServerModel{ser.Id(), ser.StaticResource(), ser.Port(), ser.Address(), true}
-
-			data, err := json.Marshal(&s)
-
-			if err != nil {
-				fmt.Fprint(w, http.StatusBadRequest)
-				return
-			}
-
-			w.Header().Set("Content-Type", "application/json")
-			fmt.Fprint(w, string(data))
-		}
-
-	} else {
-		fmt.Fprint(w, http.StatusBadRequest)
+	// проверка что порт нормальный
+	if _, err := strconv.Atoi(sM.Port); err != nil {
+		http.Error(w, "port is bad", http.StatusBadRequest)
+		return
 	}
+	// TODO проверка адреса что он без слешей
+
+	fb, err := FabricServer()
+
+	if err != nil {
+		log.NewLog().Fatal(err)
+	}
+
+	slaveServer, err := fb.GetNewSlaveServer("0.0.0.0", sM.Port)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	go log.NewLog().PrintCommon(slaveServer.RunServer().Error())
+
+	sM.Id = slaveServer.id
+	sM.Address = slaveServer.address
+	sM.IsRun = true
+
+	s := model.ServerModel{slaveServer.Id(), slaveServer.StaticResource(), slaveServer.Port(), slaveServer.Address(), true}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(s)
 }
 
 //test function for  panic handler

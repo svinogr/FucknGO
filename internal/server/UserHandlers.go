@@ -7,8 +7,10 @@ import (
 	"FucknGO/log"
 	"encoding/json"
 	"errors"
+	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
+	"strconv"
 )
 
 func user(w http.ResponseWriter, r *http.Request) {
@@ -19,6 +21,49 @@ func user(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPut:
 	case http.MethodDelete:
 	}
+}
+
+func userApi(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodPost:
+		createUser(w, r)
+	case http.MethodGet:
+		getAllUser(w, r)
+	case http.MethodDelete:
+		deleteUserById(w, r)
+	}
+}
+
+func deleteUserById(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	id, err := strconv.ParseUint(vars["id"], 10, 32)
+
+	if err != nil {
+		log.NewLog().PrintError(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	db := repo.NewDataBaseWithConfig()
+	defer db.CloseDataBase()
+
+	userRepo := db.User()
+
+	user := repo.UserModelRepo{Id: id}
+
+	_, err = userRepo.DeleteUser(&user)
+
+	if err != nil {
+		log.NewLog().PrintError(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+}
+
+func getAllUser(w http.ResponseWriter, r *http.Request) {
+
 }
 
 // createUser creates new user in db
