@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <script src="/static/js/jquery-3.6.0.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+
+    <script> $(document).ready(function () {
+            $(".newuser").click(function () {
+                var form = $("#registration_form").serializeArray();
+                var data = new Map();
+                $(form).each(function (index, obj) {
+                    data.set(obj.name, obj.value);
+                });
+
+                $.ajax({
+                    'url': '/api/user',
+                    'method': 'POST',
+                    'dataType': 'json',
+                    'contentType': 'application/json',
+                    //  'headers': {'Authorization': 'Bearer ' + $.cookie("access_token")},
+                    'data': JSON.stringify({
+                        "name": data.get('name'),
+                        "password": data.get('password'),
+                        "email": data.get('email')
+                    }),
+                    statusCode: {
+                        400: function () {
+                            alert("неправельные данные");
+                        },
+                        302: function () {
+                            window.location.href = "/api/login";
+                        }
+                    },
+                    success: function (data) {
+                        alert("da")
+                        window.location.href = "/api/login";
+                    },
+                });
+            });
+
+             $(".login").click(function () {
+                 var form = $("#login_form").serializeArray();
+                 var data = new Map();
+                 $(form).each(function (index, obj) {
+                     data.set(obj.name, obj.value);
+                 });
+
+                 $.ajax({
+                     url: "/api/auth",
+                     method: "POST",
+                     //  dataType: "json",
+                     contentType: "application/json",
+                     data: JSON.stringify({
+                         "email": data.get("email"),
+                         "password": data.get("password")
+                     }),
+                     success: function (response) {
+                         alert("suc");
+                         window.location.href = "/api/mainpage";
+                     },
+                     error: function (response) {
+                         alert("err " + response);
+                     }
+                 });
+             });
+        });
+    </script>
+</head>
+<body>
+
+<div class="container">
+    <div class="row">
+        <form class="d-flex" id="login_form" action="" method="post">
+            <input class="form-control me-2 " type="text" placeholder="email" name="email">
+            <input class="form-control me-2" type="text" placeholder="password" name="password">
+
+        </form>
+        <button class="btn btn-outline-success login" id="login">Войти</button>
+        <a class="btn btn-outline-success" href="newuserpage" role="button">Новый пользователь</a>
+    </div>
+</div>
+
+<div class="col">
+    <div class="container">
+            <form id="registration_form" action="" method="POST">
+                <p>name</p><input class="form-control me-2" type="text" name="name">
+                <p>password</p><input class="form-control me-2" type="text" name="password">
+                <p>email</p><input class="form-control me-2" type="text" name="email"><br>
+            </form>
+
+            <button id="registration" class="btn btn-outline-success float-right newuser">Добавить нового юзера
+            </button>
+
+    </div>
+</div>
+
+</body>
+</html>

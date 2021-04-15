@@ -25,8 +25,9 @@ func setupWebInterfaceHandler(f *fabricHandlers) {
 	hand := handler.MyHandler{"/login", loginPage, http.MethodGet, false, handler.TypeWeb}
 	hand2 := handler.MyHandler{"/mainpage", mainPage, http.MethodGet, true, handler.TypeWeb}
 	hand3 := handler.MyHandler{"/serverpage", serverPage, http.MethodGet, true, handler.TypeWeb}
+	hand4 := handler.MyHandler{"/newuserpage", newuser, http.MethodGet, false, handler.TypeWeb}
 
-	f.Handlers = append(f.Handlers, &hand, &hand2, &hand3)
+	f.Handlers = append(f.Handlers, &hand, &hand2, &hand3, &hand4)
 }
 
 // setupUserHandlers setup handlers for actions with user

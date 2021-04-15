@@ -99,7 +99,7 @@ func deleteServerById(w http.ResponseWriter, r *http.Request) {
 	servers := fb.servers
 
 	for _, el := range servers {
-		if el == nil {
+		if !el.isSlave {
 			continue
 		}
 
@@ -111,7 +111,6 @@ func deleteServerById(w http.ResponseWriter, r *http.Request) {
 			sM.Id = el.Id()
 			sM.IsRun = false
 			fb.RemoveServer(*el)
-			//TODO сделать удаление из спсика серверов
 			break
 		}
 	}
@@ -123,6 +122,7 @@ func deleteServerById(w http.ResponseWriter, r *http.Request) {
 // createServer creates new serverApi
 func createServer(w http.ResponseWriter, r *http.Request) {
 	var sM model.ServerModel
+
 	if err := json.NewDecoder(r.Body).Decode(&sM); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -132,7 +132,6 @@ func createServer(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "port is bad", http.StatusBadRequest)
 		return
 	}
-	// TODO проверка адреса что он без слешей
 
 	fb, err := FabricServer()
 
@@ -147,7 +146,8 @@ func createServer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go log.NewLog().PrintCommon(slaveServer.RunServer().Error())
+	//go log.NewLog().PrintCommon(slaveServer.RunServer().Error())
+	go slaveServer.RunServer()
 
 	sM.Id = slaveServer.id
 	sM.Address = slaveServer.address

@@ -49,3 +49,13 @@ func loginPage(w http.ResponseWriter, r *http.Request) {
 
 	files.Execute(w, nil)
 }
+
+func newuser(w http.ResponseWriter, r *http.Request) {
+	files, err := template.ParseFiles("ui/web/templates/newuserpage.html")
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+	}
+
+	files.Execute(w, nil)
+}

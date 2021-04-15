@@ -67,9 +67,6 @@ func (f *fabricServers) GetNewSlaveServer(address string, port string) (*server,
 
 	server.setup(address, port, uint64(idServer), true)
 
-	setupStaticResource(&server)
-	setupHandlers(&server)
-
 	f.servers = append(f.servers, &server)
 
 	return &server, nil
@@ -128,21 +125,14 @@ func setupStaticResource(server *server) {
 	_, err = os.Stat(defaultStaticResource)
 
 	if err != nil {
-		/*	err = os.MkdirAll(defaultStaticResource, 0777)
-
-			if err != nil {
-				log.NewLog().Fatal(err)
-			}
-		*/
 		err := ui.CopyResource(storageStaticResource, defaultStaticResource)
 
 		if err != nil {
 			log.NewLog().Fatal(err)
 		}
-
 	}
 	// staticResource = "./ui/web/static"
-	fileServer := http.FileServer(http.Dir(defaultStaticResource))
+	fileServer := http.FileServer(http.Dir(defaultStaticResource + "/web/static"))
 
 	//serverApi.mux.Handle("/static/js/jquery-3.6.0.min.js", http.StripPrefix("/static", fileServer))
 	server.mux.PathPrefix("/static/{rest}").Handler(
