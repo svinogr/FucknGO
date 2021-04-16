@@ -30,7 +30,7 @@
                 });
             });
 
-            $("#btn_delete").click(function () {
+            $(".delete-button").click(function () {
                 var id = $(this).prop("name");
                 alert(id)
                 $.ajax({
@@ -61,7 +61,7 @@
                     {{range . }}
                         <li class="list-group-item" id="{{.Id}}">Порт: {{.Port}} <br> Static
                             resource: {{.StaticResource}} </li>
-                        <button id="btn_delete" name="{{ .Id}}" class="btn btn-outline-success float-right">удалить
+                        <button id="btn_delete" name="{{ .Id}}" class="btn btn-outline-success float-right delete-button" >удалить
                         </button>
                     {{end}}
                 </ul>

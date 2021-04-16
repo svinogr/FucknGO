@@ -32,7 +32,8 @@ func setupWebInterfaceHandler(f *fabricHandlers) {
 
 // setupUserHandlers setup handlers for actions with user
 func setupUserHandlers(f *fabricHandlers) {
-	hand := handler.MyHandler{"/user", userApi, http.MethodPost, true, handler.TypeWeb}
+	// TODO установлено времено false потом переделать на плюс еще один столбик в таблице юзеры is active и активацией через email
+	hand := handler.MyHandler{"/user", userApi, http.MethodPost, false, handler.TypeWeb}
 	hand2 := handler.MyHandler{"/user/{id}", userApi, http.MethodDelete, true, handler.TypeWeb}
 
 	f.Handlers = append(f.Handlers, &hand, &hand2)

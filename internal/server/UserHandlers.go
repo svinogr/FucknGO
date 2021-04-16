@@ -13,16 +13,6 @@ import (
 	"strconv"
 )
 
-func user(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodGet:
-	case http.MethodPost:
-		createUser(w, r)
-	case http.MethodPut:
-	case http.MethodDelete:
-	}
-}
-
 func userApi(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
@@ -103,20 +93,6 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 
 	uM.Password = " "
 
-	//	createJWT, err := jwt.CreateJWTToken(uM.Id)
-
-	/*if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-	*/
-	//uM.Token = createJWT
-	//jsonStr, err := json.Marshal(&uM)
-
-	/*	if err != nil {
-		log.NewLog().PrintError(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}*/
 	// постановка сообщения в очередь для отправки юзеру на почту
 	err = broker.PublishMessage(broker.MailMessage{
 		Name:     uM.Name,

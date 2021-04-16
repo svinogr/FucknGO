@@ -5,8 +5,11 @@ import (
 	"FucknGO/config/ui"
 	"FucknGO/internal/handler"
 	"FucknGO/internal/jwt"
+	"FucknGO/internal/server/model"
 	"FucknGO/log"
+	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"sync"
@@ -20,10 +23,10 @@ type fabricServers struct {
 var instance *fabricServers
 var once sync.Once
 
-const API_SLAVE = "/api/slave"
-const API_MASTER = "/api"
+const ApiSlave = "/api/slave"
+const ApiMaster = "/api"
 
-// FabricServer construct singleton
+// FabricServer constructs singleton
 func FabricServer() (*fabricServers, error) {
 	var err error
 	once.Do(func() {
@@ -51,11 +54,6 @@ func (f *fabricServers) GetNewMasterServer(address string, port string) *server 
 func (f *fabricServers) GetNewSlaveServer(address string, port string) (*server, error) {
 
 	for _, el := range f.servers {
-
-		/*	if el == nil {
-			continue
-		}*/
-
 		if el.port == port {
 			return nil, errors.New("port is uses yet")
 		}
@@ -69,9 +67,14 @@ func (f *fabricServers) GetNewSlaveServer(address string, port string) (*server,
 
 	f.servers = append(f.servers, &server)
 
+	server.server.RegisterOnShutdown(func() {
+		fmt.Print("dwddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd")
+	})
+
 	return &server, nil
 }
 
+// RemoveServer removes from slice! only
 func (f *fabricServers) RemoveServer(server server) {
 	for i, el := range f.servers {
 		if el.port == server.port {
@@ -81,12 +84,32 @@ func (f *fabricServers) RemoveServer(server server) {
 	}
 }
 
+func (f *fabricServers) DeleteSlaveServer(sM *model.ServerModel) {
+
+	for _, el := range f.servers {
+		if !el.isSlave {
+			continue
+		}
+
+		if el.Id() == sM.Id {
+			err := el.server.Shutdown(context.Background())
+			sM.Port = el.Port()
+			sM.Address = el.Address()
+			sM.StaticResource = el.StaticResource()
+			sM.Id = el.Id()
+			sM.IsRun = false
+			f.RemoveServer(*el)
+			break
+		}
+	}
+}
+
 //setupStaticResource setup serverApi handler by type serverApi slave/master and auth
 func setupHandlers(s *server) {
 	fabric := NewFabric()
 	if s.isSlave {
 		for _, e := range fabric.Handlers {
-			s.mux.HandleFunc(API_SLAVE+e.GetHandler().Path, e.GetHandler().HandlerFunc).Methods(e.GetHandler().Method)
+			s.mux.HandleFunc(ApiSlave+e.GetHandler().Path, e.GetHandler().HandlerFunc).Methods(e.GetHandler().Method)
 		}
 	} else {
 		for _, e := range fabric.Handlers {
@@ -95,16 +118,16 @@ func setupHandlers(s *server) {
 			switch e.GetHandler().TypeRequest {
 			case handler.TypeWeb:
 				if e.GetHandler().NeedAuthToken {
-					s.mux.Handle(API_MASTER+e.GetHandler().Path, jwt.CheckTokensInCookie(jwt.AccessOrRefresh(fh))).Methods(e.GetHandler().Method)
+					s.mux.Handle(ApiMaster+e.GetHandler().Path, jwt.CheckTokensInCookie(jwt.AccessOrRefresh(fh))).Methods(e.GetHandler().Method)
 				}
 			case handler.TypeApi:
 				if e.GetHandler().NeedAuthToken {
-					s.mux.Handle(API_MASTER+e.GetHandler().Path, jwt.CheckTokensInCookie(jwt.AccessOrRefresh(fh))).Methods(e.GetHandler().Method)
-					//s.mux.Handle(API_MASTER+e.GetHandler().Path, jwt.JwtVerifMiddleware.Handler(jwt.ParseJWT(fh))).Methods(e.GetHandler().Method)
+					s.mux.Handle(ApiMaster+e.GetHandler().Path, jwt.CheckTokensInCookie(jwt.AccessOrRefresh(fh))).Methods(e.GetHandler().Method)
+					//s.mux.Handle(ApiMaster+e.GetHandler().Path, jwt.JwtVerifMiddleware.Handler(jwt.ParseJWT(fh))).Methods(e.GetHandler().Method)
 				}
 			}
 
-			s.mux.HandleFunc(API_MASTER+e.GetHandler().Path, e.GetHandler().HandlerFunc).Methods(e.GetHandler().Method)
+			s.mux.HandleFunc(ApiMaster+e.GetHandler().Path, e.GetHandler().HandlerFunc).Methods(e.GetHandler().Method)
 		}
 	}
 }
@@ -133,8 +156,7 @@ func setupStaticResource(server *server) {
 	}
 	// staticResource = "./ui/web/static"
 	fileServer := http.FileServer(http.Dir(defaultStaticResource + "/web/static"))
-
-	//serverApi.mux.Handle("/static/js/jquery-3.6.0.min.js", http.StripPrefix("/static", fileServer))
+	// особенность при использовании gorilla
 	server.mux.PathPrefix("/static/{rest}").Handler(
 		http.StripPrefix("/static", fileServer))
 }

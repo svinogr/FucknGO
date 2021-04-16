@@ -96,24 +96,7 @@ func deleteServerById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	servers := fb.servers
-
-	for _, el := range servers {
-		if !el.isSlave {
-			continue
-		}
-
-		if el.Id() == id {
-			err = el.server.Shutdown(context.Background())
-			sM.Port = el.Port()
-			sM.Address = el.Address()
-			sM.StaticResource = el.StaticResource()
-			sM.Id = el.Id()
-			sM.IsRun = false
-			fb.RemoveServer(*el)
-			break
-		}
-	}
+	fb.DeleteSlaveServer(&sM)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(sM)
