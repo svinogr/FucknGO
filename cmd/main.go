@@ -58,7 +58,8 @@ func startServer(config config.Config) {
 	}
 
 	ser := fb.GetNewMasterServer("0.0.0.0", port)
-	err = ser.RunServer()
+
+	err = fb.RunServer(ser)
 
 	if err.Error() != "http: serverApi closed" {
 		panic(err)

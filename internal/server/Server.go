@@ -1,13 +1,11 @@
 package server
 
 import (
-	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"net/http"
-	"os"
 )
 
-type server struct {
+type Server struct {
 	id             uint64
 	mux            mux.Router
 	address        string
@@ -17,24 +15,24 @@ type server struct {
 	isSlave        bool
 }
 
-func (s *server) Port() string {
+func (s *Server) Port() string {
 	return s.port
 }
 
-func (s *server) StaticResource() string {
+func (s *Server) StaticResource() string {
 	return s.staticResource
 }
 
-func (s *server) Address() string {
+func (s *Server) Address() string {
 	return s.address
 }
 
-func (s *server) Id() uint64 {
+func (s *Server) Id() uint64 {
 	return s.id
 }
 
 // Setup creates and starts serverApi with settings
-func (s *server) setup(address string, port string, id uint64, isSlave bool) {
+func (s *Server) setup(address string, port string, id uint64, isSlave bool) {
 	s.isSlave = isSlave
 	s.mux = *mux.NewRouter()
 	s.address = address
@@ -43,11 +41,4 @@ func (s *server) setup(address string, port string, id uint64, isSlave bool) {
 
 	setupStaticResource(s)
 	setupHandlers(s)
-}
-
-// runServer run servers
-func (s *server) RunServer() error {
-	s.server = http.Server{Addr: s.address + ":" + s.port, Handler: handlers.LoggingHandler(os.Stdout, &s.mux)} //TODO настроить запись в файл
-
-	return s.server.ListenAndServe()
 }

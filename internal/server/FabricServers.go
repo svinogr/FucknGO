@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/gorilla/handlers"
 	"net/http"
 	"os"
 	"sync"
@@ -17,7 +18,7 @@ import (
 )
 
 type fabricServers struct {
-	servers []*server
+	servers []*Server
 }
 
 var instance *fabricServers
@@ -32,17 +33,17 @@ func FabricServer() (*fabricServers, error) {
 	once.Do(func() {
 		instance = &fabricServers{}
 		//TODO сделать нормальное создание массива
-		instance.servers = make([]*server, 0)
+		instance.servers = make([]*Server, 0)
 	})
 
 	return instance, err
 }
 
 // GetNewMasterServer creates and returns new master servers
-func (f *fabricServers) GetNewMasterServer(address string, port string) *server {
+func (f *fabricServers) GetNewMasterServer(address string, port string) *Server {
 	idServer := time.Now().Unix()
 
-	server := server{}
+	server := Server{}
 	server.setup(address, port, uint64(idServer), false)
 
 	f.servers = append(f.servers, &server)
@@ -51,7 +52,7 @@ func (f *fabricServers) GetNewMasterServer(address string, port string) *server 
 }
 
 // GetNewSlaveServer creates and returns new slave  servers
-func (f *fabricServers) GetNewSlaveServer(address string, port string) (*server, error) {
+func (f *fabricServers) GetNewSlaveServer(address string, port string) (*Server, error) {
 
 	for _, el := range f.servers {
 		if el.port == port {
@@ -61,21 +62,17 @@ func (f *fabricServers) GetNewSlaveServer(address string, port string) (*server,
 
 	idServer := time.Now().Unix()
 
-	server := server{}
+	server := Server{}
 
 	server.setup(address, port, uint64(idServer), true)
 
 	f.servers = append(f.servers, &server)
 
-	server.server.RegisterOnShutdown(func() {
-		fmt.Print("dwddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd")
-	})
-
 	return &server, nil
 }
 
 // RemoveServer removes from slice! only
-func (f *fabricServers) RemoveServer(server server) {
+func (f *fabricServers) RemoveServer(server Server) {
 	for i, el := range f.servers {
 		if el.port == server.port {
 			f.servers = append(f.servers[:i], f.servers[i+1:]...)
@@ -92,7 +89,7 @@ func (f *fabricServers) DeleteSlaveServer(sM *model.ServerModel) {
 		}
 
 		if el.Id() == sM.Id {
-			err := el.server.Shutdown(context.Background())
+			_ = el.server.Shutdown(context.Background())
 			sM.Port = el.Port()
 			sM.Address = el.Address()
 			sM.StaticResource = el.StaticResource()
@@ -105,7 +102,7 @@ func (f *fabricServers) DeleteSlaveServer(sM *model.ServerModel) {
 }
 
 //setupStaticResource setup serverApi handler by type serverApi slave/master and auth
-func setupHandlers(s *server) {
+func setupHandlers(s *Server) {
 	fabric := NewFabric()
 	if s.isSlave {
 		for _, e := range fabric.Handlers {
@@ -133,7 +130,7 @@ func setupHandlers(s *server) {
 }
 
 //setupStaticResource set static dir for serverApi
-func setupStaticResource(server *server) {
+func setupStaticResource(server *Server) {
 	conf, err := config.GetConfig()
 
 	if err != nil {
@@ -159,4 +156,14 @@ func setupStaticResource(server *server) {
 	// особенность при использовании gorilla
 	server.mux.PathPrefix("/static/{rest}").Handler(
 		http.StripPrefix("/static", fileServer))
+}
+
+// runServer run servers
+func (f *fabricServers) RunServer(server *Server) error {
+	server.server = http.Server{Addr: server.address + ":" + server.port, Handler: handlers.LoggingHandler(os.Stdout, &server.mux)} //TODO настроить запись в файл
+	server.server.RegisterOnShutdown(func() {
+		fmt.Print("dwddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd")
+	})
+
+	return server.server.ListenAndServe()
 }

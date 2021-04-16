@@ -58,10 +58,9 @@
         <div class="row">
             <div class="col">
                 <ul class="list-group list-group-flush">
-                    {{range . }}
-                        <li class="list-group-item" id="{{.Id}}">Порт: {{.Port}} <br> Static
-                            resource: {{.StaticResource}} </li>
-                        <button id="btn_delete" name="{{ .Id}}" class="btn btn-outline-success float-right delete-button" >удалить
+                    {{range  . }}
+                        <li class="list-group-item" id="{{.Id}}">Порт: {{.Port}}  </li>
+                        <button id="btn_delete" name="{{.Id}}" class="btn btn-outline-success float-right delete-button" >удалить
                         </button>
                     {{end}}
                 </ul>

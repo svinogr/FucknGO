@@ -3,7 +3,6 @@ package server
 import (
 	"FucknGO/internal/server/model"
 	"FucknGO/log"
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -81,12 +80,13 @@ func deleteServerById(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	id, err := strconv.ParseUint(vars["id"], 10, 32)
-
 	if err != nil {
 		log.NewLog().PrintError(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	sM.Id = id
 
 	fb, err := FabricServer()
 
@@ -130,7 +130,7 @@ func createServer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//go log.NewLog().PrintCommon(slaveServer.RunServer().Error())
-	go slaveServer.RunServer()
+	go fb.RunServer(slaveServer)
 
 	sM.Id = slaveServer.id
 	sM.Address = slaveServer.address

@@ -35,9 +35,9 @@ func serverPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	servers := fabricServer.servers
-	fmt.Print(len(servers))
+	fmt.Println("len ", len(servers))
 
-	files.ExecuteTemplate(w, "server", &servers)
+	err = files.ExecuteTemplate(w, "server", &servers)
 }
 
 func loginPage(w http.ResponseWriter, r *http.Request) {
