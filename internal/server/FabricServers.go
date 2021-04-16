@@ -82,7 +82,6 @@ func (f *fabricServers) RemoveServer(server Server) {
 }
 
 func (f *fabricServers) DeleteSlaveServer(sM *model.ServerModel) {
-
 	for _, el := range f.servers {
 		if !el.isSlave {
 			continue
@@ -95,7 +94,6 @@ func (f *fabricServers) DeleteSlaveServer(sM *model.ServerModel) {
 			sM.StaticResource = el.StaticResource()
 			sM.Id = el.Id()
 			sM.IsRun = false
-			f.RemoveServer(*el)
 			break
 		}
 	}
@@ -162,7 +160,8 @@ func setupStaticResource(server *Server) {
 func (f *fabricServers) RunServer(server *Server) error {
 	server.server = http.Server{Addr: server.address + ":" + server.port, Handler: handlers.LoggingHandler(os.Stdout, &server.mux)} //TODO настроить запись в файл
 	server.server.RegisterOnShutdown(func() {
-		fmt.Print("dwddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd")
+		fmt.Println("server close")
+		f.RemoveServer(*server)
 	})
 
 	return server.server.ListenAndServe()
