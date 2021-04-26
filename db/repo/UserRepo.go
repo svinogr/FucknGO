@@ -63,7 +63,7 @@ func (u *UserRepo) UpdateUser(user *UserModelRepo) (*UserModelRepo, error) {
 func (u *UserRepo) FindUserById(id uint64) (*UserModelRepo, error) {
 	defer u.db.CloseDataBase()
 	user := UserModelRepo{}
-
+	//TODO переделать метод нафига еще один оьект user
 	if err := u.db.Db.QueryRow("SELECT "+COL_ID_USER+", "+COL_NAME+", "+COL_PASSWORD+", "+COL_EMAIL+" from "+TABLE_NAME_USERS+" where "+COL_ID_USER+"=$1",
 		id).
 		Scan(&user.Id, &user.Name, &user.Password, &user.Email); err != nil {

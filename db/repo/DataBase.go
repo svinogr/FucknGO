@@ -15,19 +15,16 @@ const (
 )
 
 type DataBase struct {
-	config      *config.Config
-	dataBaseUrl string
-	Db          *sql.DB
-	userRepo    *UserRepo
-	sessionRepo *SessionRepo
+	config        *config.Config
+	dataBaseUrl   string
+	Db            *sql.DB
+	userRepo      *UserRepo
+	sessionRepo   *SessionRepo
+	coordRepo     *CoordRepo
+	productRepo   *ProductRepo
+	shopRepo      *ShopRepo
+	shopStockRepo *ShopStockRepo
 }
-
-// get new db or return created db
-/*func NewDataBase(config *config.Config) *DataBase {
-	return &DataBase{
-		config: config,
-	}
-}*/
 
 func NewDataBaseWithConfig() *DataBase {
 	config, err := config.GetConfig()
@@ -91,4 +88,56 @@ func (d *DataBase) Sessions() *SessionRepo {
 	}
 
 	return d.sessionRepo
+}
+
+//Get CoordRepository
+func (d *DataBase) Coord() *CoordRepo {
+	if d.coordRepo != nil {
+		return d.coordRepo
+	}
+	d.OpenDataBase()
+	d.coordRepo = &CoordRepo{
+		d,
+	}
+
+	return d.coordRepo
+}
+
+//Get ProductRepository
+func (d *DataBase) Product() *ProductRepo {
+	if d.productRepo != nil {
+		return d.productRepo
+	}
+	d.OpenDataBase()
+	d.productRepo = &ProductRepo{
+		d,
+	}
+
+	return d.productRepo
+}
+
+//Get ShopRepository
+func (d *DataBase) Shop() *ShopRepo {
+	if d.shopRepo != nil {
+		return d.shopRepo
+	}
+	d.OpenDataBase()
+	d.shopRepo = &ShopRepo{
+		d,
+	}
+
+	return d.shopRepo
+}
+
+//Get ShopRepository
+func (d *DataBase) ShopStock() *ShopStockRepo {
+	if d.shopStockRepo != nil {
+		return d.shopStockRepo
+	}
+	d.OpenDataBase()
+	d.shopStockRepo = &ShopStockRepo{
+		d,
+	}
+
+	return d.shopStockRepo
 }
