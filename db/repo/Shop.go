@@ -1,5 +1,7 @@
 package repo
 
+import "errors"
+
 const (
 	TABLE_NAME_SHOP   = "shops"
 	COL_SHOP_ID       = "id"
@@ -95,4 +97,29 @@ func (c *ShopRepo) FindAll() (*[]ShopModelRepo, error) {
 	}
 
 	return &shopList, nil
+}
+
+// FindByListCoords finds all shoops by id coord
+func (c *ShopRepo) FindByListCoords(coords *[]CoordModelRepo) (*[]ShopModelRepo, error) {
+	shopsList := []ShopModelRepo{}
+
+	for _, ell := range *coords {
+		shop := ShopModelRepo{}
+
+		row := c.db.Db.QueryRow("SELECT * from "+TABLE_NAME_SHOP+" where "+COL_SHOP_ID+"=$1", ell.Id)
+
+		err := row.Scan(&shop.Id, &shop.CoordId, &shop.Name, &shop.Address)
+
+		if err == errors.New("ErrNoRows") {
+			continue
+		}
+
+		if err != nil {
+			return nil, err
+		}
+
+		shopsList = append(shopsList, shop)
+	}
+
+	return &shopsList, nil
 }

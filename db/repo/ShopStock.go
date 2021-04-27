@@ -88,6 +88,30 @@ func (s *ShopStockRepo) FindById(shopStock *ShopStockModelRepo) (*ShopStockModel
 	return shopStock, nil
 }
 
+// FindByShop find all stocks by shop
+func (s *ShopStockRepo) FindByShop(shop *ShopModelRepo) (*[]ShopStockModelRepo, error) {
+	shopStockList := []ShopStockModelRepo{}
+
+	row, err := s.db.Db.Query("SELECT * from "+TABLE_NAME_SHOP_STOCK+" where "+COL_SHOP_ID+"=$1",
+		shop.Id)
+
+	if err != nil {
+		return &shopStockList, err
+	}
+
+	for row.Next() {
+		shopStock := ShopStockModelRepo{}
+		err := row.Scan(&shopStock.Id, &shopStock.ShopId, &shopStock.Title, &shopStock.Description, &shopStock.DateStart, &shopStock.DateFinish)
+
+		if err != nil {
+			return nil, err
+		}
+		shopStockList = append(shopStockList, shopStock)
+	}
+
+	return &shopStockList, nil
+}
+
 func (s *ShopStockRepo) FindAll() (*[]ShopStockModelRepo, error) {
 	shopStockList := []ShopStockModelRepo{}
 
