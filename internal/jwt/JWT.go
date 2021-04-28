@@ -344,7 +344,7 @@ func SetCookieWithToken(w *http.ResponseWriter, token model.TokenModel) {
 	http.SetCookie(*w, &cookieWithToken)
 }
 
-func GetUserIdFromContext(r *http.Request) (repo.UserModelRepo, error) {
+func GetUserFromContext(r *http.Request) (repo.UserModelRepo, error) {
 	value := r.Context().Value(User)
 
 	if value == nil {

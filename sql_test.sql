@@ -10,6 +10,8 @@ CREATE TABLE if not exists users
     UNIQUE (Id)
 );
 
+ALTER TABLE users ADD COLUMN type CHARACTER VARYING(30);
+
 CREATE TABLE if not exists tokens
 (
     Id      SERIAL PRIMARY KEY,
@@ -40,6 +42,7 @@ CREATE TABLE if not exists coord
 CREATE TABLE if not exists shops
 (
     "id"      SERIAL PRIMARY KEY,
+    "user_id" INTEGER,
     "coord_id" INTEGER,
     "name"  character varying(200)   NOT NULL,
     "address"  character varying(200)   NOT NULL,

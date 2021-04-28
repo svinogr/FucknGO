@@ -1,0 +1,62 @@
+{{ define "shops"}}
+    {{ template "header" .}}
+    <script> $(document).ready(function () {
+
+            $(".delete-button").click(function () {
+                var id = $(this).prop("name");
+                alert(id)
+                $.ajax({
+                    'url': '/api/server/' + id,
+                    'method': 'DELETE',
+                    'contentType': 'application/json',
+                    statusCode: {
+                        400: function () {
+                            alert("неправельные данные");
+                        },
+                        302: function () {
+                            window.location.href = "/api/login";
+                        }
+                    },
+                    success: function (data) {
+                        window.location.href = "/api/accountpage";
+                    },
+                });
+            });
+        });
+    </script>
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <div class="container mt-4 align-content-center">
+        <div class="row">
+            <div class="col-9">
+                <ul class="list-group list-group-flush">
+                    {{range . }}
+                    <div class="input-group">
+                        <div class="col-3">
+                            <li class="list-group-item" style="border: 0px;">Название: {{.Name}}
+                            </li>
+                            <li class="list-group-item" style="border: 0px;">Адрес: {{.Address}}
+                            </li>
+                        </div>
+                        <span class="input-group-btn">
+                    <button class="btn btn-outline-danger btn-default delete-button" id="btn_delete" name="{{ .Id}}"
+                            type="button">удалить</button>
+                        </span>
+                    </div>
+                </ul>
+                {{ end}}
+            </div>
+            <div class="col-3 form-group">
+                <form id="addserver_form" action="" method="POST">
+                    <a href="newshoppage" class="btn btn-outline-success form-control">Добавить новый магазин
+                    </a>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    </body>
+    </html>
+
+{{end}}

@@ -68,6 +68,7 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 	user.Email = uM.Email
 	user.Name = uM.Name
 	user.Password = uM.Password
+	user.Type = repo.Shop
 
 	if !validRegInfo(user) {
 		http.Error(w, errors.New("Not valid register data").Error(), http.StatusBadRequest)

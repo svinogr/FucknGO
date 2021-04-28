@@ -2,6 +2,7 @@ package server
 
 import (
 	"FucknGO/db/repo"
+	"FucknGO/internal/jwt"
 	"FucknGO/internal/server/model"
 	"FucknGO/log"
 	"encoding/json"
@@ -71,6 +72,13 @@ func deleteShopById(w http.ResponseWriter, r *http.Request) {
 
 // createShop creates new shop in db
 func createShop(w http.ResponseWriter, r *http.Request) {
+	user, err := jwt.GetUserFromContext(r)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	var sM = model.ShopModel{}
 	if err := json.NewDecoder(r.Body).Decode(&sM); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -81,14 +89,16 @@ func createShop(w http.ResponseWriter, r *http.Request) {
 	shop.CoordId = sM.CoordId
 	shop.Name = sM.Name
 	shop.Address = sM.Address
+	shop.UserId = user.Id
 
 	db := repo.NewDataBaseWithConfig()
 	defer db.CloseDataBase()
 
-	_, err := db.Shop().Create(&shop)
+	_, err = db.Shop().Create(&shop)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	sM.Id = shop.Id

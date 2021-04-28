@@ -5,11 +5,12 @@ import (
 )
 
 const (
-	TABLE_NAME_USERS = "users"
-	COL_ID_USER      = "id"
-	COL_NAME         = "user_name"
-	COL_PASSWORD     = "password"
-	COL_EMAIL        = "email"
+	TABLE_NAME_USERS  = "users"
+	COL_USER_ID       = "id"
+	COL_USER_NAME     = "user_name"
+	COL_USER_PASSWORD = "password"
+	COL_USER_EMAIL    = "email"
+	COL_USER_TYPE     = "type"
 )
 
 type TypeUser int
@@ -25,6 +26,7 @@ type UserModelRepo struct {
 	Name     string
 	Password string
 	Email    string
+	Type     TypeUser
 }
 
 type UserRepo struct {
@@ -33,10 +35,11 @@ type UserRepo struct {
 
 func (u *UserRepo) CreateUser(user *UserModelRepo) (*UserModelRepo, error) {
 	defer u.db.CloseDataBase()
-	if err := u.db.Db.QueryRow("INSERT into "+TABLE_NAME_USERS+" ("+COL_NAME+", "+COL_PASSWORD+", "+COL_EMAIL+") VALUES ($1, $2, $3) RETURNING "+COL_ID_USER,
+	if err := u.db.Db.QueryRow("INSERT into "+TABLE_NAME_USERS+" ("+COL_USER_NAME+", "+COL_USER_PASSWORD+", "+COL_USER_EMAIL+","+COL_USER_TYPE+") VALUES ($1, $2, $3, $4) RETURNING "+COL_USER_ID,
 		user.Name,
 		user.Password,
-		user.Email).
+		user.Email,
+		user.Type).
 		Scan(&user.Id); err != nil {
 		return nil, err
 	}
@@ -52,14 +55,16 @@ func (u *UserRepo) CreateUser(user *UserModelRepo) (*UserModelRepo, error) {
 func (u *UserRepo) UpdateUser(user *UserModelRepo) (*UserModelRepo, error) {
 	defer u.db.CloseDataBase()
 	err := u.db.Db.QueryRow("UPDATE "+TABLE_NAME_USERS+" set "+
-		COL_NAME+"= $1, "+
-		COL_PASSWORD+"= $2, "+
-		COL_EMAIL+"= $3"+
-		" WHERE "+COL_ID_USER+"=$4 returning id, user_name, password, email",
+		COL_USER_NAME+"=$1, "+
+		COL_USER_PASSWORD+"=$2, "+
+		COL_USER_EMAIL+"=$3 "+
+		COL_USER_TYPE+"=$4 "+
+		"WHERE "+COL_USER_ID+"=$5 returning id, user_name, password, email, type",
 		user.Name,
 		user.Password,
 		user.Email,
-		user.Id).Scan(&user.Id, &user.Name, &user.Password, &user.Email)
+		user.Type,
+		user.Id).Scan(&user.Id, &user.Name, &user.Password, &user.Email, &user.Type)
 
 	if err != nil {
 		return nil, err
@@ -72,9 +77,9 @@ func (u *UserRepo) FindUserById(id uint64) (*UserModelRepo, error) {
 	defer u.db.CloseDataBase()
 	user := UserModelRepo{}
 	//TODO переделать метод нафига еще один оьект user
-	if err := u.db.Db.QueryRow("SELECT "+COL_ID_USER+", "+COL_NAME+", "+COL_PASSWORD+", "+COL_EMAIL+" from "+TABLE_NAME_USERS+" where "+COL_ID_USER+"=$1",
+	if err := u.db.Db.QueryRow("SELECT "+COL_USER_ID+", "+COL_USER_NAME+", "+COL_USER_PASSWORD+", "+COL_USER_EMAIL+", "+COL_USER_TYPE+" from "+TABLE_NAME_USERS+" where "+COL_USER_ID+"=$1",
 		id).
-		Scan(&user.Id, &user.Name, &user.Password, &user.Email); err != nil {
+		Scan(&user.Id, &user.Name, &user.Password, &user.Email, &user.Type); err != nil {
 
 		return nil, err
 	}
@@ -84,7 +89,7 @@ func (u *UserRepo) FindUserById(id uint64) (*UserModelRepo, error) {
 
 func (u *UserRepo) DeleteUser(user *UserModelRepo) (*UserModelRepo, error) {
 	defer u.db.CloseDataBase()
-	_, err := u.db.Db.Exec("DELETE from "+TABLE_NAME_USERS+" where "+COL_ID_USER+" = $1", user.Id)
+	_, err := u.db.Db.Exec("DELETE from "+TABLE_NAME_USERS+" where "+COL_USER_ID+" = $1", user.Id)
 
 	if err != nil {
 		return nil, err
@@ -97,9 +102,9 @@ func (u *UserRepo) FindUserByEmail(email string) (*UserModelRepo, error) {
 	defer u.db.CloseDataBase()
 	user := UserModelRepo{}
 
-	if err := u.db.Db.QueryRow("SELECT "+COL_ID_USER+", "+COL_NAME+", "+COL_PASSWORD+", "+COL_EMAIL+" from "+TABLE_NAME_USERS+" where "+COL_EMAIL+"=$1",
+	if err := u.db.Db.QueryRow("SELECT "+COL_USER_ID+", "+COL_USER_NAME+", "+COL_USER_PASSWORD+", "+COL_USER_EMAIL+", "+COL_USER_TYPE+" from "+TABLE_NAME_USERS+" where "+COL_USER_EMAIL+"=$1",
 		email).
-		Scan(&user.Id, &user.Name, &user.Password, &user.Email); err != nil {
+		Scan(&user.Id, &user.Name, &user.Password, &user.Email, &user.Type); err != nil {
 
 		return nil, err
 	}
@@ -111,9 +116,9 @@ func (u *UserRepo) FindUserByName(name string) (*UserModelRepo, error) {
 	defer u.db.CloseDataBase()
 	user := UserModelRepo{}
 
-	if err := u.db.Db.QueryRow("SELECT "+COL_ID_USER+", "+COL_NAME+", "+COL_PASSWORD+", "+COL_EMAIL+" from "+TABLE_NAME_USERS+" where "+COL_NAME+"=$1",
+	if err := u.db.Db.QueryRow("SELECT "+COL_USER_ID+", "+COL_USER_NAME+", "+COL_USER_PASSWORD+", "+COL_USER_EMAIL+", "+COL_USER_TYPE+" from "+TABLE_NAME_USERS+" where "+COL_USER_NAME+"=$1",
 		name).
-		Scan(&user.Id, &user.Name, &user.Password, &user.Email); err != nil {
+		Scan(&user.Id, &user.Name, &user.Password, &user.Email, &user.Type); err != nil {
 
 		return nil, err
 	}
@@ -125,7 +130,7 @@ func (u *UserRepo) FindAllUser() (*[]UserModelRepo, error) {
 	defer u.db.CloseDataBase()
 	userList := []UserModelRepo{}
 
-	row, err := u.db.Db.Query("SELECT " + COL_ID_USER + ", " + COL_NAME + ", " + COL_PASSWORD + ", " + COL_EMAIL + " from " + TABLE_NAME_USERS)
+	row, err := u.db.Db.Query("SELECT " + COL_USER_ID + ", " + COL_USER_NAME + ", " + COL_USER_PASSWORD + ", " + COL_USER_EMAIL + ", " + COL_USER_TYPE + " from " + TABLE_NAME_USERS)
 
 	if err != nil {
 		return &userList, err
@@ -133,7 +138,7 @@ func (u *UserRepo) FindAllUser() (*[]UserModelRepo, error) {
 
 	for row.Next() {
 		user := UserModelRepo{}
-		err := row.Scan(&user.Id, &user.Name, &user.Password, &user.Email)
+		err := row.Scan(&user.Id, &user.Name, &user.Password, &user.Email, &user.Type)
 
 		if err != nil {
 			return nil, err
