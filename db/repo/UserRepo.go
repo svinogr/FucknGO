@@ -12,6 +12,14 @@ const (
 	COL_EMAIL        = "email"
 )
 
+type TypeUser int
+
+const (
+	Admin = iota
+	Client
+	Shop
+)
+
 type UserModelRepo struct {
 	Id       uint64
 	Name     string
