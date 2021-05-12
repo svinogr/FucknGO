@@ -30,8 +30,9 @@ func setupWebInterfaceHandler(f *fabricHandlers) {
 	hand4 := handler.MyHandler{"/newuserpage", newuser, http.MethodGet, false, handler.TypeWeb}
 	hand5 := handler.MyHandler{"/acountpage", accountPage, http.MethodGet, true, handler.TypeWeb}
 	hand6 := handler.MyHandler{"/newshoppage", newShopPage, http.MethodGet, true, handler.TypeWeb}
+	hand7 := handler.MyHandler{"/changeshoppage/{id}", changeShopPage, http.MethodGet, true, handler.TypeWeb}
 
-	f.Handlers = append(f.Handlers, &hand, &hand2, &hand3, &hand4, &hand5, &hand6)
+	f.Handlers = append(f.Handlers, &hand, &hand2, &hand3, &hand4, &hand5, &hand6, &hand7)
 }
 
 // setupUserHandlers setup handlers for actions with user
@@ -46,7 +47,6 @@ func setupUserHandlers(f *fabricHandlers) {
 // setupAuthHandlers setup handlers for actions with auth
 func setupAuthHandlers(f *fabricHandlers) {
 	hand := handler.MyHandler{"/auth", auth, http.MethodPost, false, handler.TypeApi}
-	//	hand2 := handler.MyHandler{"/log", logPage, http.MethodGet, false, handler.TypeApi}
 	hand4 := handler.MyHandler{"/logout", logOut, http.MethodGet, true, handler.TypeApi}
 	hand3 := handler.MyHandler{"/auth/refresh-tokens", refreshToken, http.MethodPost, false, handler.TypeApi}
 
@@ -56,8 +56,10 @@ func setupAuthHandlers(f *fabricHandlers) {
 // setupShopHandlers setup handlers for actions with shopApi
 func setupShopHandlers(f *fabricHandlers) {
 	hand := handler.MyHandler{"/shop", shopApi, http.MethodPost, true, handler.TypeWeb}
+	hand2 := handler.MyHandler{"/shop/{id}", shopApi, http.MethodDelete, true, handler.TypeWeb}
+	hand3 := handler.MyHandler{"/shop/{id}", shopApi, http.MethodPut, true, handler.TypeWeb}
 
-	f.Handlers = append(f.Handlers, &hand)
+	f.Handlers = append(f.Handlers, &hand, &hand2, &hand3)
 }
 
 // setupServerHandlers setup handlers for actions with serverApi

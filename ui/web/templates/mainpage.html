@@ -2,6 +2,11 @@
     {{ template "header" .}}
 
     <script> $(document).ready(function () {
+            $(".clickable-row").click(function() {
+                var id = $(this).prop("id");
+                alert(id)
+              //  window.location = $(this).data("href");
+            });
             $("#registration").click(function () {
                 var form = $("#registration_form").serializeArray();
                 var data = new Map();
@@ -14,7 +19,6 @@
                     'method': 'POST',
                     'dataType': 'json',
                     'contentType': 'application/json',
-                    //  'headers': {'Authorization': 'Bearer ' + $.cookie("access_token")},
                     'data': JSON.stringify({
                         "name": data.get('name'),
                         "password": data.get('password'),
@@ -61,21 +65,32 @@
     <div class="container mt-4">
         <div class="row">
             <div class="col-9">
-                <ul class="list-group list-group-flush">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Пользователь</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Действие</th>
+                    </tr>
+                    </thead>
+                    <tbody>
                     {{range . }}
-                    <div class="input-group">
-                        <div class="col-6">
-                        <li class="list-group-item" style="border: 0px;">Пользователь: {{.Email}}
-                        </li>
-                        </div>
-                        <span class="input-group-btn">
+                    <tr  class="clickable-row" id="{{ .Id}}">
+                        <th scope="row">{{ .Id}}</th>
+                        <td>{{ .Name}}</td>
+                        <td>{{ .Email}}</td>
+                        <td> <span class="input-group-btn">
                     <button class="btn btn-outline-danger btn-default delete-button" id="btn_delete" name="{{ .Id}}"
                             type="button">удалить</button>
                     <button class="btn btn-outline-success float-right ml-1 " type="button">изменить</button>
                         </span>
-                    </div>
-                </ul>
-                {{ end}}
+            </td>
+                    </tr>
+                    {{ end}}
+                    </tbody>
+                </table>
+
             </div>
             <div class="col-3">
                 <a class="btn btn-outline-success form-control" href="newuserpage" role="button">Добавить

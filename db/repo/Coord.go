@@ -1,7 +1,7 @@
 package repo
 
 const (
-	TABLE_NAME_COORD = "coordRepo"
+	TABLE_NAME_COORD = "coord"
 	COL_COORD_ID     = "id"
 	COL_COORD_X      = "coord_x"
 	COL_COORD_Y      = "coord_y"
@@ -10,9 +10,9 @@ const (
 const radius float64 = 20
 
 type CoordModelRepo struct {
-	Id     uint64
-	CoordX float64
-	CoordY float64
+	Id       uint64
+	CoordLat float64
+	CoordLng float64
 }
 
 type CoordRepo struct {
@@ -22,9 +22,9 @@ type CoordRepo struct {
 func (s *CoordRepo) Create(coord *CoordModelRepo) (*CoordModelRepo, error) {
 	if err := s.db.Db.QueryRow("INSERT into "+TABLE_NAME_COORD+
 		" ("+COL_COORD_X+", "+
-		COL_COORD_Y+") VALUES ($1, $2, $3, $4) RETURNING "+COL_COORD_ID,
-		coord.CoordX,
-		coord.CoordY).
+		COL_COORD_Y+") VALUES ($1, $2) RETURNING "+COL_COORD_ID,
+		coord.CoordLat,
+		coord.CoordLng).
 		Scan(&coord.Id); err != nil {
 		return nil, err
 	}
@@ -39,9 +39,9 @@ func (s *CoordRepo) Update(coord *CoordModelRepo) (*CoordModelRepo, error) {
 		" WHERE "+COL_COORD_ID+"=$3 returning "+COL_COORD_ID+", "+
 		COL_COORD_X+", "+
 		COL_COORD_Y,
-		coord.CoordX,
-		coord.CoordY).
-		Scan(&coord.Id, &coord.CoordX, &coord.CoordY)
+		coord.CoordLat,
+		coord.CoordLng).
+		Scan(&coord.Id, &coord.CoordLat, &coord.CoordLng)
 
 	if err != nil {
 		return nil, err
@@ -60,15 +60,17 @@ func (s *CoordRepo) Delete(coord *CoordModelRepo) (*CoordModelRepo, error) {
 	return coord, nil
 }
 
-func (s *CoordRepo) FindById(coord *CoordModelRepo) (*CoordModelRepo, error) {
+func (s *CoordRepo) FindById(id uint64) (*CoordModelRepo, error) {
+	coord := CoordModelRepo{}
+
 	if err := s.db.Db.QueryRow("SELECT * from "+TABLE_NAME_COORD+" where "+COL_COORD_ID+"=$1",
-		coord.Id).
-		Scan(&coord.Id, &coord.CoordX, &coord.CoordY); err != nil {
+		id).
+		Scan(&coord.Id, &coord.CoordLat, &coord.CoordLng); err != nil {
 
 		return nil, err
 	}
 
-	return coord, nil
+	return &coord, nil
 }
 
 func (s *CoordRepo) FindAll() (*[]CoordModelRepo, error) {
@@ -82,7 +84,7 @@ func (s *CoordRepo) FindAll() (*[]CoordModelRepo, error) {
 
 	for row.Next() {
 		coord := CoordModelRepo{}
-		err := row.Scan(&coord.Id, &coord.CoordX, &coord.CoordY)
+		err := row.Scan(&coord.Id, &coord.CoordLat, &coord.CoordLng)
 
 		if err != nil {
 			return nil, err
@@ -97,10 +99,10 @@ func (s *CoordRepo) FindAll() (*[]CoordModelRepo, error) {
 func (s *CoordRepo) FindInRadius(coord *CoordModelRepo) (*[]CoordModelRepo, error) {
 	coordList := []CoordModelRepo{}
 
-	xH := coord.CoordX + radius
-	xL := coord.CoordX - radius
-	yH := coord.CoordY + radius
-	yL := coord.CoordX + radius
+	xH := coord.CoordLat + radius
+	xL := coord.CoordLat - radius
+	yH := coord.CoordLng + radius
+	yL := coord.CoordLat + radius
 
 	row, err := s.db.Db.Query("SELECT * from "+TABLE_NAME_COORD+" where "+
 		COL_COORD_X+"< $1"+" && "+
@@ -114,7 +116,7 @@ func (s *CoordRepo) FindInRadius(coord *CoordModelRepo) (*[]CoordModelRepo, erro
 
 	for row.Next() {
 		coord := CoordModelRepo{}
-		err := row.Scan(&coord.Id, &coord.CoordX, &coord.CoordY)
+		err := row.Scan(&coord.Id, &coord.CoordLat, &coord.CoordLng)
 
 		if err != nil {
 			return nil, err

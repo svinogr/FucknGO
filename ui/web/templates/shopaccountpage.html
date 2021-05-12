@@ -6,7 +6,7 @@
                 var id = $(this).prop("name");
                 alert(id)
                 $.ajax({
-                    'url': '/api/server/' + id,
+                    'url': '/api/shop/' + id,
                     'method': 'DELETE',
                     'contentType': 'application/json',
                     statusCode: {
@@ -18,33 +18,49 @@
                         }
                     },
                     success: function (data) {
-                        window.location.href = "/api/accountpage";
+                        window.location.href = "/api/acountpage";
                     },
                 });
             });
+
+            $(".clickable-row").click(function () {
+                var id = $(this).prop("id");
+                window.location.href = "/api/changeshoppage/" + id;
+            });
         });
+
+
     </script>
     <script src="/static/bootstrap/js/bootstrap.min.js"></script>
     <div class="container mt-4 align-content-center">
         <div class="row">
             <div class="col-9">
-                <ul class="list-group list-group-flush">
+                <table class="table  table-hover">
+                    <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Название</th>
+                        <th scope="col">Адрес</th>
+                        <th scope="col">Действие</th>
+                    </tr>
+                    </thead>
+                    <tbody>
                     {{range . }}
-                    <div class="input-group">
-                        <div class="col-3">
-                            <li class="list-group-item" style="border: 0px;">Название: {{.Name}}
-                            </li>
-                            <li class="list-group-item" style="border: 0px;">Адрес: {{.Address}}
-                            </li>
-                        </div>
-                        <span class="input-group-btn">
+                        <tr class="clickable-row" id="{{.Id}}">
+                            <th scope="row">{{ .Id}}</th>
+                            <td>{{ .Name}}</td>
+                            <td>{{ .Address}}</td>
+                            <td> <span class="input-group-btn">
                     <button class="btn btn-outline-danger btn-default delete-button" id="btn_delete" name="{{ .Id}}"
                             type="button">удалить</button>
                         </span>
-                    </div>
-                </ul>
-                {{ end}}
+                            </td>
+                        </tr>
+                    {{ end}}
+                    </tbody>
+                </table>
             </div>
+
             <div class="col-3 form-group">
                 <form id="addserver_form" action="" method="POST">
                     <a href="newshoppage" class="btn btn-outline-success form-control">Добавить новый магазин

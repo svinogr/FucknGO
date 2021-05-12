@@ -19,7 +19,6 @@
                     'method': 'POST',
                     'dataType': 'json',
                     'contentType': 'application/json',
-                    //  'headers': {'Authorization': 'Bearer ' + $.cookie("access_token")},
                     'data': JSON.stringify({
                         "name": data.get('name'),
                         "password": data.get('password'),
@@ -34,8 +33,7 @@
                         }
                     },
                     success: function (data) {
-                        alert("da")
-                        window.location.href = "/api/login";
+                        window.location.href = "/api/mainpage";
                     },
                 });
             });

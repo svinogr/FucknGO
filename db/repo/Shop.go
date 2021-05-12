@@ -41,15 +41,15 @@ func (c *ShopRepo) Create(shop *ShopModelRepo) (*ShopModelRepo, error) {
 func (c *ShopRepo) Update(shop *ShopModelRepo) (*ShopModelRepo, error) {
 	err := c.db.Db.QueryRow("UPDATE "+TABLE_NAME_SHOP+" set "+
 		COL_SHOP_COORD_ID+"= $1, "+
-		COL_SHOP_USER_ID+"=$2",
+		COL_SHOP_USER_ID+"=$2,"+
 		COL_SHOP_NAME+"= $3, "+
-			COL_SHOP_ADDRESS+"= $4"+
-			" WHERE "+COL_SHOP_ID+"=$5 returning "+
-			COL_SHOP_ID+", "+
-			COL_SHOP_USER_ID+", "+
-			COL_SHOP_COORD_ID+", "+
-			COL_SHOP_NAME+", "+
-			COL_SHOP_ADDRESS,
+		COL_SHOP_ADDRESS+"= $4"+
+		" WHERE "+COL_SHOP_ID+"=$5 returning "+
+		COL_SHOP_ID+", "+
+		COL_SHOP_USER_ID+", "+
+		COL_SHOP_COORD_ID+", "+
+		COL_SHOP_NAME+", "+
+		COL_SHOP_ADDRESS,
 		shop.CoordId,
 		shop.UserId,
 		shop.Name,
@@ -151,4 +151,17 @@ func (c *ShopRepo) FindByUserId(user UserModelRepo) (*[]ShopModelRepo, error) {
 	}
 
 	return &shopList, nil
+}
+
+func (c *ShopRepo) FindById(id uint64) (*ShopModelRepo, error) {
+	shop := ShopModelRepo{}
+
+	if err := c.db.Db.QueryRow("SELECT * from "+TABLE_NAME_SHOP+" where "+COL_SHOP_ID+"=$1",
+		id).Scan(&shop.Id, &shop.UserId, &shop.CoordId, &shop.Name, &shop.Address); err != nil {
+
+		return nil, err
+	}
+
+	return &shop, nil
+
 }

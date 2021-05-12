@@ -84,15 +84,36 @@ func createShop(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	db := repo.NewDataBaseWithConfig()
+	defer db.CloseDataBase()
+
+	coord := repo.CoordModelRepo{}
+	coord.CoordLat, err = strconv.ParseFloat(sM.CoordLat, 64)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	coord.CoordLng, err = strconv.ParseFloat(sM.CoordLng, 64)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	_, err = db.Coord().Create(&coord)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	shop := repo.ShopModelRepo{}
-	shop.CoordId = sM.CoordId
+	shop.CoordId = coord.Id
 	shop.Name = sM.Name
 	shop.Address = sM.Address
 	shop.UserId = user.Id
-
-	db := repo.NewDataBaseWithConfig()
-	defer db.CloseDataBase()
 
 	_, err = db.Shop().Create(&shop)
 
@@ -103,33 +124,89 @@ func createShop(w http.ResponseWriter, r *http.Request) {
 
 	sM.Id = shop.Id
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(sM)
+	/*w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(sM)*/
 }
 
-// createShop update shop in db
+//updateShop update shop in db
 func updateShop(w http.ResponseWriter, r *http.Request) {
+	user, err := jwt.GetUserFromContext(r)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	var sM = model.ShopModel{}
+
 	if err := json.NewDecoder(r.Body).Decode(&sM); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	shop := repo.ShopModelRepo{}
-	shop.Id = sM.Id
-	shop.CoordId = sM.CoordId
-	shop.Name = sM.Name
-	shop.Address = sM.Address
+	coord := repo.CoordModelRepo{}
+	coord.CoordLat, err = strconv.ParseFloat(sM.CoordLat, 64)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	coord.CoordLng, err = strconv.ParseFloat(sM.CoordLng, 64)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	db := repo.NewDataBaseWithConfig()
 	defer db.CloseDataBase()
 
-	_, err := db.Shop().Create(&shop)
+	repoShop := db.Shop()
+	shopByid, err := repoShop.FindById(sM.Id)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(sM)
+	if user.Id != shopByid.UserId {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	repoCoord := db.Coord()
+	coordById, err := repoCoord.FindById(shopByid.CoordId)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	coordById.CoordLng, err = strconv.ParseFloat(sM.CoordLng, 64)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	coordById.CoordLat, err = strconv.ParseFloat(sM.CoordLat, 64)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	shopByid.Address = sM.Address
+	shopByid.Name = sM.Name
+
+	_, err = repoShop.Update(shopByid)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	/*	w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(sM)*/
 }

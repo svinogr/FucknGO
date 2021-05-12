@@ -56,27 +56,33 @@
     <div class="container mt-4 align-content-center">
         <div class="row">
             <div class="col-9">
-                <ul class="list-group list-group-flush">
-                    {{range . }}
-                    <div class="input-group">
-                        <div class="col-3">
-                            <li class="list-group-item" style="border: 0px;">Порт: {{.Port}}
-                            </li>
-                        </div>
-                        <span class="input-group-btn">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Порт</th>
+                    <th scope="col">Действие</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{range . }}
+                    <tr>
+                        <th scope="row">{{ .Id}}</th>
+                        <td>{{ .Port}}</td>
+                        <td> <span class="input-group-btn">
                     <button class="btn btn-outline-danger btn-default delete-button" id="btn_delete" name="{{ .Id}}"
                             type="button">удалить</button>
                         </span>
-                    </div>
-                </ul>
+                        </td>
+                    </tr>
                 {{ end}}
+                </tbody>
+            </table>
             </div>
+
             <div class="col-3 form-group">
                 <form id="addserver_form" action="" method="POST">
-
-                        <li class="list-group-item" style="border: 0px;">Порт</li>
                         <input class="form-control mb-3" type="text" name="port" placeholder="Порт">
-
                     <button id="addserver" class="btn btn-outline-success form-control">Добавить новый сервер
                     </button>
 

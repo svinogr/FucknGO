@@ -12,20 +12,7 @@
             crossorigin="anonymous"></script>
     <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
     <script> $(document).ready(function () {
-            $(".search").click(function () {
-
-                var myModal = document.getElementById('myModal')
-                //   var myInput = document.getElementById('myInput')
-
-                myModal.addEventListener('shown.bs.modal', function () {
-                    // myInput.focus()
-                    alert("search")
-                })
-
-
-            });
-
-            $(".newshop").click(function () {
+            $(".updateshop").click(function () {
                 var form = $("#registration_form").serializeArray();
                 var data = new Map();
                 $(form).each(function (index, obj) {
@@ -33,11 +20,12 @@
                 });
 
                 $.ajax({
-                    'url': '/api/shop',
-                    'method': 'POST',
+                    'url': '/api/shop/'+data.get('id'),
+                    'method': 'PUT',
                     'dataType': 'json',
                     'contentType': 'application/json',
                     'data': JSON.stringify({
+                        "id": parseInt(data.get('id')),
                         "name": data.get('name'),
                         "address": data.get('address'),
                         "coord_lat": data.get('lat'),
@@ -49,10 +37,14 @@
                         },
                         302: function () {
                             window.location.href = "/api/login";
+                        },
+                        200: function () {
+                            window.location.href = "/api/acountpage";
                         }
+
                     },
                     success: function (data) {
-                        window.location.href = "/api/accountpage";
+                        window.location.href = "/api/acountpage";
                     },
                 });
             });
@@ -66,11 +58,12 @@
     <div class="row justify-content-md-center mt-4 mb-3">
         <div class="col-6 ">
             <form class="" id="registration_form" action="" method="post">
-                <input class="form-control" type="text" name="name" placeholder="название">
+                <input class="form-control" type="text" name="name" placeholder="название"  value="{{ .Name}}">
                 <div class="input-group">
-                    <input type="text" class="form-control" name="address" id="address" placeholder="адрес" readonly="readonly">
-                    <input type="text" class="form-control" hidden="hidden" name="lat" id="lat" readonly="readonly">
-                    <input type="text" class="form-control" hidden="hidden" name="lng" id="lng" readonly="readonly">
+                    <input type="text" class="form-control" name="address" id="address" placeholder="адрес" readonly="readonly" value="{{ .Address}}">
+                    <input type="text" class="form-control"  name="id" id="id" readonly="readonly" value="{{ .Id}}">
+                    <input type="text" class="form-control"  name="lat" id="lat" readonly="readonly" value="{{ .CoordLat}}">
+                    <input type="text" class="form-control"  name="lng" id="lng" readonly="readonly" value="{{ .CoordLng}}">
                     <div class="input-group-append">
                         <button class="btn btn-outline-secondary search" data-bs-toggle="modal"
                                 data-bs-target="#exampleModal" type="button">Выбрать
@@ -85,7 +78,7 @@
             <a class="btn btn-outline-success login form-control" onclick="history.back()">Отмена</a>
         </div>
         <div class="col-3">
-            <a class="btn btn-outline-success form-control newshop" role="button">Сохранить</a>
+            <a class="btn btn-outline-success form-control updateshop" role="button">Сохранить</a>
         </div>
 
     </div>

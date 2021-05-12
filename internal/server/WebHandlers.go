@@ -3,10 +3,13 @@ package server
 import (
 	"FucknGO/db/repo"
 	"FucknGO/internal/jwt"
+	"FucknGO/internal/server/model"
 	"FucknGO/log"
 	"errors"
+	"github.com/gorilla/mux"
 	"html/template"
 	"net/http"
+	"strconv"
 )
 
 func mainPage(w http.ResponseWriter, r *http.Request) {
@@ -117,4 +120,66 @@ func newShopPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	files.Execute(w, nil)
+}
+
+func changeShopPage(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	id, err := strconv.ParseUint(vars["id"], 10, 32)
+
+	if err != nil {
+		log.NewLog().PrintError(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	user, err := jwt.GetUserFromContext(r)
+
+	if err != nil {
+		log.NewLog().PrintError(err)
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	db := repo.NewDataBaseWithConfig()
+	shopRepo := db.Shop()
+	shopById, err := shopRepo.FindById(id)
+
+	if err != nil {
+		log.NewLog().PrintError(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if shopById.UserId != user.Id {
+		log.NewLog().PrintError(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	coordRepo := db.Coord()
+	coordById, err := coordRepo.FindById(shopById.CoordId)
+
+	if err != nil {
+		log.NewLog().PrintError(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	files, err := template.ParseFiles("ui/web/templates/changeshoppage.html")
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+	}
+
+	sM := model.ShopModel{
+		Id:       id,
+		UserId:   user.Id,
+		CoordLat: strconv.FormatFloat(coordById.CoordLat, 'f', -1, 64),
+		CoordLng: strconv.FormatFloat(coordById.CoordLng, 'f', -1, 64),
+		Name:     shopById.Name,
+		Address:  shopById.Address,
+	}
+
+	files.Execute(w, sM)
 }
