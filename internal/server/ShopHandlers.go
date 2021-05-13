@@ -16,7 +16,7 @@ func shopApi(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		createShop(w, r)
 	case http.MethodGet:
-		getAllShops(w, r)
+		getAllShopsByAccount(w, r)
 	case http.MethodPut:
 		updateShop(w, r)
 	case http.MethodDelete:
@@ -24,13 +24,49 @@ func shopApi(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getAllShops(w http.ResponseWriter, r *http.Request) {
+func getAllShopsByAccount(w http.ResponseWriter, r *http.Request) {
+	user, err := jwt.GetUserFromContext(r)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	db := repo.NewDataBaseWithConfig()
 	defer db.CloseDataBase()
 
 	shopRepo := db.Shop()
 
-	all, err := shopRepo.FindAll()
+	allFinded, err := shopRepo.FindByUserId(user)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	all := []model.ShopModel{}
+
+	coordRepo := db.Coord()
+
+	for _, el := range *allFinded {
+		coordById, err := coordRepo.FindById(el.CoordId)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			continue
+		}
+
+		m := model.ShopModel{
+			Id:       el.Id,
+			UserId:   el.UserId,
+			CoordLat: strconv.FormatFloat(coordById.CoordLat, 'f', -1, 64),
+			CoordLng: strconv.FormatFloat(coordById.CoordLng, 'f', -1, 64),
+			Name:     el.Name,
+			Address:  el.Address,
+		}
+
+		all = append(all, m)
+	}
 
 	if err != nil {
 		log.NewLog().PrintError(err)

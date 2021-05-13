@@ -85,9 +85,9 @@ func accountPage(w http.ResponseWriter, r *http.Request) {
 
 	switch user.Type {
 	case repo.Admin:
-		shopPage(w, user)
+		shopAccountPage(w, user)
 	case repo.Shop:
-		shopPage(w, user)
+		shopAccountPage(w, user)
 	case repo.Client:
 		clientPage(user)
 	}
@@ -97,7 +97,7 @@ func clientPage(user repo.UserModelRepo) {
 
 }
 
-func shopPage(w http.ResponseWriter, user repo.UserModelRepo) {
+func shopAccountPage(w http.ResponseWriter, user repo.UserModelRepo) {
 	files := template.Must(template.ParseFiles("ui/web/templates/shopaccountpage.html", "ui/web/templates/header.html"))
 
 	db := repo.NewDataBaseWithConfig()
@@ -122,7 +122,84 @@ func newShopPage(w http.ResponseWriter, r *http.Request) {
 	files.Execute(w, nil)
 }
 
-func changeShopPage(w http.ResponseWriter, r *http.Request) {
+func shopPage(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	id, err := strconv.ParseUint(vars["id"], 10, 32)
+
+	if err != nil {
+		log.NewLog().PrintError(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	db := repo.NewDataBaseWithConfig()
+	defer db.CloseDataBase()
+
+	shopRepo := db.Shop()
+	shopById, err := shopRepo.FindById(id)
+
+	user, err := jwt.GetUserFromContext(r)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if shopById.UserId != user.Id {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	stockRepo := db.ShopStock()
+	stoks, err := stockRepo.FindByShop(shopById)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	sTArray := []model.StockModel{}
+
+	for _, el := range *stoks {
+		sT := model.StockModel{}
+		sT.Id = el.Id
+		sT.ShopId = el.ShopId
+		sT.Title = el.Title
+		sT.DateStart = el.DateStart.String()
+		sT.DateFinish = el.DateStart.String()
+
+		sTArray = append(sTArray, sT)
+	}
+
+	coordRepo := db.Coord()
+	coordById, err := coordRepo.FindById(shopById.CoordId)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	sM := model.ShopModel{}
+	sM.Id = shopById.Id
+	sM.UserId = shopById.UserId
+	sM.CoordLng = strconv.FormatFloat(coordById.CoordLng, 'f', -1, 64)
+	sM.CoordLat = strconv.FormatFloat(coordById.CoordLat, 'f', -1, 64)
+	sM.Address = shopById.Address
+	sM.Name = shopById.Name
+	sM.Stocks = sTArray
+	sM.Id = shopById.Id
+
+	files, err := template.ParseFiles("ui/web/templates/shoppage.html", "ui/web/templates/header.html")
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+	}
+
+	files.ExecuteTemplate(w, "shoppage", &sM)
+}
+
+func updateShopPage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	id, err := strconv.ParseUint(vars["id"], 10, 32)
@@ -142,6 +219,7 @@ func changeShopPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	db := repo.NewDataBaseWithConfig()
+	defer db.CloseDataBase()
 	shopRepo := db.Shop()
 	shopById, err := shopRepo.FindById(id)
 

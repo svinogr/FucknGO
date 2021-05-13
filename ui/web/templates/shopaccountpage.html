@@ -4,7 +4,6 @@
 
             $(".delete-button").click(function () {
                 var id = $(this).prop("name");
-                alert(id)
                 $.ajax({
                     'url': '/api/shop/' + id,
                     'method': 'DELETE',
@@ -23,18 +22,21 @@
                 });
             });
 
-            $(".clickable-row").click(function () {
+            $(".updateshop").click(function () {
                 var id = $(this).prop("id");
                 window.location.href = "/api/changeshoppage/" + id;
             });
+
+            $(".clickable-row").click(function () {
+                var id = $(this).prop("id");
+                window.location.href = "/api/shoppage/" + id;
+            });
         });
-
-
     </script>
     <script src="/static/bootstrap/js/bootstrap.min.js"></script>
     <div class="container mt-4 align-content-center">
         <div class="row">
-            <div class="col-9">
+            <div class="col-8">
                 <table class="table  table-hover">
                     <thead>
                     <tr>
@@ -46,13 +48,15 @@
                     </thead>
                     <tbody>
                     {{range . }}
-                        <tr class="clickable-row" id="{{.Id}}">
-                            <th scope="row">{{ .Id}}</th>
-                            <td>{{ .Name}}</td>
-                            <td>{{ .Address}}</td>
-                            <td> <span class="input-group-btn">
+                        <tr id="{{.Id}}">
+                            <th class="clickable-row" id="{{.Id}}" scope="row">{{ .Id}}</th>
+                            <td class="clickable-row" id="{{.Id}}">{{ .Name}}</td>
+                            <td class="clickable-row" id="{{.Id}}">{{ .Address}}</td>
+                            <td> <span class="btn-group">
                     <button class="btn btn-outline-danger btn-default delete-button" id="btn_delete" name="{{ .Id}}"
                             type="button">удалить</button>
+                                    <button class="btn btn-outline-info btn-default updateshop" id="{{ .Id}}"
+                                            type="button">Изменить</button>
                         </span>
                             </td>
                         </tr>
@@ -60,17 +64,94 @@
                     </tbody>
                 </table>
             </div>
+            <div class="col-4">
+                <div>
+                    <div class="form-group">
+                        <form id="addserver_form" action="" method="POST">
+                            <a href="newshoppage" class="btn btn-outline-success btn-block form-control">Добавить новый
+                                магазин
+                            </a>
 
-            <div class="col-3 form-group">
-                <form id="addserver_form" action="" method="POST">
-                    <a href="newshoppage" class="btn btn-outline-success form-control">Добавить новый магазин
-                    </a>
+                        </form>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-center">
+                    <div id="map" style="height: 300px; width: 300px; color: #005cbf; align-content: center"></div>
+                    <script>
+                        function initMap() {
+                            $.ajax({
+                                'url': '/api/shop',
+                                'method': 'GET',
+                                'contentType': 'application/json',
+                                statusCode: {
+                                    400: function () {
+                                        alert("неправельные данные");
+                                    },
+                                    302: function () {
+                                        window.location.href = "/api/login";
+                                    }
+                                },
+                                success: function (data) {
+                                    // window.location.href = "/api/acountpage";
+                                    map(data);
+                                },
+                            });
 
-                </form>
+                            function map(data) {
+                                inputAddress = document.getElementById("searchAddress");
+                                geocoder = new google.maps.Geocoder();
+                                map = new google.maps.Map(document.getElementById("map"), {
+                                    zoom: 16,
+                                    center: {lat: -33, lng: 151},
+                                    mapTypeControl: true,
+                                    mapTypeControlOptions: {
+                                        style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
+                                        mapTypeIds: ["roadmap", "terrain"],
+                                    },
+                                })
+                                let markers = [];
+                                $.each(JSON.parse(data), function (key, val) {
+                                    const infoWindow = new google.maps.InfoWindow();
+                                    var myLatlng = new google.maps.LatLng(val.coord_lat, val.coord_lng);
+                                    let marker = new google.maps.Marker({
+                                        position: myLatlng,
+                                        map: map,
+                                        title: val.name
+                                    });
+                                    marker.addListener("click", () => {
+                                        infoWindow.close();
+                                        infoWindow.setContent(marker.getTitle());
+                                        infoWindow.open(marker.getMap(), marker);
+                                    });
+                                });
+
+                                if (navigator.geolocation) {
+                                    navigator.geolocation.getCurrentPosition(
+                                        (position) => {
+                                            const pos = {
+                                                lat: position.coords.latitude,
+                                                lng: position.coords.longitude,
+                                            };
+                                            map.setCenter(pos);
+                                        },
+                                        () => {
+
+                                        }
+                                    );
+                                } else {
+                                    alert("erro")
+                                }
+
+                            }
+                        }
+                    </script>
+                    <script async
+                            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBIwzALxUPNbatRBj3Xi1Uhp0fFzwWNBkE&callback=initMap&libraries=&v=weekly">
+                    </script>
+                </div>
             </div>
         </div>
     </div>
-
 
     </body>
     </html>

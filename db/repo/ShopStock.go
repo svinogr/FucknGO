@@ -3,7 +3,7 @@ package repo
 import "time"
 
 const (
-	TABLE_NAME_SHOP_STOCK           = "shop_stock"
+	TABLE_NAME_SHOP_STOCK           = "shops_stock"
 	COL_SHOP_STOCK_ID               = "id"
 	COL_SHOP_STOCK_SHOP_ID          = "shop_id"
 	COL_SHOP_STOCK_SHOP_TITLE       = "title"
@@ -106,6 +106,7 @@ func (s *ShopStockRepo) FindByShop(shop *ShopModelRepo) (*[]ShopStockModelRepo, 
 		if err != nil {
 			return nil, err
 		}
+
 		shopStockList = append(shopStockList, shopStock)
 	}
 
