@@ -166,6 +166,7 @@ func shopPage(w http.ResponseWriter, r *http.Request) {
 		sT.Id = el.Id
 		sT.ShopId = el.ShopId
 		sT.Title = el.Title
+		sT.Description = el.Description
 		sT.DateStart = el.DateStart.String()
 		sT.DateFinish = el.DateStart.String()
 
@@ -244,7 +245,7 @@ func updateShopPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	files, err := template.ParseFiles("ui/web/templates/changeshoppage.html")
+	files, err := template.ParseFiles("ui/web/templates/changeshoppage.html", "ui/web/templates/header.html")
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
@@ -259,5 +260,5 @@ func updateShopPage(w http.ResponseWriter, r *http.Request) {
 		Address:  shopById.Address,
 	}
 
-	files.Execute(w, sM)
+	files.ExecuteTemplate(w, "changeshoppage", sM)
 }

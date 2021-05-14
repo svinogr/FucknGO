@@ -92,7 +92,7 @@ func (s *ShopStockRepo) FindById(shopStock *ShopStockModelRepo) (*ShopStockModel
 func (s *ShopStockRepo) FindByShop(shop *ShopModelRepo) (*[]ShopStockModelRepo, error) {
 	shopStockList := []ShopStockModelRepo{}
 
-	row, err := s.db.Db.Query("SELECT * from "+TABLE_NAME_SHOP_STOCK+" where "+COL_SHOP_ID+"=$1",
+	row, err := s.db.Db.Query("SELECT * from "+TABLE_NAME_SHOP_STOCK+" where "+COL_SHOP_STOCK_SHOP_ID+"=$1",
 		shop.Id)
 
 	if err != nil {

@@ -22,11 +22,6 @@
                 });
             });
 
-            $(".updateshop").click(function () {
-                var id = $(this).prop("id");
-                window.location.href = "/api/changeshoppage/" + id;
-            });
-
             $(".clickable-row").click(function () {
                 var id = $(this).prop("id");
                 window.location.href = "/api/shoppage/" + id;
@@ -43,7 +38,6 @@
                         <th scope="col">ID</th>
                         <th scope="col">Название</th>
                         <th scope="col">Адрес</th>
-                        <th scope="col">Действие</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -52,13 +46,6 @@
                             <th class="clickable-row" id="{{.Id}}" scope="row">{{ .Id}}</th>
                             <td class="clickable-row" id="{{.Id}}">{{ .Name}}</td>
                             <td class="clickable-row" id="{{.Id}}">{{ .Address}}</td>
-                            <td> <span class="btn-group">
-                    <button class="btn btn-outline-danger btn-default delete-button" id="btn_delete" name="{{ .Id}}"
-                            type="button">удалить</button>
-                                    <button class="btn btn-outline-info btn-default updateshop" id="{{ .Id}}"
-                                            type="button">Изменить</button>
-                        </span>
-                            </td>
                         </tr>
                     {{ end}}
                     </tbody>
