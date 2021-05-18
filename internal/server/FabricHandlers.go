@@ -34,8 +34,9 @@ func setupWebInterfaceHandler(f *fabricHandlers) {
 	hand7 := handler.MyHandler{"/changeshoppage/{id}", updateShopPage, http.MethodGet, true, handler.TypeWeb}
 	hand8 := handler.MyHandler{"/shoppage/{id}", shopPage, http.MethodGet, true, handler.TypeWeb}
 	hand9 := handler.MyHandler{"/shop/{id}/newstockpage", newStockPage, http.MethodGet, true, handler.TypeWeb}
+	hand10 := handler.MyHandler{"/shop/{id_shop}/stockpage/{id_stock}", stockPage, http.MethodGet, true, handler.TypeWeb}
 
-	f.Handlers = append(f.Handlers, &hand, &hand2, &hand3, &hand4, &hand5, &hand6, &hand7, &hand8, &hand9)
+	f.Handlers = append(f.Handlers, &hand, &hand2, &hand3, &hand4, &hand5, &hand6, &hand7, &hand8, &hand9, &hand10)
 }
 
 // setupUserHandlers setup handlers for actions with user
@@ -68,9 +69,11 @@ func setupShopHandlers(f *fabricHandlers) {
 
 // setupStockHandlers setup handlers for actions with stockApi
 func setupStockHandlers(f *fabricHandlers) {
-	hand := handler.MyHandler{"/shop/{id}/stock", stockApi, http.MethodPost, true, handler.TypeWeb}
+	hand := handler.MyHandler{"/shop/{id_shop}/stock", stockApi, http.MethodPost, true, handler.TypeWeb}
+	hand2 := handler.MyHandler{"/shop/{id_shop}/stock/{id_stock}", stockApi, http.MethodDelete, true, handler.TypeWeb}
+	hand3 := handler.MyHandler{"/shop/{id_shop}/stock/{id_stock}", stockApi, http.MethodPut, true, handler.TypeWeb}
 
-	f.Handlers = append(f.Handlers, &hand)
+	f.Handlers = append(f.Handlers, &hand, &hand2, &hand3)
 }
 
 // setupServerHandlers setup handlers for actions with serverApi

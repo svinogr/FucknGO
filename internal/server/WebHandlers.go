@@ -6,6 +6,7 @@ import (
 	"FucknGO/internal/server/model"
 	"FucknGO/log"
 	"errors"
+	"fmt"
 	"github.com/gorilla/mux"
 	"html/template"
 	"net/http"
@@ -284,4 +285,84 @@ func updateShopPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	files.ExecuteTemplate(w, "changeshoppage", sM)
+}
+
+func stockPage(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	idShop, err := strconv.ParseUint(vars["id_shop"], 10, 32)
+
+	if err != nil {
+		log.NewLog().PrintError(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	idStock, err := strconv.ParseUint(vars["id_stock"], 10, 32)
+
+	if err != nil {
+		log.NewLog().PrintError(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	db := repo.NewDataBaseWithConfig()
+	stockRepo := db.ShopStock()
+	stock := repo.ShopStockModelRepo{Id: idStock}
+	_, err = stockRepo.FindById(&stock)
+
+	if err != nil {
+		log.NewLog().PrintError(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if stock.ShopId != idShop {
+		log.NewLog().PrintError(err)
+		http.Error(w, errors.New("user denied  to this action ").Error(), http.StatusBadRequest)
+		return
+	}
+
+	shopRepo := db.Shop()
+	shopById, err := shopRepo.FindById(idShop)
+
+	if err != nil {
+		log.NewLog().PrintError(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	user, err := jwt.GetUserFromContext(r)
+
+	if err != nil {
+		log.NewLog().PrintError(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if user.Id != shopById.UserId {
+		log.NewLog().PrintError(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	files, err := template.ParseFiles("ui/web/templates/stockpage.html", "ui/web/templates/header.html")
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+	}
+	layout := "2006-01-02"
+	sM := model.StockModel{}
+	sM.ShopId = stock.ShopId
+	sM.Id = stock.Id
+	sM.Title = stock.Title
+	sM.Description = stock.Description
+	sM.DateStart = stock.DateStart.Format(layout)
+	fmt.Println(stock.DateStart)
+	fmt.Println(sM.DateStart)
+	sM.DateFinish = stock.DateFinish.Format(layout)
+	fmt.Println(stock.DateFinish)
+	fmt.Print(sM.DateFinish)
+
+	files.ExecuteTemplate(w, "stockpage", sM)
 }

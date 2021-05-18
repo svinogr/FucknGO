@@ -5,6 +5,11 @@
                 var id = $(this).prop("id");
                 window.location.href = "/api/changeshoppage/" + id;
             });
+
+            $(".clickable-row").click(function () {
+                var id = $(this).prop("id");
+                window.location.href = "/api/shop/" + {{.Id}} + "/stockpage/" + id;
+            });
         })
     </script>
     <div class="container mt-4">

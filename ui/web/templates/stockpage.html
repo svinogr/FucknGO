@@ -1,0 +1,111 @@
+{{ define "stockpage"}}
+    {{template "header".}}
+    <script src="/static/js/jquery-3.6.0.min.js" type="text/javascript"></script>
+
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+    <script> $(document).ready(function () {
+
+            $(".delete-button").click(function () {
+                $.ajax({
+                    'url': '/api/shop/' + {{.ShopId}} + '/stock/{{.Id}}',
+                    'method': 'DELETE',
+                    'contentType': 'application/json',
+                    statusCode: {
+                        400: function () {
+                            alert("неправельные данные");
+                        },
+                        302: function () {
+                            window.location.href = "/api/login";
+                        }
+                    },
+                    success: function (data) {
+                        window.location.href = "/api/shoppage/{{.ShopId}}";
+                    },
+                });
+            });
+
+            $(".updatestock").click(function () {
+                var form = $("#registration_form").serializeArray();
+                var data = new Map();
+                $(form).each(function (index, obj) {
+                    data.set(obj.name, obj.value);
+                });
+
+                $.ajax({
+                    'url': '/api/shop/' + {{.ShopId}} + '/stock/' + {{.Id}} ,
+                    'method': 'PUT',
+                    'dataType': 'json',
+                    'contentType': 'application/json',
+                    'data': JSON.stringify({
+                        "id": {{.Id}},
+                        "title": data.get('title'),
+                        "description": data.get('description'),
+                        "date_start": new Date(data.get('date_start')),
+                        "date_finish": new Date(data.get('date_finish'))
+                    }),
+                    statusCode: {
+                        400: function () {
+                            alert("неправельные данные");
+                        },
+                        302: function () {
+                            window.location.href = "/api/login";
+                        },
+                        200: function () {
+                          //  window.history.back();
+                        }
+
+                    },
+                    success: function (data) {
+                        window.history.back();
+                    },
+                });
+            });
+        });
+    </script>
+    </head>
+    <body>
+    <div class="container">
+        <div class="mt-4">
+            <h4>Настройка акции</h4>
+
+        </div>
+        <div class="row mt-4 mb-3">
+            <div class="col-3" style="background:#9fcdff">
+                <img  src="" alt="">
+            </div>
+            <div class="col-5">
+                <div class="row">
+                    <div class="col-12 ">
+                        <form class="" id="registration_form" action="" method="post">
+                            <input type="text" class="form-control" name="title" id="title" placeholder="название"
+                                   value="{{.Title}}">
+                            <textarea rows="5" class="form-control" name="description" id="description"
+                                      placeholder="описание">{{.Description}}</textarea>
+                            <input type="date" class="form-control" name="date_start" id="date_start"
+                                   placeholder="начало" value="{{.DateStart}}">
+                            <input type="date" class="form-control" name="date_finish" id="date_finish"
+                                   placeholder="конец" value="{{.DateFinish}}">
+                            <input type="text" class="form-control" hidden="hidden" name="shop_id" id="shop_id"
+                                   readonly="readonly" value="{{ .ShopId}}">
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-4">
+                <div class="form-group">
+                    <button class="btn btn-outline-danger btn-block form-control delete-button" id="btn_delete"
+                            name="{{ .Id}}"
+                            type="button">Удалить
+                    </button>
+                    <br>
+                    <a class="btn btn-outline-success btn-block form-control" onclick="history.back()">Назад</a>
+                    <br>
+                    <a class="btn btn-outline-success btn-block form-control updatestock" role="button">Сохранить</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    </body>
+    </html>
+{{end}}

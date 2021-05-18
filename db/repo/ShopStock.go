@@ -3,13 +3,13 @@ package repo
 import "time"
 
 const (
-	TABLE_NAME_SHOP_STOCK           = "shops_stock"
-	COL_SHOP_STOCK_ID               = "id"
-	COL_SHOP_STOCK_SHOP_ID          = "shop_id"
-	COL_SHOP_STOCK_SHOP_TITLE       = "title"
-	COL_SHOP_STOCK_SHOP_DESCRIPTON  = "description"
-	COL_SHOP_STOCK_SHOP_DATE_START  = "date_start"
-	COL_SHOP_STOCK_SHOP_DATE_FINISH = "date_finish"
+	TABLE_NAME_STOCK           = "shops_stock"
+	COL_STOCK_ID               = "id"
+	COL_STOCK_SHOP_ID          = "shop_id"
+	COL_STOCK_SHOP_TITLE       = "title"
+	COL_STOCK_SHOP_DESCRIPTON  = "description"
+	COL_STOCK_SHOP_DATE_START  = "date_start"
+	COL_STOCK_SHOP_DATE_FINISH = "date_finish"
 )
 
 type ShopStockModelRepo struct {
@@ -26,12 +26,12 @@ type ShopStockRepo struct {
 }
 
 func (s *ShopStockRepo) Create(shopStock *ShopStockModelRepo) (*ShopStockModelRepo, error) {
-	if err := s.db.Db.QueryRow("INSERT into "+TABLE_NAME_SHOP_STOCK+
-		" ("+COL_SHOP_STOCK_SHOP_ID+", "+
-		COL_SHOP_STOCK_SHOP_TITLE+", "+
-		COL_SHOP_STOCK_SHOP_DESCRIPTON+", "+
-		COL_SHOP_STOCK_SHOP_DATE_START+", "+
-		COL_SHOP_STOCK_SHOP_DATE_FINISH+") VALUES ($1, $2, $3, $4, $5) RETURNING "+COL_SHOP_STOCK_ID,
+	if err := s.db.Db.QueryRow("INSERT into "+TABLE_NAME_STOCK+
+		" ("+COL_STOCK_SHOP_ID+", "+
+		COL_STOCK_SHOP_TITLE+", "+
+		COL_STOCK_SHOP_DESCRIPTON+", "+
+		COL_STOCK_SHOP_DATE_START+", "+
+		COL_STOCK_SHOP_DATE_FINISH+") VALUES ($1, $2, $3, $4, $5) RETURNING "+COL_STOCK_ID,
 		shopStock.ShopId,
 		shopStock.Title,
 		shopStock.Description,
@@ -44,31 +44,37 @@ func (s *ShopStockRepo) Create(shopStock *ShopStockModelRepo) (*ShopStockModelRe
 	return shopStock, nil
 }
 
-func (s *ShopStockRepo) Update(shopStock *ShopStockModelRepo) (*ShopStockModelRepo, error) {
-	err := s.db.Db.QueryRow("UPDATE "+TABLE_NAME_SHOP_STOCK+" set "+
-		COL_SHOP_STOCK_SHOP_ID+"= $1, "+
-		COL_SHOP_STOCK_SHOP_TITLE+"= $2, "+
-		COL_SHOP_STOCK_SHOP_DESCRIPTON+"= $3, "+
-		COL_SHOP_STOCK_SHOP_DATE_START+"= $4, "+
-		COL_SHOP_STOCK_SHOP_DATE_FINISH+"= $5, "+
-		" WHERE "+COL_SHOP_STOCK_ID+"=$6 returning "+COL_SHOP_STOCK_ID,
-		shopStock.ShopId,
-		shopStock.Title,
-		shopStock.Description,
-		shopStock.DateStart,
-		shopStock.DateFinish,
-		shopStock.Id).
-		Scan(&shopStock.Id, &shopStock.ShopId, &shopStock.Title, &shopStock.Description, &shopStock.DateStart, &shopStock.DateFinish)
+func (s *ShopStockRepo) Update(stock *ShopStockModelRepo) (*ShopStockModelRepo, error) {
+	err := s.db.Db.QueryRow("UPDATE "+TABLE_NAME_STOCK+" set "+
+		COL_STOCK_SHOP_ID+"= $1, "+
+		COL_STOCK_SHOP_TITLE+"= $2, "+
+		COL_STOCK_SHOP_DESCRIPTON+"= $3, "+
+		COL_STOCK_SHOP_DATE_START+"= $4, "+
+		COL_STOCK_SHOP_DATE_FINISH+"= $5 "+
+		"where "+COL_STOCK_ID+"=$6 returning "+
+		COL_STOCK_ID+", "+
+		COL_STOCK_SHOP_ID+","+
+		COL_STOCK_SHOP_TITLE+", "+
+		COL_STOCK_SHOP_DESCRIPTON+", "+
+		COL_STOCK_SHOP_DATE_START+", "+
+		COL_STOCK_SHOP_DATE_FINISH,
+		stock.ShopId,
+		stock.Title,
+		stock.Description,
+		stock.DateStart,
+		stock.DateFinish,
+		stock.Id).
+		Scan(&stock.Id, &stock.ShopId, &stock.Title, &stock.Description, &stock.DateStart, &stock.DateFinish)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return shopStock, nil
+	return stock, nil
 }
 
 func (s *ShopStockRepo) Delete(shopStock *ShopStockModelRepo) (*ShopStockModelRepo, error) {
-	_, err := s.db.Db.Exec("DELETE from "+TABLE_NAME_SHOP_STOCK+" where "+COL_SHOP_STOCK_ID+" = $1", shopStock.Id)
+	_, err := s.db.Db.Exec("DELETE from "+TABLE_NAME_STOCK+" where "+COL_STOCK_ID+" = $1", shopStock.Id)
 
 	if err != nil {
 		return nil, err
@@ -78,7 +84,7 @@ func (s *ShopStockRepo) Delete(shopStock *ShopStockModelRepo) (*ShopStockModelRe
 }
 
 func (s *ShopStockRepo) FindById(shopStock *ShopStockModelRepo) (*ShopStockModelRepo, error) {
-	if err := s.db.Db.QueryRow("SELECT * from "+TABLE_NAME_SHOP_STOCK+" where "+COL_SHOP_STOCK_ID+"=$1",
+	if err := s.db.Db.QueryRow("SELECT * from "+TABLE_NAME_STOCK+" where "+COL_STOCK_ID+"=$1",
 		shopStock.Id).
 		Scan(&shopStock.Id, &shopStock.ShopId, &shopStock.Title, &shopStock.Description, &shopStock.DateStart, &shopStock.DateFinish); err != nil {
 
@@ -92,7 +98,7 @@ func (s *ShopStockRepo) FindById(shopStock *ShopStockModelRepo) (*ShopStockModel
 func (s *ShopStockRepo) FindByShop(shop *ShopModelRepo) (*[]ShopStockModelRepo, error) {
 	shopStockList := []ShopStockModelRepo{}
 
-	row, err := s.db.Db.Query("SELECT * from "+TABLE_NAME_SHOP_STOCK+" where "+COL_SHOP_STOCK_SHOP_ID+"=$1",
+	row, err := s.db.Db.Query("SELECT * from "+TABLE_NAME_STOCK+" where "+COL_STOCK_SHOP_ID+"=$1",
 		shop.Id)
 
 	if err != nil {
@@ -116,7 +122,7 @@ func (s *ShopStockRepo) FindByShop(shop *ShopModelRepo) (*[]ShopStockModelRepo, 
 func (s *ShopStockRepo) FindAll() (*[]ShopStockModelRepo, error) {
 	shopStockList := []ShopStockModelRepo{}
 
-	row, err := s.db.Db.Query("SELECT * from " + TABLE_NAME_SHOP_STOCK)
+	row, err := s.db.Db.Query("SELECT * from " + TABLE_NAME_STOCK)
 
 	if err != nil {
 		return &shopStockList, err
