@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <script src="/static/js/jquery-3.6.0.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+
+    <script> $(document).ready(function () {
+            $(".newuser").click(function () {
+                var form = $("#registration_form").serializeArray();
+                var data = new Map();
+                $(form).each(function (index, obj) {
+                    data.set(obj.name, obj.value);
+                });
+
+                $.ajax({
+                    'url': '/api/user',
+                    'method': 'POST',
+                    'dataType': 'json',
+                    'contentType': 'application/json',
+                    'data': JSON.stringify({
+                        "name": data.get('name'),
+                        "password": data.get('password'),
+                        "email": data.get('email')
+                    }),
+                    statusCode: {
+                        400: function () {
+                            alert("неправельные данные");
+                        },
+                        302: function () {
+                            window.location.href = "/api/login";
+                        }
+                    },
+                    success: function (data) {
+                        window.location.href = "/api/mainpage";
+                    },
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="row justify-content-md-center mt-4 mb-3">
+        <div class="col-6 ">
+            <form class="" id="registration_form" action="" method="post">
+                <input class="form-control" type="text" name="name" placeholder="name">
+                <input class="form-control mt-3" type="text" placeholder="email" name="email">
+                <input class="form-control mt-3" type="text" placeholder="password" name="password">
+
+            </form>
+        </div>
+    </div>
+    <div class="row justify-content-md-center">
+        <div class="col-3">
+            <a href="login" class="btn btn-outline-success login form-control" id="login">Войти</a>
+        </div>
+        <div class="col-3">
+            <a class="btn btn-outline-success form-control newuser"  role="button">Добавить нового юзера</a>
+        </div>
+
+    </div>
+</div>
+
+
+
+</body>
+</html>

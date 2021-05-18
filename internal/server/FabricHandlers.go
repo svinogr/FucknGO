@@ -16,6 +16,7 @@ func NewFabric() fabricHandlers {
 	setupAuthHandlers(&f)
 	setupUserHandlers(&f)
 	setupShopHandlers(&f)
+	setupStockHandlers(&f)
 	testPanicHendler(&f)
 	setupWebInterfaceHandler(&f)
 
@@ -32,8 +33,9 @@ func setupWebInterfaceHandler(f *fabricHandlers) {
 	hand6 := handler.MyHandler{"/newshoppage", newShopPage, http.MethodGet, true, handler.TypeWeb}
 	hand7 := handler.MyHandler{"/changeshoppage/{id}", updateShopPage, http.MethodGet, true, handler.TypeWeb}
 	hand8 := handler.MyHandler{"/shoppage/{id}", shopPage, http.MethodGet, true, handler.TypeWeb}
+	hand9 := handler.MyHandler{"/shop/{id}/newstockpage", newStockPage, http.MethodGet, true, handler.TypeWeb}
 
-	f.Handlers = append(f.Handlers, &hand, &hand2, &hand3, &hand4, &hand5, &hand6, &hand7, &hand8)
+	f.Handlers = append(f.Handlers, &hand, &hand2, &hand3, &hand4, &hand5, &hand6, &hand7, &hand8, &hand9)
 }
 
 // setupUserHandlers setup handlers for actions with user
@@ -62,6 +64,13 @@ func setupShopHandlers(f *fabricHandlers) {
 	hand4 := handler.MyHandler{"/shop", shopApi, http.MethodGet, true, handler.TypeWeb}
 
 	f.Handlers = append(f.Handlers, &hand, &hand2, &hand3, &hand4)
+}
+
+// setupStockHandlers setup handlers for actions with stockApi
+func setupStockHandlers(f *fabricHandlers) {
+	hand := handler.MyHandler{"/shop/{id}/stock", stockApi, http.MethodPost, true, handler.TypeWeb}
+
+	f.Handlers = append(f.Handlers, &hand)
 }
 
 // setupServerHandlers setup handlers for actions with serverApi

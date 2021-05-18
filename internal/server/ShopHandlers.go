@@ -68,12 +68,6 @@ func getAllShopsByAccount(w http.ResponseWriter, r *http.Request) {
 		all = append(all, m)
 	}
 
-	if err != nil {
-		log.NewLog().PrintError(err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
 	json.NewEncoder(w).Encode(all)
 }
 
@@ -160,8 +154,8 @@ func createShop(w http.ResponseWriter, r *http.Request) {
 
 	sM.Id = shop.Id
 
-	/*w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(sM)*/
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(sM)
 }
 
 //updateShop update shop in db
@@ -243,6 +237,6 @@ func updateShop(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	/*	w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(sM)*/
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(sM)
 }

@@ -2,6 +2,11 @@
     {{ template "header" .}}
 
     <script> $(document).ready(function () {
+            $(".clickable-row").click(function() {
+                var id = $(this).prop("id");
+                alert(id)
+              //  window.location = $(this).data("href");
+            });
             $("#registration").click(function () {
                 var form = $("#registration_form").serializeArray();
                 var data = new Map();
@@ -14,7 +19,6 @@
                     'method': 'POST',
                     'dataType': 'json',
                     'contentType': 'application/json',
-                    //  'headers': {'Authorization': 'Bearer ' + $.cookie("access_token")},
                     'data': JSON.stringify({
                         "name": data.get('name'),
                         "password": data.get('password'),
@@ -34,8 +38,9 @@
                 });
             });
 
-            $("#btn_delete").click(function () {
+            $(".delete-button").click(function () {
                 var id = $(this).prop("name");
+                alert(id)
                 $.ajax({
                     'url': '/api/user/' + id,
                     'method': 'DELETE',
@@ -57,29 +62,40 @@
     </script>
     <script src="/static/bootstrap/js/bootstrap.min.js"></script>
 
-    <div class="container" style="margin-top:50px;">
+    <div class="container mt-4">
         <div class="row">
-            <div class="col">
-                <ul class="list-group list-group-flush">
+            <div class="col-9">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Пользователь</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Действие</th>
+                    </tr>
+                    </thead>
+                    <tbody>
                     {{range . }}
-                        <li class="list-group-item">Пользователь: {{.Email}} <br> Хэш: {{.Password}}</li>
-                        <button id="btn_delete" name="{{ .Id}}" class="btn btn-outline-success float-right">удалить
-                        </button>
-                    {{end}}
-                </ul>
-            </div>
-            <div class="col">
-                <div class="container">
-                    <form id="registration_form" action="" method="POST">
-                        <p>name</p><input class="form-control me-2" type="text" name="name">
-                        <p>password</p><input class="form-control me-2" type="text" name="password">
-                        <p>email</p><input class="form-control me-2" type="text" name="email"><br>
-                    </form>
-                    <button id="registration" class="btn btn-outline-success float-right">Добавить нового юзера
-                    </button>
-                </div>
-            </div>
+                    <tr  class="clickable-row" id="{{ .Id}}">
+                        <th scope="row">{{ .Id}}</th>
+                        <td>{{ .Name}}</td>
+                        <td>{{ .Email}}</td>
+                        <td> <span class="input-group-btn">
+                    <button class="btn btn-outline-danger btn-default delete-button" id="btn_delete" name="{{ .Id}}"
+                            type="button">удалить</button>
+                    <button class="btn btn-outline-success float-right ml-1 " type="button">изменить</button>
+                        </span>
+            </td>
+                    </tr>
+                    {{ end}}
+                    </tbody>
+                </table>
 
+            </div>
+            <div class="col-3">
+                <a class="btn btn-outline-success form-control" href="newuserpage" role="button">Добавить
+                    пользователя</a>
+            </div>
         </div>
     </div>
 

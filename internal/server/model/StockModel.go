@@ -5,6 +5,6 @@ type StockModel struct {
 	ShopId      uint64 `json:"shop_id"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
-	DateStart   string `json:"datestart"`
+	DateStart   string `json:"date_start"`
 	DateFinish  string `json:"date_finish"`
 }

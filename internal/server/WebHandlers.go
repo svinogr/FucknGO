@@ -113,13 +113,36 @@ func shopAccountPage(w http.ResponseWriter, user repo.UserModelRepo) {
 }
 
 func newShopPage(w http.ResponseWriter, r *http.Request) {
-	files, err := template.ParseFiles("ui/web/templates/newshoppage.html")
+	files, err := template.ParseFiles("ui/web/templates/newshoppage.html", "ui/web/templates/header.html")
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 	}
 
-	files.Execute(w, nil)
+	files.ExecuteTemplate(w, "newshoppage", nil)
+}
+
+func newStockPage(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	idShop, err := strconv.ParseUint(vars["id"], 10, 32)
+
+	if err != nil {
+		log.NewLog().PrintError(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	stock := model.StockModel{}
+	stock.ShopId = idShop
+
+	files, err := template.ParseFiles("ui/web/templates/newstockpage.html", "ui/web/templates/header.html")
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+	}
+
+	files.ExecuteTemplate(w, "newstockpage", stock)
 }
 
 func shopPage(w http.ResponseWriter, r *http.Request) {
