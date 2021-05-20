@@ -54,6 +54,7 @@ CREATE TABLE if not exists shops_stock
     "id"      SERIAL PRIMARY KEY,
     "shop_id" INTEGER,
     "title"  character varying(200)   NOT NULL,
+    "img" character varying(50),
     "description"  character varying(200)   NOT NULL,
     "date_start" timestamp NOT NULL,
     "date_finish" timestamp NOT NULL,

@@ -6,7 +6,6 @@ import (
 	"FucknGO/internal/server/model"
 	"FucknGO/log"
 	"errors"
-	"fmt"
 	"github.com/gorilla/mux"
 	"html/template"
 	"net/http"
@@ -351,6 +350,7 @@ func stockPage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 	}
+
 	layout := "2006-01-02"
 	sM := model.StockModel{}
 	sM.ShopId = stock.ShopId
@@ -358,11 +358,8 @@ func stockPage(w http.ResponseWriter, r *http.Request) {
 	sM.Title = stock.Title
 	sM.Description = stock.Description
 	sM.DateStart = stock.DateStart.Format(layout)
-	fmt.Println(stock.DateStart)
-	fmt.Println(sM.DateStart)
 	sM.DateFinish = stock.DateFinish.Format(layout)
-	fmt.Println(stock.DateFinish)
-	fmt.Print(sM.DateFinish)
+	sM.Img = stock.Img
 
 	files.ExecuteTemplate(w, "stockpage", sM)
 }

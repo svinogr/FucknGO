@@ -13,10 +13,11 @@ type UiConfigStr struct {
 }
 
 type WWWConfig struct {
-	Js      string `json:"js"`
-	Html    string `json:"html"`
-	Static  string `json:"static"`
-	Storage string `json:"storage"`
+	Js              string `json:"js"`
+	Html            string `json:"html"`
+	Static          string `json:"static"`
+	Storage         string `json:"storage"`
+	StorageImgStock string `json:"storage_img_stock"`
 }
 
 func CopyResource(src string, dst string) (err error) {
@@ -112,3 +113,39 @@ func CopyFile(src, dst string) (err error) {
 
 	return
 }
+
+/*func SaveImg(src *multipart.File, dst string) (err error) {
+	// не забыть закрыть файл вне
+
+	out, err := os.Create(dst)
+	if err != nil {
+		return
+	}
+	defer func() {
+		if e := out.Close(); e != nil {
+			err = e
+		}
+	}()
+
+	_, err = io.Copy(out, *src)
+	if err != nil {
+		return
+	}
+
+	err = out.Sync()
+	if err != nil {
+		return
+	}
+
+	si, err := src.Stat()
+	if err != nil {
+		return
+	}
+	err = os.Chmod(dst, si.Mode())
+	if err != nil {
+		return
+	}
+
+	return
+}
+*/

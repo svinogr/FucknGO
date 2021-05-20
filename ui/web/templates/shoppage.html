@@ -8,7 +8,7 @@
 
             $(".clickable-row").click(function () {
                 var id = $(this).prop("id");
-                window.location.href = "/api/shop/" + {{.Id}} + "/stockpage/" + id;
+                window.location.href = "/api/shop/" + {{.Id}} +"/stockpage/" + id;
             });
         })
     </script>
@@ -17,9 +17,11 @@
         <H4><small>{{.Address}}</small></H4>
     </div>
 
-    <div class="container mt-4 align-content-center">
+    <div class="container  align-content-center">
+
         <div class="row">
-            <div class="col-8">
+
+            <div class="col-9">
                 <table class="table  table-hover">
                     <thead>
                     <tr>
@@ -38,25 +40,13 @@
                             <td class="clickable-row" id="{{.Id}}">{{ .Description}}</td>
                             <td class="clickable-row" id="{{.Id}}">{{ .DateStart}}</td>
                             <td class="clickable-row" id="{{.Id}}">{{ .DateFinish}}</td>
-                                      </tr>
+                        </tr>
                     {{ end}}
                     </tbody>
                 </table>
             </div>
-            <div class="col-4">
-                <div>
-                    <div class="form-group">
+            <div class="col-3">
 
-                        <a class="btn btn-outline-success btn-block form-control" href="/api/shop/{{ .Id}}/newstockpage">Добавить акцию
-                        </a>
-                        <br>
-                        <form id="addserver_form" action="" method="POST">
-                            <a class="btn btn-outline-info btn-block  form-control updateshop" id="{{ .Id}}">Настроить
-                                магазин</a>
-
-                        </form>
-                    </div>
-                </div>
                 <div class="d-flex justify-content-center">
                     <div id="map" style="height: 300px; width: 300px; color: #005cbf; align-content: center"></div>
                     <script>
@@ -130,9 +120,22 @@
                     <script async
                             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBIwzALxUPNbatRBj3Xi1Uhp0fFzwWNBkE&callback=initMap&libraries=&v=weekly">
                     </script>
+                </div><br>
+                <div class="form-group">
+
+                    <a class="btn btn-outline-success btn-block form-control" href="/api/shop/{{ .Id}}/newstockpage">Добавить
+                        акцию
+                    </a>
+                    <br>
+
+                    <a class="btn btn-outline-info btn-block  form-control updateshop" id="{{ .Id}}">Настроить
+                        магазин</a>
+
+
                 </div>
             </div>
         </div>
+    </div>
     </div>
     </body>
     </html>

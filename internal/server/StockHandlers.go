@@ -1,6 +1,7 @@
 package server
 
 import (
+	"FucknGO/config"
 	"FucknGO/db/repo"
 	"FucknGO/internal/jwt"
 	"FucknGO/internal/server/model"
@@ -9,8 +10,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
+	"io"
 	"net/http"
+	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -30,11 +34,62 @@ func stockApi(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateStock(w http.ResponseWriter, r *http.Request) {
+
+	err := r.ParseMultipartForm(2024)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	form := r.MultipartForm
+	jsonM := form.Value["json"]
+
 	var sM = model.StockModel{}
 
-	if err := json.NewDecoder(r.Body).Decode(&sM); err != nil {
+	err = json.Unmarshal([]byte(jsonM[0]), &sM) // получем из json обьект
+
+	if err != nil {
+		log.NewLog().PrintError(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
+	}
+
+	img, header, err := r.FormFile("img") // получаем файл картинку
+	defer img.Close()
+
+	if err != nil {
+		log.NewLog().PrintError(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var imgName string
+
+	if img != nil { // если картинка есть
+		conf, err := config.GetConfig() // конфиг для записи картинки на диск
+
+		if err != nil {
+			log.NewLog().PrintError(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		// создаем путь куда запсиать картинку
+		imgName = strconv.FormatUint(sM.Id, 10) + strings.Split(header.Filename, ".")[0] // имя картинки будет = id stock
+		dst, err := os.OpenFile(conf.JsonStr.UiConfig.WWW.StorageImgStock+"/"+imgName, os.O_WRONLY|os.O_CREATE, 0666)
+
+		if err != nil {
+			log.NewLog().PrintError(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		_, err = io.Copy(dst, img)
+
+		if err != nil {
+			log.NewLog().PrintError(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
 	}
 
 	vars := mux.Vars(r)
@@ -97,6 +152,12 @@ func updateStock(w http.ResponseWriter, r *http.Request) {
 	stock.Title = sM.Title
 	stock.Description = sM.Description
 	stock.DateStart, err = time.Parse(time.RFC3339, sM.DateStart)
+	// если картинка не пришла значит ставим по умолчанию no_image.jpg иначе ставим пришедшую
+	if &imgName != nil {
+		stock.Img = imgName
+	} else {
+		stock.Img = "no_image.jpg"
+	}
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -119,10 +180,10 @@ func updateStock(w http.ResponseWriter, r *http.Request) {
 	}
 	sM.Id = stock.Id
 	sM.ShopId = stock.ShopId
+	sM.Img = stock.Img
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(sM)
-
 }
 
 func deleteStockById(w http.ResponseWriter, r *http.Request) {

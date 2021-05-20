@@ -42,7 +42,8 @@
       "js": "./web/client/build",
       "html": "./web/templates",
       "static": "./ui",
-      "storage": "./uistorage"
+      "storage": "./uistorage",
+      "storage_img_stock": "./ui/web/static/img/stock"
     }
   },
   "log": {
@@ -54,4 +55,5 @@
     "port": 5672,
     "address": "localhost"
   }
+
 }

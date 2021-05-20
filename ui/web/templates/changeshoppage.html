@@ -71,9 +71,21 @@
             <h4>Настройка магазина</h4>
 
         </div>
+
         <div class="row">
-            <div class="col-8">
+
+            <div class="col-3 mt-4 mb-3">
+                <div class="row">
+                    <div class="col-12" style="background:#9fcdff; height: 200px">
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6">
+
                 <div class="row  mt-4 mb-3">
+
                     <div class="col-12 ">
                         <form class="" id="registration_form" action="" method="post">
                             <input class="form-control" type="text" name="name" placeholder="название"
@@ -98,7 +110,7 @@
                 </div>
 
             </div>
-            <div class="col-4 mt-4 mb-3">
+            <div class="col-3 mt-4 mb-3">
                 <div class="form-group">
                     <button class="btn btn-outline-danger btn-block form-control delete-button" id="btn_delete"
                             name="{{ .Id}}"
@@ -140,7 +152,7 @@
                             var lng;
 
                             function initMap() {
-                            //TODO сделать нормально чтоб при появлении окна маркеры стирались и ставились те что есть уже в адресе
+                                //TODO сделать нормально чтоб при появлении окна маркеры стирались и ставились те что есть уже в адресе
                                 inputAddress = document.getElementById("searchAddress");
                                 geocoder = new google.maps.Geocoder();
 
@@ -172,7 +184,7 @@
                                 }
 
                                 marker = new google.maps.Marker({
-                                    position: {lat:parseFloat({{.CoordLat}}), lng: parseFloat({{.CoordLng}})},
+                                    position: {lat: parseFloat({{.CoordLat}}), lng: parseFloat({{.CoordLng}})},
                                     map: map
                                 });
                                 marker.setMap(map);
