@@ -54,7 +54,7 @@ func (s *ShopStockRepo) Update(stock *ShopStockModelRepo) (*ShopStockModelRepo, 
 		COL_STOCK_TITLE+"= $2, "+
 		COL_STOCK_DESCRIPTON+"= $3, "+
 		COL_STOCK_DATE_START+"= $4, "+
-		COL_STOCK_DATE_FINISH+"= $5 "+
+		COL_STOCK_DATE_FINISH+"= $5, "+
 		COL_STOCK_IMG+"= $6 "+
 		"where "+COL_STOCK_ID+"=$7 returning "+
 		COL_STOCK_ID+", "+
@@ -62,7 +62,7 @@ func (s *ShopStockRepo) Update(stock *ShopStockModelRepo) (*ShopStockModelRepo, 
 		COL_STOCK_TITLE+", "+
 		COL_STOCK_DESCRIPTON+", "+
 		COL_STOCK_DATE_START+", "+
-		COL_STOCK_DATE_FINISH,
+		COL_STOCK_DATE_FINISH+", "+
 		COL_STOCK_IMG,
 		stock.ShopId,
 		stock.Title,

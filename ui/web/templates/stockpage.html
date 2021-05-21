@@ -4,7 +4,6 @@
 
     <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
     <script> $(document).ready(function () {
-
             $(".delete-button").click(function () {
                 $.ajax({
                     'url': '/api/shop/' + {{.ShopId}} +'/stock/{{.Id}}',
@@ -24,8 +23,49 @@
                 });
             });
 
+            var file = null;
+            var del = false;
+
+            $('.updateimg').on('change', function () {
+                var maxFileSize = 2 * 1024 * 1024; // (байт) Максимальный размер файла (2мб)
+                file = this.files[0];
+
+                if (!file.type.match(/image\/(jpeg|jpg|png|gif)/)) {
+                    alert('Фотография должна быть в формате jpg, png или gif');
+                }
+
+                if (file.size > maxFileSize) {
+                    alert('Размер фотографии не должен превышать 2 Мб');
+                }
+
+                preview(file);
+
+                this.value = '';
+            });
+
+            $(".deleteImg").click(function () {
+                $("#img").attr('src', src = "/static/img/stock/-1.jpg");
+                file = null;
+                del = true;
+            });
+
+            function preview(file) {
+                var reader = new FileReader();
+                reader.addEventListener('load', function (event) {
+                  $("#img").attr('src', event.target.result);
+                });
+                reader.readAsDataURL(file);
+            }
+
             $(".updatestock").click(function () {
-                var img = $("#img").prop("files");
+                // var img = $("#img").prop("files");
+
+                if (del) {
+                    var img = file;
+
+                } else {
+                file = "old"
+                }
 
                 var form = $("#registration_form").serializeArray();
 
@@ -43,7 +83,7 @@
                 })
 
                 var formData = new FormData();
-                formData.append('img', img[0]);
+                formData.append('img', img);
                 formData.append('json', json);
 
                 $.ajax({
@@ -104,13 +144,26 @@
         </div>
         <div class="row mt-4 mb-3">
             <div class="col-3">
-                <img style="width:100%; height:100%" src="/static/img/stock/{{.Img}}">
-                <form>
-                    <div class="form-group">
-                        <label for="exampleFormControlFile1">Выберите картинку</label>
-                        <input type="file" accept=".jpeg" class="form-control-file" name="img" id="img">
-                    </div>
-                </form>
+                <img id="img" style="width:100%; height:100%" src="/static/img/stock/{{.Img}}">
+                <div class="input-group-append">
+                    <form>
+                        <div class="form-group">
+                            <input type="file"
+                                   class="updateimg form-control-file btn btn-outline-success btn-block form-control"
+                                   name="img" id="img">
+                        </div>
+                    </form>
+                    {{/*    <button class="btn btn-outline-success btn-block form-control" data-bs-toggle="modal"
+                            data-bs-target="#exampleModal" type="button">Выбрать картинку
+                    </button>*/}}
+                </div>
+                <br>
+                <div>
+                    <button class="btn btn-outline-danger btn-block form-control deleteImg" type="button">Удалить
+                        картинку
+                    </button>
+                </div>
+
                 <img src="" alt="">
             </div>
             <div class="col-6">
@@ -146,6 +199,36 @@
             </div>
         </div>
     </div>
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Выбрать картинку</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div></div>
+                        <form>
+                            <div class="form-group">
+                                <label for="exampleFormControlFile1">Выберите картинку</label>
+                                <input type="file" accept=".jpeg" class="form-control-file" name="img" id="img">
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary updateimg" onclick="setAddress()"
+                            data-bs-dismiss="modal"> Сохранить
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     </body>
     </html>
 {{end}}
