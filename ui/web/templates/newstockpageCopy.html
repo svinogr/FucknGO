@@ -1,0 +1,68 @@
+{{ define "newstockpage"}}
+    {{ template "header" .}}
+    <script> $(document).ready(function () {
+
+            $(".newstock").click(function () {
+                var form = $("#registration_form").serializeArray();
+                var data = new Map();
+                $(form).each(function (index, obj) {
+                    data.set(obj.name, obj.value);
+                });
+
+                $.ajax({
+                    'url': '/api/shop/' + data.get('shop_id') + '/stock',
+                    'method': 'POST',
+                    'dataType': 'json',
+                    'contentType': 'application/json',
+                    'data': JSON.stringify({
+                        "title": data.get('title'),
+                        "description": data.get('description'),
+                        "date_start": new Date(data.get('date_start')),
+                        "date_finish": new Date(data.get('date_finish'))
+                    }),
+                    statusCode: {
+                        400: function () {
+                            alert("неправельные данные");
+                        },
+                        302: function () {
+                            window.location.href = "/api/login";
+                        }
+                    },
+                    success: function (data) {
+                        window.history.back()
+                    },
+                });
+            });
+        });
+    </script>
+    </head>
+    <body>
+
+    <div class="container">
+
+        <div class="row justify-content-md-center mt-4 mb-3">
+            <div class="col-6 ">
+                <form class="" id="registration_form" action="" method="post">
+                    <input type="text" class="form-control" name="title" id="title" placeholder="название">
+                    <textarea rows="5" class="form-control" name="description" id="description"
+                              placeholder="описание"></textarea>
+                    <input type="date" class="form-control" name="date_start" id="date_start" placeholder="начало">
+                    <input type="date" class="form-control" name="date_finish" id="date_finish" placeholder="конец">
+                    <input type="text" class="form-control" hidden="hidden" name="shop_id" id="shop_id"
+                           readonly="readonly" value="{{ .ShopId}}">
+                </form>
+            </div>
+        </div>
+        <div class="row justify-content-md-center">
+            <div class="col-3">
+                <a class="btn btn-outline-success login form-control" onclick="history.back()">Отмена</a>
+            </div>
+            <div class="col-3">
+                <a class="btn btn-outline-success form-control newstock" role="button">Сохранить</a>
+            </div>
+
+        </div>
+    </div>
+    </body>
+    </html>
+{{end}}

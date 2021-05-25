@@ -135,14 +135,15 @@ func newStockPage(w http.ResponseWriter, r *http.Request) {
 
 	stock := model.StockModel{}
 	stock.ShopId = idShop
+	stock.Img = "-1.jpg"
 
-	files, err := template.ParseFiles("ui/web/templates/newstockpage.html", "ui/web/templates/header.html")
+	files, err := template.ParseFiles("ui/web/templates/stockpage.html", "ui/web/templates/header.html")
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusServiceUnavailable)
 	}
 
-	files.ExecuteTemplate(w, "newstockpage", stock)
+	files.ExecuteTemplate(w, "stockpage", stock)
 }
 
 func shopPage(w http.ResponseWriter, r *http.Request) {

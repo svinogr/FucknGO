@@ -25,8 +25,8 @@
                 <table class="table  table-hover">
                     <thead>
                     <tr>
-                        <th scope="col">ID</th>
                         <th scope="col"></th>
+                        <th scope="col">ID</th>
                         <th scope="col">Название</th>
                         <th scope="col">Описание</th>
                         <th scope="col">Дата начала</th>
@@ -36,9 +36,9 @@
                     <tbody>
                     {{range .Stocks }}
                         <tr id="{{.Id}}">
-                            <th class="clickable-row" id="{{.Id}}" scope="row">{{ .Id}}</th>
-                            <th class="clickable-row" id="{{.Id}}" scope="row"><img style="width:50px; height:50px"
+                            <th class="clickable-row" id="{{.Id}}" scope="row"><img style="width:100px; height:100px"
                                                                                     src="/static/img/stock/{{.Img}}">
+                            <th class="clickable-row" id="{{.Id}}" scope="row">{{ .Id}}</th>
                             </th>
                             <td class="clickable-row" id="{{.Id}}">{{ .Title}}</td>
                             <td class="clickable-row" id="{{.Id}}">{{ .Description}}</td>

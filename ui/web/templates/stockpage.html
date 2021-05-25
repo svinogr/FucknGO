@@ -68,8 +68,12 @@
                     data.set(obj.name, obj.value);
                 });
 
+                var id = parseInt(data.get('id'),10);
+                var idShop = parseInt(data.get('shopId'));
+
                 var json = JSON.stringify({
-                    "id": {{.Id}},
+                    "id": id,
+                    "shop_id": idShop,
                     "title": data.get('title'),
                     "description": data.get('description'),
                     "date_start": new Date(data.get('date_start')),
@@ -81,15 +85,27 @@
                 formData.append('img', file);
                 formData.append('json', json);
 
+                let url;
+                let type;
+                if (id < 1) {
+                    url = '/api/shop/' + idShop +'/stock';
+                    type = "POST"
+                    alert("0");
+                } else {
+                    url = url = '/api/shop/' + idShop +'/stock/' + id ;
+                    type = "PUT"
+                    alert("1");
+                }
+
                 $.ajax({
-                    type: "PUT",
-                    url: '/api/shop/' + {{.ShopId}} +'/stock/' + {{.Id}},
+                    type: type,
+                    url: url,
                     data: formData,
                     contentType: false,
                     processData: false,
                     cache: false,
                     complete: function (data) {
-                            window.history.back();
+                        window.history.back();
 
                     }
                 });
@@ -140,7 +156,13 @@
         </div>
         <div class="row mt-4 mb-3">
             <div class="col-3">
-                <img id="img" style="width:100%; height:100%" src="/static/img/stock/{{.Img}}">
+
+                {{if lt .Id 1 }}
+                          <img id="img" style="width:100%; height:250px" src="/static/img/stock/-1.jpg">
+                {{else}}
+
+                    <img id="img" style="width:100%; height:250px" src="/static/img/stock/{{.Img}}">
+                {{end}}
                 <div class="input-group-append">
                     <form>
                         <div class="form-group">
@@ -168,6 +190,11 @@
                         <form class="" id="registration_form" action="" method="post">
                             <input type="text" class="form-control" name="title" id="title" placeholder="название"
                                    value="{{.Title}}">
+                            <input type="text" hidden="hidden" class="form-control" name="id" id="id"
+                                   placeholder="название" value="{{.Id}}">
+                            <input type="text" hidden="hidden" class="form-control" name="shopId" id="shopId"
+                                   placeholder="название"
+                                   value="{{.ShopId}}">
                             <textarea rows="5" class="form-control" name="description" id="description"
                                       placeholder="описание">{{.Description}}</textarea>
                             <input type="date" class="form-control" name="date_start" id="date_start"

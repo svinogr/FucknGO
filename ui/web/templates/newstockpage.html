@@ -1,20 +1,113 @@
-{{ define "newstockpage"}}
-    {{ template "header" .}}
-    <script> $(document).ready(function () {
+{{ define "stockpage"}}
+    {{template "header".}}
+    <script src="/static/js/jquery-3.6.0.min.js" type="text/javascript"></script>
 
-            $(".newstock").click(function () {
+    <link rel="stylesheet" href="/static/bootstrap/css/bootstrap.min.css">
+    <script> $(document).ready(function () {
+            $(".delete-button").click(function () {
+                $.ajax({
+                    'url': '/api/shop/' + {{.ShopId}} +'/stock/{{.Id}}',
+                    'method': 'DELETE',
+                    'contentType': 'application/json',
+                    statusCode: {
+                        400: function () {
+                            alert("неправельные данные");
+                        },
+                        302: function () {
+                            window.location.href = "/api/login";
+                        }
+                    },
+                    success: function (data) {
+                        window.location.href = "/api/shoppage/{{.ShopId}}";
+                    },
+                });
+            });
+
+            var file = null;
+            var imgName = "";
+
+            $('.updateimg').on('change', function () {
+                var maxFileSize = 2 * 1024 * 1024; // (байт) Максимальный размер файла (2мб)
+                file = this.files[0];
+
+                if (!file.type.match(/image\/(jpeg|jpg|png|gif)/)) {
+                    alert('Фотография должна быть в формате jpg, png или gif');
+                }
+
+                if (file.size > maxFileSize) {
+                    alert('Размер фотографии не должен превышать 2 Мб');
+                }
+
+                preview(file);
+
+                imgName = "new";
+
+                this.value = '';
+            });
+
+            $(".deleteImg").click(function () {
+                $("#img").attr('src', src = "/static/img/stock/-1.jpg");
+                file = null;
+                imgName = "-1";
+            });
+
+            function preview(file) {
+                var reader = new FileReader();
+                reader.addEventListener('load', function (event) {
+                    $("#img").attr('src', event.target.result);
+                });
+                reader.readAsDataURL(file);
+            }
+
+            $(".updatestock").click(function () {
                 var form = $("#registration_form").serializeArray();
+
                 var data = new Map();
+
                 $(form).each(function (index, obj) {
                     data.set(obj.name, obj.value);
                 });
 
+                var json = JSON.stringify({
+                    "id": {{.Id}},
+                    "title": data.get('title'),
+                    "description": data.get('description'),
+                    "date_start": new Date(data.get('date_start')),
+                    "date_finish": new Date(data.get('date_finish')),
+                    "img": imgName
+                })
+
+                var formData = new FormData();
+                formData.append('img', file);
+                formData.append('json', json);
+
                 $.ajax({
-                    'url': '/api/shop/' + data.get('shop_id') + '/stock',
-                    'method': 'POST',
+                    type: "PUT",
+                    url: '/api/shop/' + {{.ShopId}} +'/stock/' + {{.Id}},
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    cache: false,
+                    complete: function (data) {
+                        window.history.back();
+
+                    }
+                });
+
+
+                /*   var form = $("#registration_form").serializeArray();
+                   var data = new Map();
+                   $(form).each(function (index, obj) {
+                       data.set(obj.name, obj.value);
+                   });*/
+
+                /*    $.ajax({
+                        'url': '/api/shop/' + {{.ShopId}} + '/stock/' + {{.Id}} ,
+                    'method': 'PUT',
                     'dataType': 'json',
                     'contentType': 'application/json',
                     'data': JSON.stringify({
+                        "id": {{.Id}},
                         "title": data.get('title'),
                         "description": data.get('description'),
                         "date_start": new Date(data.get('date_start')),
@@ -26,43 +119,112 @@
                         },
                         302: function () {
                             window.location.href = "/api/login";
+                        },
+                        200: function () {
+                          //  window.history.back();
                         }
+
                     },
                     success: function (data) {
-                        window.history.back()
+                        window.history.back();
                     },
-                });
+                });*/
             });
         });
     </script>
     </head>
     <body>
-
     <div class="container">
-
-        <div class="row justify-content-md-center mt-4 mb-3">
-            <div class="col-6 ">
-                <form class="" id="registration_form" action="" method="post">
-                    <input type="text" class="form-control" name="title" id="title" placeholder="название">
-                    <textarea rows="5" class="form-control" name="description" id="description"
-                              placeholder="описание"></textarea>
-                    <input type="date" class="form-control" name="date_start" id="date_start" placeholder="начало">
-                    <input type="date" class="form-control" name="date_finish" id="date_finish" placeholder="конец">
-                    <input type="text" class="form-control" hidden="hidden" name="shop_id" id="shop_id"
-                           readonly="readonly" value="{{ .ShopId}}">
-                </form>
-            </div>
+        <div class="mt-4">
+            <h4>Настройка акции</h4>
         </div>
-        <div class="row justify-content-md-center">
+        <div class="row mt-4 mb-3">
             <div class="col-3">
-                <a class="btn btn-outline-success login form-control" onclick="history.back()">Отмена</a>
-            </div>
-            <div class="col-3">
-                <a class="btn btn-outline-success form-control newstock" role="button">Сохранить</a>
-            </div>
+                <img id="img" style="width:100%; height:250px" src="/static/img/stock/{{.Img}}">
+                <div class="input-group-append">
+                    <form>
+                        <div class="form-group">
+                            <input type="file"
+                                   class="updateimg form-control-file btn btn-outline-success btn-block form-control"
+                                   name="img" id="img">
+                        </div>
+                    </form>
+                    {{/*    <button class="btn btn-outline-success btn-block form-control" data-bs-toggle="modal"
+                            data-bs-target="#exampleModal" type="button">Выбрать картинку
+                    </button>*/}}
+                </div>
+                <br>
+                <div>
+                    <button class="btn btn-outline-danger btn-block form-control deleteImg" type="button">Удалить
+                        картинку
+                    </button>
+                </div>
 
+                <img src="" alt="">
+            </div>
+            <div class="col-6">
+                <div class="row">
+                    <div class="col-12 ">
+                        <form class="" id="registration_form" action="" method="post">
+                            <input type="text" class="form-control" name="title" id="title" placeholder="название"
+                                   value="{{.Title}}">
+                            <textarea rows="5" class="form-control" name="description" id="description"
+                                      placeholder="описание">{{.Description}}</textarea>
+                            <input type="date" class="form-control" name="date_start" id="date_start"
+                                   placeholder="начало" value="{{.DateStart}}">
+                            <input type="date" class="form-control" name="date_finish" id="date_finish"
+                                   placeholder="конец" value="{{.DateFinish}}">
+                            <input type="text" class="form-control" hidden="hidden" name="shop_id" id="shop_id"
+                                   readonly="readonly" value="{{ .ShopId}}">
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-3">
+                <div class="form-group">
+                    <button class="btn btn-outline-danger btn-block form-control delete-button" id="btn_delete"
+                            name="{{ .Id}}"
+                            type="button">Удалить
+                    </button>
+                    <br>
+                    <a class="btn btn-outline-success btn-block form-control" onclick="history.back()">Назад</a>
+                    <br>
+                    <a class="btn btn-outline-success btn-block form-control updatestock" role="button">Сохранить</a>
+                </div>
+            </div>
         </div>
     </div>
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Выбрать картинку</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div></div>
+                        <form>
+                            <div class="form-group">
+                                <label for="exampleFormControlFile1">Выберите картинку</label>
+                                <input type="file" accept=".jpeg" class="form-control-file" name="img" id="img">
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary updateimg" onclick="setAddress()"
+                            data-bs-dismiss="modal"> Сохранить
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     </body>
     </html>
 {{end}}
