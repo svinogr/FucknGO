@@ -26,6 +26,7 @@
                     <thead>
                     <tr>
                         <th scope="col">ID</th>
+                        <th scope="col"></th>
                         <th scope="col">Название</th>
                         <th scope="col">Описание</th>
                         <th scope="col">Дата начала</th>
@@ -36,6 +37,9 @@
                     {{range .Stocks }}
                         <tr id="{{.Id}}">
                             <th class="clickable-row" id="{{.Id}}" scope="row">{{ .Id}}</th>
+                            <th class="clickable-row" id="{{.Id}}" scope="row"><img style="width:50px; height:50px"
+                                                                                    src="/static/img/stock/{{.Img}}">
+                            </th>
                             <td class="clickable-row" id="{{.Id}}">{{ .Title}}</td>
                             <td class="clickable-row" id="{{.Id}}">{{ .Description}}</td>
                             <td class="clickable-row" id="{{.Id}}">{{ .DateStart}}</td>
@@ -120,7 +124,8 @@
                     <script async
                             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBIwzALxUPNbatRBj3Xi1Uhp0fFzwWNBkE&callback=initMap&libraries=&v=weekly">
                     </script>
-                </div><br>
+                </div>
+                <br>
                 <div class="form-group">
 
                     <a class="btn btn-outline-success btn-block form-control" href="/api/shop/{{ .Id}}/newstockpage">Добавить

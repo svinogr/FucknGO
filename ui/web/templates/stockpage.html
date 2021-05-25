@@ -24,7 +24,7 @@
             });
 
             var file = null;
-            var del = false;
+            var imgName = "";
 
             $('.updateimg').on('change', function () {
                 var maxFileSize = 2 * 1024 * 1024; // (байт) Максимальный размер файла (2мб)
@@ -40,36 +40,30 @@
 
                 preview(file);
 
+                imgName = "new";
+
                 this.value = '';
             });
 
             $(".deleteImg").click(function () {
                 $("#img").attr('src', src = "/static/img/stock/-1.jpg");
                 file = null;
-                del = true;
+                imgName = "-1";
             });
 
             function preview(file) {
                 var reader = new FileReader();
                 reader.addEventListener('load', function (event) {
-                  $("#img").attr('src', event.target.result);
+                    $("#img").attr('src', event.target.result);
                 });
                 reader.readAsDataURL(file);
             }
 
             $(".updatestock").click(function () {
-                // var img = $("#img").prop("files");
-
-                if (del) {
-                    var img = file;
-
-                } else {
-                file = "old"
-                }
-
                 var form = $("#registration_form").serializeArray();
 
                 var data = new Map();
+
                 $(form).each(function (index, obj) {
                     data.set(obj.name, obj.value);
                 });
@@ -79,11 +73,12 @@
                     "title": data.get('title'),
                     "description": data.get('description'),
                     "date_start": new Date(data.get('date_start')),
-                    "date_finish": new Date(data.get('date_finish'))
+                    "date_finish": new Date(data.get('date_finish')),
+                    "img": imgName
                 })
 
                 var formData = new FormData();
-                formData.append('img', img);
+                formData.append('img', file);
                 formData.append('json', json);
 
                 $.ajax({
@@ -94,7 +89,8 @@
                     processData: false,
                     cache: false,
                     complete: function (data) {
-                        alert("success");
+                            window.history.back();
+
                     }
                 });
 

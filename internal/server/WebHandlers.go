@@ -192,6 +192,7 @@ func shopPage(w http.ResponseWriter, r *http.Request) {
 		sT.Description = el.Description
 		sT.DateStart = el.DateStart.String()
 		sT.DateFinish = el.DateStart.String()
+		sT.Img = el.Img
 
 		sTArray = append(sTArray, sT)
 	}
