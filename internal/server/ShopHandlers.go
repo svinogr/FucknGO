@@ -47,13 +47,41 @@ func getAllShopsByAccount(w http.ResponseWriter, r *http.Request) {
 	all := []model.ShopModel{}
 
 	coordRepo := db.Coord()
+	stockRepo := db.ShopStock()
 
 	for _, el := range *allFinded {
 		coordById, err := coordRepo.FindById(el.CoordId)
 
 		if err != nil {
+			log.NewLog().PrintError(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			continue
+		}
+
+		stocks, err := stockRepo.FindByShop(&el)
+
+		if err != nil {
+			log.NewLog().PrintError(err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			continue
+		}
+
+		stMArr := []model.StockModel{}
+
+		layout := "2006-01-02"
+
+		for _, elSt := range *stocks {
+			stM := model.StockModel{
+				Id:          elSt.Id,
+				ShopId:      elSt.ShopId,
+				Img:         elSt.Img,
+				Title:       elSt.Title,
+				Description: elSt.Description,
+				DateStart:   elSt.DateStart.Format(layout),
+				DateFinish:  elSt.DateFinish.Format(layout),
+			}
+
+			stMArr = append(stMArr, stM)
 		}
 
 		m := model.ShopModel{
@@ -63,6 +91,7 @@ func getAllShopsByAccount(w http.ResponseWriter, r *http.Request) {
 			CoordLng: strconv.FormatFloat(coordById.CoordLng, 'f', -1, 64),
 			Name:     el.Name,
 			Address:  el.Address,
+			Stocks:   stMArr,
 		}
 
 		all = append(all, m)
