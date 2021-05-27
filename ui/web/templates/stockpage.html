@@ -48,7 +48,14 @@
             $(".deleteImg").click(function () {
                 $("#img").attr('src', src = "/static/img/stock/-1.jpg");
                 file = null;
-                imgName = "-1";
+
+                if (parseInt($(this).prop('name')) > 0) {
+
+                    imgName = "-1";
+                } else {
+                    imgName = "";
+                }
+
             });
 
             function preview(file) {

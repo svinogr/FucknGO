@@ -33,6 +33,8 @@ func stockApi(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+var db *repo.DataBase
+
 /*
 func validStockByShopByUser(r *http.Request) (idUser uint64, idShop uint64,  idStock uint64, err error)  {
 
@@ -85,7 +87,7 @@ func updateStock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db := repo.NewDataBaseWithConfig()
+	db = repo.NewDataBaseWithConfig()
 	defer db.CloseDataBase()
 
 	shopRepo := db.Shop()
@@ -118,68 +120,20 @@ func updateStock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	conf, err := config.GetConfig() // конфиг для удаления картинки на диск
+	err = setImgToStock(&sM, &stock, r)
 
 	if err != nil {
-		log.NewLog().PrintError(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	switch sM.Img {
-	case "new":
-		img, header, err := r.FormFile("img") // получаем файл картинку
-
-		if img != nil {
-			defer img.Close()
-		}
-
-		if err != nil {
-
-			if err.Error() == "http: no such file" { // файл не передан. значит неправильный запрос
-				log.NewLog().PrintError(err)
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-
-			} else {
-				log.NewLog().PrintError(err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-		}
-		// создаем путь куда запсиать картинку
-		imgName := strconv.FormatUint(sM.Id, 10) + "." + strings.Split(header.Filename, ".")[1] // имя картинки будет = id stock без разрещения
-		//imgName = strconv.FormatUint(sM.Id, 10) // имя картинки будет = id stock
-		dst, err := os.OpenFile(conf.JsonStr.UiConfig.WWW.StorageImgStock+"/"+imgName, os.O_WRONLY|os.O_CREATE, 0666)
-
-		if err != nil {
+		if err.Error() == "http: no such file" {
 			log.NewLog().PrintError(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+
+			return
+		} else {
+			log.NewLog().PrintError(err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+
 			return
 		}
-
-		_, err = io.Copy(dst, img)
-
-		if err != nil {
-			log.NewLog().PrintError(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		stock.Img = imgName
-
-	case "-1":
-		dst := conf.JsonStr.UiConfig.WWW.StorageImgStock + "/" + stock.Img // получаем адрес картинки для удаления
-
-		err = os.Remove(dst)
-
-		if err != nil {
-			log.NewLog().PrintError(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		// ставим картинку по умолчанию
-		stock.Img = "-1.jpg"
 	}
 
 	stock.Title = sM.Title
@@ -188,7 +142,6 @@ func updateStock(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		fmt.Print(err.Error())
 		return
 	}
 
@@ -205,12 +158,64 @@ func updateStock(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	sM.Id = stock.Id
-	sM.ShopId = stock.ShopId
-	sM.Img = stock.Img
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(sM)
+}
+
+func setImgToStock(sM *model.StockModel, stock *repo.ShopStockModelRepo, r *http.Request) error {
+	conf, err := config.GetConfig() // конфиг для удаления картинки на диск
+
+	if err != nil {
+		return err
+	}
+
+	switch sM.Img {
+	case "new":
+		img, header, err := r.FormFile("img") // получаем файл картинку
+
+		if img != nil {
+			defer img.Close()
+		}
+
+		if err != nil {
+			return err
+		}
+		// создаем путь куда запсиать картинку
+		imgName := strconv.FormatUint(stock.Id, 10) + "." + strings.Split(header.Filename, ".")[1] // имя картинки будет = id stock без разрещения
+		//imgName = strconv.FormatUint(sM.Id, 10) // имя картинки будет = id stock
+		dst, err := os.OpenFile(conf.JsonStr.UiConfig.WWW.StorageImgStock+"/"+imgName, os.O_WRONLY|os.O_CREATE, 0666)
+
+		if err != nil {
+			return err
+		}
+
+		_, err = io.Copy(dst, img)
+
+		if err != nil {
+			return err
+		}
+
+		sM.Img = imgName
+		stock.Img = imgName
+
+	case "-1":
+		dst := conf.JsonStr.UiConfig.WWW.StorageImgStock + "/" + stock.Img // получаем адрес картинки для удаления
+
+		err = os.Remove(dst)
+		if err != nil {
+			return err
+		}
+		// ставим картинку по умолчанию
+		sM.Img = "-1.jpg"
+		stock.Img = "-1.jpg"
+
+	case "":
+		sM.Img = "-1.jpg"
+		stock.Img = "-1.jpg"
+	}
+
+	return nil
 }
 
 func deleteStockById(w http.ResponseWriter, r *http.Request) {
@@ -238,7 +243,7 @@ func deleteStockById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db := repo.NewDataBaseWithConfig()
+	db = repo.NewDataBaseWithConfig()
 	defer db.CloseDataBase()
 
 	shopRepo := db.Shop()
@@ -291,25 +296,6 @@ func deleteStockById(w http.ResponseWriter, r *http.Request) {
 	stockRepo.Delete(&stock)
 }
 
-func HaveUserThisShop(r *http.Request) (bool, error) {
-	/*	vars := mux.Vars(r)
-		//TODO как то надо в этом методе инкапсулировать говно из остальных
-		idShop, err := strconv.ParseUint(vars["id_shop"], 10, 32)
-
-		if err != nil {
-			log.NewLog().PrintError(err)
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-		user, err := jwt.GetUserFromContext(r)
-
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}*/
-	return false, nil
-}
-
 func createStock(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	//TODO возможно стоит перенести проверкю на принадлежность магазина юзеру в мидлвере
@@ -328,7 +314,7 @@ func createStock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db := repo.NewDataBaseWithConfig()
+	db = repo.NewDataBaseWithConfig()
 	defer db.CloseDataBase()
 
 	shopRepo := db.Shop()
@@ -362,16 +348,65 @@ func createStock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	conf, err := config.GetConfig() // конфиг для удаления картинки на диск
-
-	if err != nil {
-		log.NewLog().PrintError(err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
 	stock := repo.ShopStockModelRepo{}
-	stock.Img = "-1.jpg"
+
+	/*	switch sM.Img {
+		case "new":
+			img, header, err := r.FormFile("img") // получаем файл картинку
+
+			if img != nil {
+				defer img.Close()
+			}
+
+			if err != nil {
+
+				if err.Error() == "http: no such file" { // файл не передан. значит неправильный запрос
+					log.NewLog().PrintError(err)
+					http.Error(w, err.Error(), http.StatusBadRequest)
+					return
+
+				} else {
+					log.NewLog().PrintError(err)
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+			}
+			// создаем путь куда запсиать картинку
+			imgName := strconv.FormatUint(stock.Id, 10) + "." + strings.Split(header.Filename, ".")[1] // имя картинки будет = id stock без разрещения
+			//imgName = strconv.FormatUint(sM.Id, 10) // имя картинки будет = id stock
+			dst, err := os.OpenFile(conf.JsonStr.UiConfig.WWW.StorageImgStock+"/"+imgName, os.O_WRONLY|os.O_CREATE, 0666)
+
+			if err != nil {
+				log.NewLog().PrintError(err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			_, err = io.Copy(dst, img)
+
+			if err != nil {
+				log.NewLog().PrintError(err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			stock.Img = imgName
+
+		case "-1":
+			dst := conf.JsonStr.UiConfig.WWW.StorageImgStock + "/" + stock.Img // получаем адрес картинки для удаления
+
+			err = os.Remove(dst)
+
+			if err != nil {
+				log.NewLog().PrintError(err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			// ставим картинку по умолчанию
+			stock.Img = "-1.jpg"
+		}*/
+
+	//stock.Img = "-1.jpg"
 
 	stock.ShopId = idShop
 	stock.Title = sM.Title
@@ -399,63 +434,30 @@ func createStock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	switch sM.Img {
-	case "new":
-		img, header, err := r.FormFile("img") // получаем файл картинку
+	err = setImgToStock(&sM, &stock, r)
 
-		if img != nil {
-			defer img.Close()
-		}
-
-		if err != nil {
-
-			if err.Error() == "http: no such file" { // файл не передан. значит неправильный запрос
-				log.NewLog().PrintError(err)
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-
-			} else {
-				log.NewLog().PrintError(err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-		}
-		// создаем путь куда запсиать картинку
-		imgName := strconv.FormatUint(stock.Id, 10) + "." + strings.Split(header.Filename, ".")[1] // имя картинки будет = id stock без разрещения
-		//imgName = strconv.FormatUint(sM.Id, 10) // имя картинки будет = id stock
-		dst, err := os.OpenFile(conf.JsonStr.UiConfig.WWW.StorageImgStock+"/"+imgName, os.O_WRONLY|os.O_CREATE, 0666)
-
-		if err != nil {
+	if err != nil {
+		if err.Error() == "http: no such file" {
 			log.NewLog().PrintError(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+
+			return
+		} else {
+			log.NewLog().PrintError(err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+
 			return
 		}
-
-		_, err = io.Copy(dst, img)
-
-		if err != nil {
-			log.NewLog().PrintError(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		stock.Img = imgName
-
-	case "-1":
-		dst := conf.JsonStr.UiConfig.WWW.StorageImgStock + "/" + stock.Img // получаем адрес картинки для удаления
-
-		err = os.Remove(dst)
-
-		if err != nil {
-			log.NewLog().PrintError(err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		// ставим картинку по умолчанию
-		stock.Img = "-1.jpg"
 	}
 
-	stockRepo.Update(&stock)
+	_, err = stockRepo.Update(&stock)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	sM.Id = stock.Id
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(sM)
